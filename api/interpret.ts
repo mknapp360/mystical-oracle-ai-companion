@@ -33,7 +33,7 @@ export default async function handler(req: Request): Promise<Response> {
         {
           role: 'system',
           content:
-            'You are a wise and intuitive tarot reader. Interpret spreads using traditional and poetic symbolism. Mention each card.',
+            'You are a wise and intuitive tarot reader. Interpret spreads using a kabbalistic framework in a spiritual but practical tone. Mention each card. Limit the interpretation to 200 words.',
         },
         {
           role: 'user',
