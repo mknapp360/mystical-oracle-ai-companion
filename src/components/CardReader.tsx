@@ -175,7 +175,11 @@ export const CardReader = ({ cards }: CardReaderProps) => {
       {/* Initial State */}
       {drawnCards.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-8xl mb-6">🔮</div>
+          <img
+            src="/images/sunburst.png"
+            alt="Sunburst"
+            className="w-32 h-32 mb-6 mx-auto"
+          />
           <h2 className="font-serif text-2xl text-purple-200 mb-4">Welcome to Your Tarot Reading</h2>
           <p className="text-muted-foreground max-w-md mx-auto">
             Focus on your question and draw a card to receive guidance from the mystical realm.
