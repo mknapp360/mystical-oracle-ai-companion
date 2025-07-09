@@ -168,16 +168,16 @@ const handleAskTheCards = async () => {
         )}
 
         {/* AI Interpretation */}
-        {aiResponse && (
-          <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto">
-            <CardContent className="pt-6">
-              <h3 className="font-serif text-lg text-purple-200 text-center mb-4">Interpretation</h3>
-              <div className="prose prose-invert text-muted-foreground">
-                <p>{aiResponse}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {aiResponse && (
+            <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto">
+              <CardContent className="pt-6">
+                <h3 className="font-serif text-lg text-purple-200 text-center mb-4">Interpretation</h3>
+                <div className="prose prose-invert text-muted-foreground w-full max-w-none">
+                  <p>{aiResponse}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
       {drawnCards.length > 0 && !aiResponse && (
         <div className="text-center">
