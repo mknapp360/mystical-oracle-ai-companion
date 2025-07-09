@@ -1,52 +1,58 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 
-if (!process.env.OPENAI_API_KEY) {
-  console.error('Missing OPENAI_API_KEY in environment variables');
-}
-
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+    });
   }
-
-  if (!process.env.OPENAI_API_KEY) {
-    console.error('Missing OPENAI_API_KEY in env');
-    return res.status(500).json({ error: 'Missing OpenAI API key' });
-  }
-
-  const { question, cards } = req.body;
-
-  if (!question || !Array.isArray(cards)) {
-    return res.status(400).json({ error: 'Invalid request payload' });
-  }
-
-  const prompt = buildTarotPrompt(question, cards);
 
   try {
+    const body = await req.json();
+    const { question, cards } = body;
+
+    if (!question || !Array.isArray(cards)) {
+      return new Response(JSON.stringify({ error: 'Invalid request payload' }), {
+        status: 400,
+      });
+    }
+
+    const prompt = buildTarotPrompt(question, cards);
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         {
           role: 'system',
-          content: 'You are a wise and intuitive tarot reader...',
+          content:
+            'You are a wise and intuitive tarot reader. Interpret spreads using traditional and poetic symbolism. Mention each card.',
         },
         {
           role: 'user',
           content: prompt,
         },
       ],
+      temperature: 0.85,
     });
 
-    const interpretation = completion.choices?.[0]?.message?.content || 'No interpretation returned.';
-    res.status(200).json({ interpretation });
-  } catch (err: any) {
-    console.error('OpenAI error:', err?.message || err);
-    res.status(500).json({ error: 'OpenAI failed to return interpretation' });
+    const interpretation = completion.choices[0]?.message?.content || 'No interpretation generated.';
+    return new Response(JSON.stringify({ interpretation }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('OpenAI API error:', error.message);
+    return new Response(JSON.stringify({ error: 'Failed to fetch interpretation' }), {
+      status: 500,
+    });
   }
 }
 
@@ -56,7 +62,9 @@ function buildTarotPrompt(question: string, cards: any[]) {
   const cardInfo = cards
     .map(({ card, orientation }: any, index: number) => {
       const meaning = orientation === 'upright' ? card.uprightMeaning : card.reversedMeaning;
-      return `Card ${index + 1}: ${card.name} (${orientation})\nMeaning: ${meaning}\nKeywords: ${card.keywords.join(', ')}\nDescription: ${card.description}`;
+      return `Card ${index + 1}: ${card.name} (${orientation})\nMeaning: ${meaning}\nKeywords: ${card.keywords.join(
+        ', '
+      )}\nDescription: ${card.description}`;
     })
     .join('\n\n');
 
