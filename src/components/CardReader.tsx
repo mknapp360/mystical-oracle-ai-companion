@@ -74,6 +74,33 @@ export const CardReader = ({ cards }: CardReaderProps) => {
 
   const getThreeCardLabels = () => ['Past / Situation', 'Present / Challenge', 'Future / Outcome'];
 
+const handleAskTheCards = async () => {
+  if (drawnCards.length === 0 || !question.trim()) return;
+
+  setLoading(true);
+
+  const formattedCards = drawnCards.map((card, index) => ({
+    card,
+    orientation: isReversed[index] ? 'reversed' : 'upright',
+  }));
+
+  try {
+    const response = await fetch('/api/interpret', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, cards: formattedCards }),
+    });
+
+    const data = await response.json();
+    setAiResponse(data.interpretation);
+  } catch (err) {
+    console.error('Error fetching AI interpretation:', err);
+    setAiResponse('There was an error connecting to the mystical servers. Try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <div className="space-y-8">
       {/* Question Input */}
@@ -139,6 +166,18 @@ export const CardReader = ({ cards }: CardReaderProps) => {
         <div className="mt-6 p-4 bg-card/80 border border-purple-300 rounded prose prose-invert max-w-xl mx-auto">
           <h3 className="text-lg font-bold mb-2">Interpretation:</h3>
           <p>{aiResponse}</p>
+        </div>
+      )}
+
+      {drawnCards.length > 0 && !aiResponse && (
+        <div className="text-center">
+          <Button
+            onClick={handleAskTheCards}
+            disabled={loading || !question.trim()}
+            className="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          >
+            {loading ? 'Consulting the Oracle…' : 'Interpret My Reading'}
+          </Button>
         </div>
       )}
 
