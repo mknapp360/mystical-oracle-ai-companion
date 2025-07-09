@@ -23,6 +23,8 @@ export const CardReader = ({ cards }: CardReaderProps) => {
 
   const drawSingleCard = async () => {
     if (isDrawing) return;
+
+    setAiResponse('');
     
     setIsDrawing(true);
     
@@ -44,6 +46,8 @@ export const CardReader = ({ cards }: CardReaderProps) => {
 
   const drawThreeCards = async () => {
     if (isDrawing) return;
+
+    setAiResponse('');
     
     setIsDrawing(true);
     
