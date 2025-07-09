@@ -158,26 +158,25 @@ const handleAskTheCards = async () => {
       </Card>
 
       {/* Question Display */}
-        {question && drawnCards.length > 0 && (
-          <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto">
-            <CardContent className="pt-6">
-              <h3 className="font-serif text-lg text-purple-200 text-center mb-2">Your Question</h3>
-              <p className="text-muted-foreground text-center italic">"{question}"</p>
-            </CardContent>
-          </Card>
-        )}
+      {question && drawnCards.length > 0 && (
+        <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            <h3 className="font-serif text-lg text-purple-200 text-center mb-2">Your Question</h3>
+            <p className="text-muted-foreground text-center italic">"{question}"</p>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* AI Interpretation */}
-          {aiResponse && (
-            <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm max-w-2xl mx-auto">
-              <CardContent className="pt-6">
-                <h3 className="font-serif text-lg text-purple-200 text-center mb-4">Interpretation</h3>
-                <div className="prose prose-invert text-muted-foreground w-full max-w-none">
-                  <p>{aiResponse}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      {aiResponse && (
+        <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
+          <CardContent className="pt-6">
+            <h3 className="text-lg font-bold mb-2">Interpretation:</h3>
+            <div className="font-serif text-lg text-purple-200 text-center mb-2">
+              <p>{aiResponse}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {drawnCards.length > 0 && !aiResponse && (
         <div className="text-center">
