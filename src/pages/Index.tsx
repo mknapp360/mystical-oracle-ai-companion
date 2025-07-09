@@ -37,7 +37,7 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div className="text-center flex-1">
                 <h1 className="font-serif text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-                  Mystic Tarot
+                  Tarot Pathwork
                 </h1>
                 <p className="text-muted-foreground mt-1 text-sm">
                   Discover the wisdom of the cards

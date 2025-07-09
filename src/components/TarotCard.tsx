@@ -27,7 +27,7 @@ export const TarotCard = ({ card, isRevealed = false, onClick, className = "" }:
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                 <span className="text-2xl">✨</span>
               </div>
-              <p className="font-serif text-sm opacity-80">Mystic Tarot</p>
+              <p className="font-serif text-sm opacity-80">Tarot Pathwork</p>
             </div>
           </div>
         ) : (

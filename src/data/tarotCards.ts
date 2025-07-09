@@ -11,7 +11,7 @@ export const majorArcana: TarotCard[] = [
     reversedMeaning: 'Recklessness, taken advantage of, inconsideration, lack of direction',
     keywords: ['new beginnings', 'innocence', 'adventure', 'potential'],
     description: 'The Fool represents new beginnings, having faith in the future, being inexperienced, not knowing what to expect, having beginner\'s luck, improvisation and believing in the universe.',
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop'
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//fool.jpg'
   },
   {
     id: 'magician',
@@ -22,7 +22,7 @@ export const majorArcana: TarotCard[] = [
     reversedMeaning: 'Manipulation, poor planning, untapped talents, lack of focus',
     keywords: ['manifestation', 'willpower', 'desire', 'creation'],
     description: 'The Magician represents manifestation, resourcefulness, inspired action, and having the power to create your reality through focused will.',
-    imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=600&fit=crop'
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//magician.jpg'
   },
   {
     id: 'high-priestess',
@@ -33,7 +33,7 @@ export const majorArcana: TarotCard[] = [
     reversedMeaning: 'Secrets, disconnected from intuition, withdrawal, silence',
     keywords: ['intuition', 'mystery', 'subconscious', 'inner wisdom'],
     description: 'The High Priestess represents intuition, sacred knowledge, divine feminine energy, and trusting your inner voice.',
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop'
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//high-priestess.jpg'
   },
   {
     id: 'empress',
@@ -44,7 +44,7 @@ export const majorArcana: TarotCard[] = [
     reversedMeaning: 'Creative block, dependence on others, lack of growth',
     keywords: ['abundance', 'nurturing', 'fertility', 'creativity'],
     description: 'The Empress represents femininity, beauty, nature, nurturing, and the abundance that comes from connecting with the natural world.',
-    imageUrl: 'https://images.unsplash.com/photo-1573913426373-6cdbabf3e4d2?w=400&h=600&fit=crop'
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//empress.jpg'
   },
   {
     id: 'emperor',
@@ -55,7 +55,7 @@ export const majorArcana: TarotCard[] = [
     reversedMeaning: 'Tyranny, rigidity, coldness, lack of discipline',
     keywords: ['authority', 'structure', 'control', 'leadership'],
     description: 'The Emperor represents authority, establishment, structure, and the need for order and discipline in your life.',
-    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=600&fit=crop'
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//emperor.jpg'
   },
   {
     id: 'hierophant',
@@ -66,8 +66,30 @@ export const majorArcana: TarotCard[] = [
     reversedMeaning: 'Personal beliefs, freedom, challenging the status quo',
     keywords: ['tradition', 'conformity', 'morality', 'ethics'],
     description: 'The Hierophant represents spiritual wisdom, religious beliefs, tradition, and the importance of social approval.',
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=600&fit=crop'
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//hierophant.jpg'
   }
 ];
 
-export const allCards = [...majorArcana];
+export const wands: TarotCard[] = [
+  {
+    id: 'ace-of-wands',
+    name: 'Ace of Wands',
+    type: 'minor',
+    suit: 'wands',
+    number: 1,
+    uprightMeaning: 'Inspiration, new opportunities, growth, potential',
+    reversedMeaning: 'Delays, lack of motivation, weighed down',
+    keywords: ['potential', 'creativity', 'initiative'],
+    description: 'The Ace of Wands symbolizes new beginnings, creative spark, and the passionate pursuit of goals.',
+    imageUrl: 'https://swiopqkhkmogbatmfrgo.supabase.co/storage/v1/object/public/tarot-cards//ace-of-wands.jpg',
+  },
+  // Add more cards here...
+];
+
+export const allCards = [
+  ...majorArcana,
+  ...wands,
+  // ...cups,
+  // ...swords,
+  // ...pentacles,
+];
