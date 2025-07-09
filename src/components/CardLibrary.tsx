@@ -16,11 +16,19 @@ export const CardLibrary = ({ cards }: CardLibraryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCard, setSelectedCard] = useState<TarotCardType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeSuit, setActiveSuit] = useState<string>('major');
 
-  const filteredCards = cards.filter(card =>
-    card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    card.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const suits = ['major', 'wands', 'cups', 'swords', 'pentacles'];
+
+  const filteredCards = cards.filter((card) => {
+    const matchesSearch =
+      card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      card.keywords.some((keyword) => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSuit =
+      (activeSuit === 'major' && card.type === 'major') || card.suit === activeSuit;
+
+    return matchesSearch && matchesSuit;
+  });
 
   const handleCardClick = (card: TarotCardType) => {
     setSelectedCard(card);
@@ -29,7 +37,7 @@ export const CardLibrary = ({ cards }: CardLibraryProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Search */}
+      {/* Search Bar */}
       <div className="relative max-w-md mx-auto">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
@@ -50,6 +58,20 @@ export const CardLibrary = ({ cards }: CardLibraryProps) => {
         )}
       </div>
 
+      {/* Suit Selector */}
+      <div className="flex flex-wrap justify-center gap-2">
+        {suits.map((suit) => (
+          <Button
+            key={suit}
+            variant={activeSuit === suit ? 'default' : 'secondary'}
+            onClick={() => setActiveSuit(suit)}
+            className="capitalize"
+          >
+            {suit}
+          </Button>
+        ))}
+      </div>
+
       {/* Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredCards.map((card) => (
@@ -64,11 +86,12 @@ export const CardLibrary = ({ cards }: CardLibraryProps) => {
         ))}
       </div>
 
+      {/* No Cards Found */}
       {filteredCards.length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🔮</div>
           <h3 className="text-xl font-serif text-purple-200 mb-2">No cards found</h3>
-          <p className="text-muted-foreground">Try adjusting your search terms</p>
+          <p className="text-muted-foreground">Try adjusting your search terms or suit filter</p>
         </div>
       )}
 

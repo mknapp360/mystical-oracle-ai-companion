@@ -18,6 +18,8 @@ export const CardReader = ({ cards }: CardReaderProps) => {
   const [revealedCards, setRevealedCards] = useState<boolean[]>([]);
   const [isReversed, setIsReversed] = useState<boolean[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [aiResponse, setAiResponse] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const drawSingleCard = async () => {
     if (isDrawing) return;
@@ -131,6 +133,13 @@ export const CardReader = ({ cards }: CardReaderProps) => {
             <p className="text-muted-foreground text-center italic">"{question}"</p>
           </CardContent>
         </Card>
+      )}
+
+      {aiResponse && (
+        <div className="mt-6 p-4 bg-card/80 border border-purple-300 rounded prose prose-invert max-w-xl mx-auto">
+          <h3 className="text-lg font-bold mb-2">Interpretation:</h3>
+          <p>{aiResponse}</p>
+        </div>
       )}
 
       {/* Drawn Cards */}
