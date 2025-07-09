@@ -74,6 +74,7 @@ export const CardReader = ({ cards }: CardReaderProps) => {
     setRevealedCards([]);
     setIsReversed([]);
     setQuestion('');
+    setAiResponse('');
   };
 
   const getThreeCardLabels = () => ['Past / Situation', 'Present / Challenge', 'Future / Outcome'];
