@@ -88,7 +88,7 @@ const Index = () => {
                     <Sparkles className="w-4 h-4" />
                     Card Reading
                   </Button>
-                  <Button
+                  {/*<Button
                     variant={activeTab === 'library' ? 'default' : 'ghost'}
                     onClick={() => setActiveTab('library')}
                     className={`gap-2 ${
@@ -99,7 +99,7 @@ const Index = () => {
                   >
                     <BookOpen className="w-4 h-4" />
                     Card Library
-                  </Button>
+                  </Button> */}
                 </CardContent>
               </Card>
             </nav>

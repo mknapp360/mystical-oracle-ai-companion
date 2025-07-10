@@ -1,7 +1,7 @@
 import { Home, BookOpen, History, LogOut } from 'lucide-react';
 import { useMediaQuery } from '@uidotdev/usehooks'; // optional but great for responsive logic
 import { logout } from './Auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export const NavBar = ({ user }: { user: any }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
