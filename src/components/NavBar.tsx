@@ -30,10 +30,6 @@ export const NavBar = ({ user }: NavBarProps) => {
         {/* If user is logged in */}
         {user ? (
           <>
-            <Link to="/" className="text-purple-300 hover:text-white flex flex-col items-center">
-              <Home size={20} />
-              <span className="text-xs">Home</span>
-            </Link>
 
             <button
               onClick={logout}
