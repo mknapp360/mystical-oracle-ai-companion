@@ -17,6 +17,11 @@ export const NavBar = ({ user }: NavBarProps) => {
     >
       <div className="flex justify-around items-center py-3">
         {/* Shared: Link to Card Library */}
+        <Link to="/" className="text-purple-300 hover:text-white flex flex-col items-center">
+          <Home size={20} />
+          <span className="text-xs">Home</span>
+        </Link>
+
         <Link to="/library" className="text-purple-300 hover:text-white flex flex-col items-center">
           <Book size={20} />
           <span className="text-xs">Library</span>
@@ -27,7 +32,7 @@ export const NavBar = ({ user }: NavBarProps) => {
           <>
             <Link to="/" className="text-purple-300 hover:text-white flex flex-col items-center">
               <Home size={20} />
-              <span className="text-xs">Reading</span>
+              <span className="text-xs">Home</span>
             </Link>
 
             <button
