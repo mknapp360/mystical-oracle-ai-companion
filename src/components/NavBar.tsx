@@ -2,6 +2,7 @@ import { Home, Book, BookOpen, History, LogIn, LogOut } from 'lucide-react';
 import { useMediaQuery } from '@uidotdev/usehooks'; // optional but great for responsive logic
 import { logout } from './Auth';
 import { useNavigate, Link } from 'react-router-dom';
+import { loginWithGoogle } from './Auth';
 
 interface NavBarProps {
   user: any;
@@ -39,7 +40,7 @@ export const NavBar = ({ user }: NavBarProps) => {
           </>
         ) : (
           <button
-            onClick={() => window.location.href = '/login'} // Or trigger OAuth flow
+            onClick={loginWithGoogle} // Or trigger OAuth flow
             className="text-purple-300 hover:text-white flex flex-col items-center"
           >
             <LogIn size={20} />
