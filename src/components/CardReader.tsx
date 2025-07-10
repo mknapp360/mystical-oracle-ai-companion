@@ -199,25 +199,6 @@ const handleAskTheCards = async (count: number) => {
         </Card>
       )}
 
-      <Button 
-        onClick={() => handleAskTheCards(1)} 
-        disabled={isDrawing || !question.trim()}
-        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-      >
-        <Shuffle className="w-4 h-4 mr-2" />
-        Draw Single Card
-      </Button>
-
-      <Button 
-        onClick={() => handleAskTheCards(3)} 
-        disabled={isDrawing || !question.trim()}
-        variant="outline"
-        className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
-      >
-        <Shuffle className="w-4 h-4 mr-2" />
-        Draw Three Cards
-      </Button>
-
       {/* Drawn Cards */}
 {drawnCards.length > 0 && (
   <div className="space-y-6">

@@ -1,39 +1,51 @@
-import { Home, BookOpen, History, LogOut } from 'lucide-react';
+import { Home, Book, BookOpen, History, LogIn, LogOut } from 'lucide-react';
 import { useMediaQuery } from '@uidotdev/usehooks'; // optional but great for responsive logic
 import { logout } from './Auth';
 import { useNavigate, Link } from 'react-router-dom';
 
-export const NavBar = ({ user }: { user: any }) => {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const navigate = useNavigate();
+interface NavBarProps {
+  user: any;
+}
 
-  if (!user) return null;
+export const NavBar = ({ user }: NavBarProps) => {
+  const isMobile = window.innerWidth <= 768;
 
   return (
     <nav
-      className={`fixed z-50 w-full bg-background/90 backdrop-blur-sm border-t border-purple-500/20
-        ${isMobile ? 'bottom-0' : 'top-0 border-b'}`}
+      className={`fixed ${isMobile ? 'bottom-0' : 'top-0'} w-full bg-background border-t border-purple-700/20 z-50`}
     >
-      <div className="flex justify-around items-center p-2 max-w-4xl mx-auto text-purple-300">
-        <button onClick={() => navigate('/')} className="flex flex-col items-center hover:text-purple-100">
-          <Home size={20} />
-          <span className="text-xs">Home</span>
-        </button>
-
-        <button onClick={() => navigate('/library')} className="flex flex-col items-center hover:text-purple-100">
-          <BookOpen size={20} />
+      <div className="flex justify-around items-center py-3">
+        {/* Shared: Link to Card Library */}
+        <Link to="/library" className="text-purple-300 hover:text-white flex flex-col items-center">
+          <Book size={20} />
           <span className="text-xs">Library</span>
-        </button>
+        </Link>
 
-        <button onClick={() => navigate('/my-readings')} className="flex flex-col items-center hover:text-purple-100">
-          <History size={20} />
-          <span className="text-xs">My Readings</span>
-        </button>
+        {/* If user is logged in */}
+        {user ? (
+          <>
+            <Link to="/" className="text-purple-300 hover:text-white flex flex-col items-center">
+              <Home size={20} />
+              <span className="text-xs">Reading</span>
+            </Link>
 
-        <button onClick={logout} className="flex flex-col items-center hover:text-pink-400">
-          <LogOut size={20} />
-          <span className="text-xs">Logout</span>
-        </button>
+            <button
+              onClick={logout}
+              className="text-purple-300 hover:text-white flex flex-col items-center"
+            >
+              <LogOut size={20} />
+              <span className="text-xs">Logout</span>
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => window.location.href = '/login'} // Or trigger OAuth flow
+            className="text-purple-300 hover:text-white flex flex-col items-center"
+          >
+            <LogIn size={20} />
+            <span className="text-xs">Login</span>
+          </button>
+        )}
       </div>
     </nav>
   );
