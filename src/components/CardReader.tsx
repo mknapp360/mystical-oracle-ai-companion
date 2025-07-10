@@ -8,12 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Textarea } from './ui/textarea';
 import { Shuffle, RotateCcw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { supabase } from '../lib/supabaseClient';
+
 
 interface CardReaderProps {
   cards: TarotCardType[];
+  user: any;
 }
 
-export const CardReader = ({ cards }: CardReaderProps) => {
+export const CardReader = ({ cards, user }: CardReaderProps) => {
   const [question, setQuestion] = useState('');
   const [drawnCards, setDrawnCards] = useState<TarotCardType[]>([]);
   const [revealedCards, setRevealedCards] = useState<boolean[]>([]);
@@ -101,6 +104,22 @@ const handleAskTheCards = async () => {
 
     const data = await response.json();
     setAiResponse(data.interpretation);
+
+    // 🔐 Save reading to Supabase
+    if (user) {
+      const { error } = await supabase.from('readings').insert({
+        user_id: user.id,
+        question,
+        cards: JSON.stringify(formattedCards),
+        interpretation: data.interpretation,
+      });
+
+      if (error) {
+        console.error('Error saving reading:', error);
+      } else {
+        console.log('Reading saved successfully');
+      }
+    }
   } catch (err) {
     console.error('Error fetching AI interpretation:', err);
     setAiResponse('There was an error connecting to the mystical servers. Try again.');

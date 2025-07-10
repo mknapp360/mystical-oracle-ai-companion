@@ -105,7 +105,7 @@ const Index = () => {
 
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
-          {activeTab === 'reading' && <CardReader cards={allCards} />}
+          {activeTab === 'reading' && <CardReader cards={allCards} user={user} />}
           {activeTab === 'library' && <CardLibrary cards={allCards} />}
         </main>
 
