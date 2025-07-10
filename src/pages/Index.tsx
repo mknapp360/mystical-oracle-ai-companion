@@ -60,51 +60,7 @@ const Index = () => {
                   Discover the wisdom of the cards
                 </p>
               </div>
-            </div>
-
-            {/* Navigation */}
-            <div className="text-right">
-              {user ? (
-                <button onClick={logout} className="text-sm text-purple-300 hover:underline">
-                  Logout ({user.email})
-                </button>
-              ) : (
-                <button onClick={loginWithGoogle} className="text-sm text-purple-300 hover:underline">
-                  Login with Google
-                </button>
-              )}
-            </div>
-
-            <nav className="flex justify-center mt-6">
-              <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-1 flex gap-1">
-                  <Button
-                    variant={activeTab === 'reading' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('reading')}
-                    className={`gap-2 ${
-                      activeTab === 'reading' 
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
-                        : 'text-muted-foreground hover:text-purple-300'
-                    }`}
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Card Reading
-                  </Button>
-                  {/*<Button
-                    variant={activeTab === 'library' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('library')}
-                    className={`gap-2 ${
-                      activeTab === 'library' 
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
-                        : 'text-muted-foreground hover:text-purple-300'
-                    }`}
-                  >
-                    <BookOpen className="w-4 h-4" />
-                    Card Library
-                  </Button> */}
-                </CardContent>
-              </Card>
-            </nav>
+            </div>           
           </div>
         </header>
 
