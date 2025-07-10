@@ -8,6 +8,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { BookOpen, Sparkles, Stars, Moon } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { loginWithGoogle, logout } from '../components/Auth';
+import { NavBar } from '../components/NavBar';
 
 type ActiveTab = 'reading' | 'library';
 
@@ -25,7 +26,9 @@ const Index = () => {
   }, []);
 
   return (
+    
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <NavBar user={user} />
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 text-purple-500/20 animate-pulse">
@@ -122,6 +125,7 @@ const Index = () => {
         </footer>
       </div>
     </div>
+    
   );
 };
 
