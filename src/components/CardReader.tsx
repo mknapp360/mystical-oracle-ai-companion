@@ -85,14 +85,18 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
   const getThreeCardLabels = () => ['Past / Situation', 'Present / Challenge', 'Future / Outcome'];
 
-const handleAskTheCards = async () => {
-  if (drawnCards.length === 0 || !question.trim()) return;
+const handleAskTheCards = async (count: number) => {
+  const drawn = [...cards].sort(() => Math.random() - 0.5).slice(0, count);
+  const reversed = drawn.map(() => Math.random() < 0.5);
 
+  setDrawnCards(drawn);
+  setIsReversed(reversed);
+  setRevealedCards(new Array(count).fill(true));
   setLoading(true);
 
-  const formattedCards = drawnCards.map((card, index) => ({
+  const formattedCards = drawn.map((card, index) => ({
     card,
-    orientation: isReversed[index] ? 'reversed' : 'upright',
+    orientation: reversed[index] ? 'reversed' : 'upright',
   }));
 
   try {
@@ -105,23 +109,18 @@ const handleAskTheCards = async () => {
     const data = await response.json();
     setAiResponse(data.interpretation);
 
-    // 🔐 Save reading to Supabase
     if (user) {
-      const { error } = await supabase.from('readings').insert({
-        user_id: user.id,
-        question,
-        cards: JSON.stringify(formattedCards),
-        interpretation: data.interpretation,
-      });
-
-      if (error) {
-        console.error('Error saving reading:', error);
-      } else {
-        console.log('Reading saved successfully');
-      }
+      await supabase.from('readings').insert([
+        {
+          user_id: user.id,
+          question,
+          cards: JSON.stringify(formattedCards),
+          interpretation: data.interpretation,
+        },
+      ]);
     }
   } catch (err) {
-    console.error('Error fetching AI interpretation:', err);
+    console.error('Error interpreting reading:', err);
     setAiResponse('There was an error connecting to the mystical servers. Try again.');
   } finally {
     setLoading(false);
@@ -200,17 +199,24 @@ const handleAskTheCards = async () => {
         </Card>
       )}
 
-      {drawnCards.length > 0 && !aiResponse && (
-        <div className="text-center">
-          <Button
-            onClick={handleAskTheCards}
-            disabled={loading || !question.trim()}
-            className="mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-          >
-            {loading ? 'Consulting the Oracle…' : 'Interpret My Reading'}
-          </Button>
-        </div>
-      )}
+      <Button 
+        onClick={() => handleAskTheCards(1)} 
+        disabled={isDrawing || !question.trim()}
+        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+      >
+        <Shuffle className="w-4 h-4 mr-2" />
+        Draw Single Card
+      </Button>
+
+      <Button 
+        onClick={() => handleAskTheCards(3)} 
+        disabled={isDrawing || !question.trim()}
+        variant="outline"
+        className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
+      >
+        <Shuffle className="w-4 h-4 mr-2" />
+        Draw Three Cards
+      </Button>
 
       {/* Drawn Cards */}
 {drawnCards.length > 0 && (
