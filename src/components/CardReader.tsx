@@ -30,6 +30,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
     setAiResponse('');
     setIsDrawing(true);
+    setLoading(true);
     
     // Shuffle and pick a random card
     const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
@@ -40,10 +41,13 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
     setRevealedCards([false]);
     setIsReversed([reversed]);
     
-    // Reveal after animation
-    setTimeout(() => {
+    // Reveal after animation and then get AI interpretation
+    setTimeout(async () => {
       setRevealedCards([true]);
       setIsDrawing(false);
+      
+      // Get AI interpretation
+      await getAIInterpretation([selectedCard], [reversed]);
     }, 800);
   };
 
@@ -52,6 +56,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
     setAiResponse('');
     setIsDrawing(true);
+    setLoading(true);
     
     // Shuffle and pick 3 random cards
     const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
@@ -65,9 +70,12 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
     // Reveal cards one by one
     setTimeout(() => setRevealedCards([true, false, false]), 600);
     setTimeout(() => setRevealedCards([true, true, false]), 1200);
-    setTimeout(() => {
+    setTimeout(async () => {
       setRevealedCards([true, true, true]);
       setIsDrawing(false);
+      
+      // Get AI interpretation after all cards are revealed
+      await getAIInterpretation(selectedCards, reversedStates);
     }, 1800);
   };
 
@@ -82,20 +90,10 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
   const getThreeCardLabels = () => ['Past / Situation', 'Present / Challenge', 'Future / Outcome'];
 
-  const handleAskTheCards = async (count: number) => {
-    if (!cards || cards.length < count) return;
-
-    const drawn = [...cards].sort(() => Math.random() - 0.5).slice(0, count);
-    const reversed = drawn.map(() => Math.random() < 0.5);
-
-    setDrawnCards(drawn);
-    setIsReversed(reversed);
-    setRevealedCards(new Array(count).fill(true));
-    setLoading(true);
-
-    const formattedCards = drawn.map((card, index) => ({
+  const getAIInterpretation = async (cards: TarotCardType[], reversedStates: boolean[]) => {
+    const formattedCards = cards.map((card, index) => ({
       card,
-      orientation: reversed[index] ? 'reversed' : 'upright',
+      orientation: reversedStates[index] ? 'reversed' : 'upright',
     }));
 
     try {
@@ -136,12 +134,11 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
     }
   };
 
-  // Add buttons for AI interpretation
+  // Add buttons for manual AI interpretation (fallback)
   const interpretReading = () => {
-    if (drawnCards.length === 1) {
-      handleAskTheCards(1);
-    } else if (drawnCards.length === 3) {
-      handleAskTheCards(3);
+    if (drawnCards.length > 0 && !loading && !aiResponse) {
+      setLoading(true);
+      getAIInterpretation(drawnCards, isReversed);
     }
   };
 
@@ -174,21 +171,21 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               onClick={drawSingleCard} 
-              disabled={isDrawing || cards.length === 0}
+              disabled={isDrawing || loading || cards.length === 0}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
               <Shuffle className="w-4 h-4 mr-2" />
-              Draw Single Card
+              {loading && drawnCards.length === 1 ? 'Interpreting...' : 'Draw Single Card'}
             </Button>
             
             <Button 
               onClick={drawThreeCards} 
-              disabled={isDrawing || cards.length < 3}
+              disabled={isDrawing || loading || cards.length < 3}
               variant="outline"
               className="border-purple-500/50 text-purple-300 hover:bg-purple-600/20"
             >
               <Shuffle className="w-4 h-4 mr-2" />
-              Draw Three Cards
+              {loading && drawnCards.length === 3 ? 'Interpreting...' : 'Draw Three Cards'}
             </Button>
             
             {drawnCards.length > 0 && (
@@ -215,14 +212,14 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
         </Card>
       )}
 
-      {/* AI Interpretation Button */}
+      {/* Fallback AI Interpretation Button - only shows if interpretation failed */}
       {drawnCards.length > 0 && revealedCards.every(Boolean) && !loading && !aiResponse && (
         <div className="text-center">
           <Button 
             onClick={interpretReading}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
           >
-            Get AI Interpretation
+            Retry Interpretation
           </Button>
         </div>
       )}
