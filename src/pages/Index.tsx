@@ -1,16 +1,28 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CardLibrary } from '../components/CardLibrary';
 import { CardReader } from '../components/CardReader';
 import { allCards } from '../data/tarotCards';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { BookOpen, Sparkles, Stars, Moon } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
+import { loginWithGoogle, logout } from '../components/Auth';
 
 type ActiveTab = 'reading' | 'library';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('reading');
+
+  const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -46,6 +58,18 @@ const Index = () => {
             </div>
 
             {/* Navigation */}
+            <div className="text-right">
+              {user ? (
+                <button onClick={logout} className="text-sm text-purple-300 hover:underline">
+                  Logout ({user.email})
+                </button>
+              ) : (
+                <button onClick={loginWithGoogle} className="text-sm text-purple-300 hover:underline">
+                  Login with Google
+                </button>
+              )}
+            </div>
+
             <nav className="flex justify-center mt-6">
               <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
                 <CardContent className="p-1 flex gap-1">
