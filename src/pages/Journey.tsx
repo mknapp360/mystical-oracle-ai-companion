@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TarotCard as TarotCardType } from "@/types/tarot";
-import { TarotCard } from "@/components/TarotCard";
+import { TarotCard as TarotCardComponent } from "@/components/TarotCard";
 
 interface Reading {
   id: string;
   question: string;
-  cards: string; // stored as JSON string
+  cards: string; // stored as stringified JSON
   interpretation: string;
   created_at: string;
 }
@@ -16,7 +15,6 @@ interface Reading {
 export default function JourneyPage() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [selectedReading, setSelectedReading] = useState<Reading | null>(null);
-  const [parsedCards, setParsedCards] = useState<{ card: TarotCardType; orientation: string }[]>([]);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -39,30 +37,23 @@ export default function JourneyPage() {
     fetchUserAndReadings();
   }, []);
 
-  const handleSelectReading = (reading: Reading) => {
-    try {
-      const cards = JSON.parse(reading.cards);
-      setParsedCards(cards);
-    } catch (err) {
-      console.error("Error parsing cards:", err);
-      setParsedCards([]);
-    }
-    setSelectedReading(reading);
-  };
+  const parsedCards = selectedReading ? JSON.parse(selectedReading.cards) : [];
 
   return (
     <div className="max-w-3xl mx-auto py-12 space-y-6">
       <h1 className="text-3xl font-serif text-purple-200 text-center">🧭 My Journey</h1>
 
       {readings.length === 0 && (
-        <p className="text-center text-muted-foreground">No readings yet. Start your journey by drawing your first card!</p>
+        <p className="text-center text-muted-foreground">
+          No readings yet. Start your journey by drawing your first card!
+        </p>
       )}
 
       {readings.map((reading) => (
         <Card
           key={reading.id}
           className="bg-card/50 backdrop-blur-sm border-purple-500/30 hover:shadow-md transition cursor-pointer"
-          onClick={() => handleSelectReading(reading)}
+          onClick={() => setSelectedReading(reading)}
         >
           <CardContent className="py-4 flex justify-between items-center">
             <div>
@@ -78,50 +69,54 @@ export default function JourneyPage() {
         </Card>
       ))}
 
-      {/* Modal to show full reading */}
+      {/* Modal for reading detail */}
       <Dialog open={!!selectedReading} onOpenChange={() => setSelectedReading(null)}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto border-purple-500/30 bg-background/95 backdrop-blur-sm">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-purple-500/30 bg-background/95 backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="text-purple-200 font-serif">
-              Reading from {selectedReading && new Date(selectedReading.created_at).toLocaleDateString()}
+              Reading from{" "}
+              {selectedReading && new Date(selectedReading.created_at).toLocaleDateString()}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-6 mt-4">
-            <p className="italic text-muted-foreground">
-              {selectedReading?.question || "No question provided."}
-            </p>
 
-            {/* Render AI interpretation */}
-            <div className="space-y-2">
-              <h3 className="text-purple-200 font-serif text-lg">Interpretation</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                {selectedReading?.interpretation}
-              </p>
-            </div>
+          {selectedReading && (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="font-serif text-lg text-purple-300">Interpretation</h3>
+                <p className="italic text-muted-foreground">
+                  {selectedReading.question || "No question provided."}
+                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                  {selectedReading.interpretation}
+                </p>
+              </div>
 
-            {/* Render cards */}
-            {parsedCards.length > 0 && (
-              <div>
-                <h3 className="text-purple-200 font-serif text-lg mb-2">Drawn Cards</h3>
-                <div className={`grid gap-4 ${parsedCards.length === 3 ? 'md:grid-cols-3' : 'justify-center'}`}>
-                  {parsedCards.map((entry, idx) => (
-                    <div key={idx} className="flex flex-col items-center space-y-2">
+              {parsedCards.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="font-serif text-lg text-purple-300">Drawn Cards</h3>
+                  <div className="grid grid-cols-3 gap-6 justify-center items-start">
+                    {parsedCards.map((entry: any, index: number) => (
                       <div
-                        className={`transition-transform ${
+                        key={index}
+                        className={`max-w-[180px] mx-auto transform ${
                           entry.orientation === "reversed" ? "rotate-180" : ""
                         }`}
                       >
-                        <TarotCard card={entry.card} isRevealed={true} />
+                        <TarotCardComponent
+                          card={entry.card}
+                          isRevealed={true}
+                          className="w-full h-auto"
+                        />
+                        <p className="text-center text-xs text-muted-foreground mt-2 italic">
+                          {entry.orientation === "reversed" ? "Reversed" : "Upright"}
+                        </p>
                       </div>
-                      <p className="text-xs italic text-muted-foreground">
-                        {entry.orientation.charAt(0).toUpperCase() + entry.orientation.slice(1)}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
