@@ -8,6 +8,8 @@ import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Search, X } from 'lucide-react';
 
+
+
 interface CardLibraryProps {
   cards: TarotCardType[];
 }
@@ -30,12 +32,15 @@ export const CardLibrary = ({ cards }: CardLibraryProps) => {
     return matchesSearch && matchesSuit;
   });
 
+  
+
   const handleCardClick = (card: TarotCardType) => {
     setSelectedCard(card);
     setIsDialogOpen(true);
   };
 
   return (
+    
     <div className="space-y-6">
       {/* Search Bar */}
       <div className="relative max-w-md mx-auto">
