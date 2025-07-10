@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/Layout';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import JourneyPage from "./pages/Journey";
 import { CardLibrary } from './components/CardLibrary';
 import { allCards } from './data/tarotCards';
 import { useEffect, useState } from 'react';
@@ -44,6 +45,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/library" element={<CardLibrary cards={allCards} />} />
               <Route path="*" element={<NotFound />} />
+              <Route path="/journey" element={<JourneyPage />} />
             </Routes>
           </Layout>
         </BrowserRouter>

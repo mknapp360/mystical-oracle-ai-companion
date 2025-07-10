@@ -27,6 +27,13 @@ export const NavBar = ({ user }: NavBarProps) => {
           <span className="text-xs">Library</span>
         </Link>
 
+        {user && (
+        <Link to="/journey" className="text-purple-300 hover:text-white flex flex-col items-center">
+          <History size={20} />
+          <span className="text-xs">My Journey</span>
+        </Link>
+)}
+
         {/* If user is logged in */}
         {user ? (
           <>
