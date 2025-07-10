@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Textarea } from './ui/textarea';
 import { Shuffle, RotateCcw } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface CardReaderProps {
   cards: TarotCardType[];
@@ -20,6 +21,8 @@ export const CardReader = ({ cards }: CardReaderProps) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<TarotCardType | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const drawSingleCard = async () => {
     if (isDrawing) return;
@@ -191,41 +194,46 @@ const handleAskTheCards = async () => {
       )}
 
       {/* Drawn Cards */}
-      {drawnCards.length > 0 && (
-        <div className="space-y-6">
-          <div className={`grid gap-6 ${drawnCards.length === 3 ? 'md:grid-cols-3' : 'justify-center'}`}>
-            {drawnCards.map((card, index) => (
-              <div key={`${card.id}-${index}`} className="space-y-3">
-                {drawnCards.length === 3 && (
-                  <h3 className="font-serif text-center text-purple-300 text-sm">
-                    {getThreeCardLabels()[index]}
-                  </h3>
-                )}
-                <div className={`mx-auto max-w-[200px] ${revealedCards[index] ? 'card-flip' : ''}`}>
-                  <TarotCard
-                    card={card}
-                    isRevealed={revealedCards[index]}
-                    className={isReversed[index] && revealedCards[index] ? 'rotate-180' : ''}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Card Meanings */}
-          {revealedCards.some(revealed => revealed) && (
-            <div className="space-y-6">
-              {drawnCards.map((card, index) => (
-                revealedCards[index] && (
-                  <CardMeaning 
-                    key={`meaning-${card.id}-${index}`} 
-                    card={card} 
-                    isReversed={isReversed[index]}
-                  />
-                )
-              ))}
-            </div>
+{drawnCards.length > 0 && (
+  <div className="space-y-6">
+    <div className={`grid gap-6 ${drawnCards.length === 3 ? 'md:grid-cols-3' : 'justify-center'}`}>
+      {drawnCards.map((card, index) => (
+        <div key={`${card.id}-${index}`} className="space-y-3">
+          {drawnCards.length === 3 && (
+            <h3 className="font-serif text-center text-purple-300 text-sm">
+              {getThreeCardLabels()[index]}
+            </h3>
           )}
+          <div
+            onClick={() => {
+              setSelectedCard(card);
+              setIsDialogOpen(true);
+            }}
+            className={`cursor-pointer mx-auto max-w-[200px] ${revealedCards[index] ? 'card-flip' : ''}`}
+          >
+            <TarotCard
+              card={card}
+              isRevealed={revealedCards[index]}
+              className={isReversed[index] && revealedCards[index] ? 'rotate-180' : ''}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+
+          {/* Card Meaning Modal */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-purple-500/30 bg-background/95 backdrop-blur-sm">
+              <DialogHeader>
+                <DialogTitle className="font-serif text-center text-purple-200">Card Meaning</DialogTitle>
+              </DialogHeader>
+              {selectedCard && (
+                <CardMeaning card={selectedCard} isReversed={isReversed[drawnCards.indexOf(selectedCard)]} />
+              )}
+            </DialogContent>
+          </Dialog>
+          
+          
         </div>
       )}
 
