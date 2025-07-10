@@ -24,11 +24,11 @@ const Index = () => {
     };
     getUser();
   }, []);
-  <NavBar user={user} />
+  
   return (
     
     <div className="min-h-screen bg-background relative overflow-hidden">
-      
+      <NavBar user={user} />
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 text-purple-500/20 animate-pulse">
