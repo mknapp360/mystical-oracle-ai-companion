@@ -1,10 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+import { supabase } from '../lib/supabaseClient'; // ✅ Use existing instance
 
 export async function loginWithGoogle() {
   await supabase.auth.signInWithOAuth({
@@ -14,5 +8,5 @@ export async function loginWithGoogle() {
 
 export const logout = async () => {
   await supabase.auth.signOut();
-  window.location.href = '/'; // force redirect
+  window.location.href = '/'; // ✅ redirect to home/login
 };
