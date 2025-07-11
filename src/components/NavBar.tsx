@@ -36,7 +36,7 @@ export const NavBar = ({ user }: NavBarProps) => {
           {user ? (
             <button
               onClick={logout}
-              className="text-purple-300 hover:text-white flex flex-col items-center"
+              className="text-white hover:text-white flex flex-col items-center"
             >
               <LogOut size={20} />
               <span className="text-xs">Logout</span>
@@ -44,7 +44,7 @@ export const NavBar = ({ user }: NavBarProps) => {
           ) : (
             <button
               onClick={loginWithGoogle}
-              className="text-purple-300 hover:text-white flex flex-col items-center"
+              className="text-white hover:text-white flex flex-col items-center"
             >
               <LogIn size={20} />
               <span className="text-xs">Login</span>
@@ -55,7 +55,7 @@ export const NavBar = ({ user }: NavBarProps) => {
           {user && (
             <button
               onClick={() => setShowProfile(true)}
-              className="text-purple-300 hover:text-white flex flex-col items-center"
+              className="text-white hover:text-white flex flex-col items-center"
             >
               <Menu size={20} />
               <span className="text-xs">Menu</span>
