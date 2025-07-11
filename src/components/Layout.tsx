@@ -11,7 +11,7 @@ const Layout = ({ children, user }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <NavBar user={user} />
-      <main className="pt-16 pb-16">{children}</main>
+      <main className="pb-16">{children}</main>
     </div>
   );
 };
