@@ -11,7 +11,7 @@ interface ProfileMenuProps {
 export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
   return (
     <Sheet open={open} onOpenChange={onClose}>
-        <SheetContent side="right" className="max-w-xs w-full bg-white border-l border-purple-300/30">
+        <SheetContent side="right" className="max-w-xs w-full bg-[#28325c] border-l border-purple-300/30">
         <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
             <SheetHeader>
                 <SheetTitle className="text-lg font-semibold">{user?.user_metadata?.full_name || "User"}</SheetTitle>
@@ -22,7 +22,7 @@ export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
             </div>
         </Card>
 
-        <div className="mt-6 flex flex-col gap-4 text-left text-purple-200">
+        <div className="mt-6 flex flex-col gap-4 text-left text-white">
           <button className="hover:text-white mt-6 border-t">Account Settings</button>
           <button className="hover:text-white mt-6 border-t">Reading Settings</button>
           <button className="hover:text-white mt-6 border-t">About Us</button>
