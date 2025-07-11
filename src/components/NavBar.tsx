@@ -1,4 +1,4 @@
-import { Home, Book, History, LogIn, LogOut, Menu } from 'lucide-react';
+import { Home, Book, BookOpen, History, LogIn, LogOut, Menu } from 'lucide-react';
 import { logout, loginWithGoogle } from './Auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -14,20 +14,20 @@ export const NavBar = ({ user }: NavBarProps) => {
   return (
     <>
       {/* Bottom NavBar container - always fixed to bottom */}
-      <nav className="fixed bottom-0 w-full bg-background border-t border-purple-700/20 z-50">
+      <nav className="fixed bottom-0 w-full bg-[#28325c] border-t border-purple-700/20 z-50">
         <div className="flex justify-around items-center py-3 px-4 relative">
-          <Link to="/" className="text-purple-300 hover:text-white flex flex-col items-center">
+          <Link to="/" className="text-white hover:text-white flex flex-col items-center">
             <Home size={20} />
             <span className="text-xs">Home</span>
           </Link>
 
-          <Link to="/library" className="text-purple-300 hover:text-white flex flex-col items-center">
-            <Book size={20} />
+          <Link to="/library" className="text-white hover:text-white flex flex-col items-center">
+            <BookOpen size={20} />
             <span className="text-xs">Library</span>
           </Link>
 
           {user && (
-            <Link to="/journey" className="text-purple-300 hover:text-white flex flex-col items-center">
+            <Link to="/journey" className="text-white hover:text-white flex flex-col items-center">
               <History size={20} />
               <span className="text-xs">My Journey</span>
             </Link>

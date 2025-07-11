@@ -29,27 +29,27 @@ const Index = () => {
     <>
     <NavBar user={user} />
     
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-[#28325c] relative overflow-hidden">
       
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 text-purple-500/20 animate-pulse">
+        <div className="absolute top-10 left-10 text-white animate-pulse">
           <Stars className="w-8 h-8" />
         </div>
-        <div className="absolute top-32 right-20 text-pink-500/20 animate-pulse delay-1000">
+        <div className="absolute top-32 right-20 text-white animate-pulse delay-1000">
           <Moon className="w-6 h-6" />
         </div>
-        <div className="absolute bottom-40 left-1/4 text-indigo-500/20 animate-pulse delay-2000">
+        <div className="absolute bottom-40 left-1/4 text-white animate-pulse delay-2000">
           <Sparkles className="w-7 h-7" />
         </div>
-        <div className="absolute bottom-20 right-1/3 text-purple-400/20 animate-pulse delay-500">
+        <div className="absolute bottom-20 right-1/3 text-white animate-pulse delay-500">
           <Stars className="w-5 h-5" />
         </div>
       </div>
 
       <div className="relative z-10">
         {/* Header */}
-        <header className="border-b border-purple-500/20 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <header className="border-b border-purple-500/20 bg-[#28325c] backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div className="text-center flex-1">
@@ -71,7 +71,7 @@ const Index = () => {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-purple-500/20 bg-background/80 backdrop-blur-sm mt-16">
+        <footer className="border-t border-purple-500/20 bg-[#28325c] backdrop-blur-sm mt-16">
           <div className="container mx-auto px-4 py-8 text-center">
             <p className="text-muted-foreground text-sm">
               🔮 Let the cards guide your journey through the mysteries of life 🔮
