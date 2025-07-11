@@ -35,7 +35,6 @@ export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
           onClick={onClose}
           className="absolute top-2 right-2 text-muted-foreground hover:text-white"
         >
-          <X size={18} />
         </button>
       </SheetContent>
     </Sheet>
