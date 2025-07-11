@@ -5,7 +5,6 @@ import { CardReader } from '../components/CardReader';
 import { allCards } from '../data/tarotCards';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
-import { BookOpen, Sparkles, Stars, Moon } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { loginWithGoogle, logout } from '../components/Auth';
 import { NavBar } from '../components/NavBar';
@@ -31,21 +30,6 @@ const Index = () => {
     
     <div className="min-h-screen bg-[#28325c] relative overflow-hidden">
       
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 text-white animate-pulse">
-          <Stars className="w-8 h-8" />
-        </div>
-        <div className="absolute top-32 right-20 text-white animate-pulse delay-1000">
-          <Moon className="w-6 h-6" />
-        </div>
-        <div className="absolute bottom-40 left-1/4 text-white animate-pulse delay-2000">
-          <Sparkles className="w-7 h-7" />
-        </div>
-        <div className="absolute bottom-20 right-1/3 text-white animate-pulse delay-500">
-          <Stars className="w-5 h-5" />
-        </div>
-      </div>
 
       <div className="relative z-10">
         {/* Header */}
