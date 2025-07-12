@@ -103,7 +103,10 @@ export default function JourneyPage() {
                     <Download size={14} /> Download
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => deleteReading(reading.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteReading(reading.id);
+                    }}
                     className="flex items-center gap-2 text-red-500 hover:bg-red-100/10 text-sm"
                   >
                     <Trash size={14} /> Delete
