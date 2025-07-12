@@ -11,7 +11,7 @@ interface CardMeaningProps {
 
 export const CardMeaning = ({ card, isReversed = false }: CardMeaningProps) => {
   return (
-    <Card className="w-full max-w-2xl mx-auto border-border bg-card/50 backdrop-blur-sm">
+    <Card className="w-full max-w-2xl mx-auto border-border bg-background backdrop-blur-sm">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Badge variant="secondary" className="bg-purple-600/80 text-white">
