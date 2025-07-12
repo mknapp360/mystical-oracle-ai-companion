@@ -251,8 +251,10 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
         <Card className="border-border bg-input backdrop-blur-sm">
           <CardContent className="pt-6">
             <h3 className="text-lg font-bold mb-4 text-black">Interpretation:</h3>
-            <div className="prose prose-purple max-w-none">
-              <p className="text-muted-foreground leading-relaxed">{aiResponse}</p>
+            <div className="prose prose-black max-w-none text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {aiResponse
+                .replace('**Summary:**', 'TLDR')
+                .replace('**Deeper Insight:**', '\n\nMystic Deep Dive')}
             </div>
           </CardContent>
         </Card>
