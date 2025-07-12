@@ -91,12 +91,13 @@ export default function JourneyPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-background border border-border shadow-lg mt-2 p-2 rounded-md">
                   <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-background border">
-                    <DropdownMenuItem
+                    <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
+                    </DropdownMenuSubTrigger>
+
+                    <DropdownMenuSubContent className="bg-background border">
+                      <DropdownMenuItem
                         onClick={() => {
                           const text = encodeURIComponent(`🧿 Tarot Reading: "${reading.question}"\n\n${reading.interpretation}`);
                           const url = `https://wa.me/?text=${text}`;
