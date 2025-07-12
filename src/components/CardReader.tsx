@@ -116,7 +116,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
     // If user didn't ask a question, prepend message
     const prefix = question.trim() === ''
-      ? "What the Angels want you to focus on right now is: "
+      ? ""
       : "";
 
     setAiResponse(prefix + data.interpretation);
@@ -248,9 +248,9 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
       {/* AI Response */}
       {aiResponse && (
-        <Card className="border-border bg-card/80 backdrop-blur-sm">
+        <Card className="border-border bg-input backdrop-blur-sm">
           <CardContent className="pt-6">
-            <h3 className="text-lg font-bold mb-4 text-white">Interpretation:</h3>
+            <h3 className="text-lg font-bold mb-4 text-black">Interpretation:</h3>
             <div className="prose prose-purple max-w-none">
               <p className="text-muted-foreground leading-relaxed">{aiResponse}</p>
             </div>
