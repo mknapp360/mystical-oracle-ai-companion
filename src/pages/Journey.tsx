@@ -95,7 +95,7 @@ export default function JourneyPage() {
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
+                  <DropdownMenuSubContent className="bg-background border">
                     <DropdownMenuItem
                         onClick={() => {
                           const text = encodeURIComponent(`🧿 Tarot Reading: "${reading.question}"\n\n${reading.interpretation}`);
