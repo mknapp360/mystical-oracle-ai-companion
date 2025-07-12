@@ -8,23 +8,24 @@
 
 @layer base {
   :root {
-    --background: 240 10% 8%;
-    --foreground: 280 15% 95%;
+    /* New theme using RGB/HEX-like HSL approximations */
+    --background: 226 38% 26%;           /* #28325c */
+    --foreground: 0 0% 100%;             /* #ffffff */
 
-    --card: 240 15% 12%;
-    --card-foreground: 280 15% 95%;
+    --card: 226 38% 30%;                 /* Slightly lighter than background */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 240 15% 12%;
-    --popover-foreground: 280 15% 95%;
+    --popover: 226 38% 30%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 280 100% 70%;
-    --primary-foreground: 240 10% 8%;
+    --primary: 39 92% 34%;               /* #a16207 for headers */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 30% 20%;
-    --secondary-foreground: 280 15% 95%;
+    --secondary: 39 100% 20%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 15% 15%;
-    --muted-foreground: 280 10% 60%;
+    --muted: 226 25% 35%;
+    --muted-foreground: 0 0% 80%;
 
     --accent: 45 100% 70%;
     --accent-foreground: 240 10% 8%;
@@ -32,9 +33,9 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 240 15% 20%;
-    --input: 240 15% 15%;
-    --ring: 280 100% 70%;
+    --border: 226 38% 40%;
+    --input: 226 38% 35%;
+    --ring: 39 92% 34%;
 
     --radius: 0.75rem;
   }
@@ -92,3 +93,4 @@
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
