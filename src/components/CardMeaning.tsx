@@ -11,14 +11,14 @@ interface CardMeaningProps {
 
 export const CardMeaning = ({ card, isReversed = false }: CardMeaningProps) => {
   return (
-    <Card className="w-full max-w-2xl mx-auto border-purple-500/30 bg-card/50 backdrop-blur-sm">
+    <Card className="w-full max-w-2xl mx-auto border-border bg-card/50 backdrop-blur-sm">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Badge variant="secondary" className="bg-purple-600/80 text-white">
             {card.type === 'major' ? 'Major Arcana' : 'Minor Arcana'}
           </Badge>
           {card.number !== undefined && (
-            <Badge variant="outline" className="border-purple-500/50">
+            <Badge variant="outline" className="border-purple-500/50 text-black">
               {card.number}
             </Badge>
           )}
@@ -28,18 +28,18 @@ export const CardMeaning = ({ card, isReversed = false }: CardMeaningProps) => {
             </Badge>
           )}
         </div>
-        <CardTitle className="font-serif text-2xl text-purple-200">{card.name}</CardTitle>
+        <CardTitle className="font-serif text-2xl text-black">{card.name}</CardTitle>
       </CardHeader>
       
       <CardContent className="space-y-6">
         {/* Keywords */}
         <div>
-          <h3 className="font-semibold text-purple-300 mb-2">Keywords</h3>
+          <h3 className="font-semibold text-black mb-2">Keywords</h3>
           <div className="flex flex-wrap gap-2">
             {card.keywords.map((keyword) => (
               <span 
                 key={keyword} 
-                className="bg-purple-600/20 text-purple-200 px-3 py-1 rounded-full text-sm border border-purple-500/30"
+                className="bg-input text-black px-3 py-1 rounded-full text-sm border border-border"
               >
                 {keyword}
               </span>
@@ -51,7 +51,7 @@ export const CardMeaning = ({ card, isReversed = false }: CardMeaningProps) => {
 
         {/* Description */}
         <div>
-          <h3 className="font-semibold text-purple-300 mb-2">Description</h3>
+          <h3 className="font-semibold text-black mb-2">Description</h3>
           <p className="text-muted-foreground leading-relaxed">{card.description}</p>
         </div>
 
