@@ -12,10 +12,10 @@
     --background: 226 38% 26%;           /* #28325c */
     --foreground: 0 0% 100%;             /* #ffffff */
 
-    --card: 226 38% 30%;                 /* Slightly lighter than background */
+    --card: 49 63% 88%;                 /* #f1ecce */
     --card-foreground: 0 0% 100%;
 
-    --popover: 226 38% 30%;
+    --popover: 33 42% 19%;
     --popover-foreground: 0 0% 100%;
 
     --primary: 39 92% 34%;               /* #a16207 for headers */
@@ -33,9 +33,9 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 226 38% 40%;
+    --border: 33 42% 19%;               /* #46351D */
     --input: 226 38% 35%;
-    --ring: 39 92% 34%;
+    --ring: 33 42% 19%;
 
     --radius: 0.75rem;
   }
