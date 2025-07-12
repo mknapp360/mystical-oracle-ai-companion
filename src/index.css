@@ -18,13 +18,16 @@
     --popover: #46351D;
     --popover-foreground: 0 0% 100%;
 
+    --title: #ff8c42;
+    --title-foreground: 0 0% 100%;
+
     --primary: #a16207;               /* #a16207 for headers */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 39 100% 20%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 226 25% 35%;
+    --muted: #f6f3df;
     --muted-foreground: 0 0% 80%;
 
     --accent: 45 100% 70%;
