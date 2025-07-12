@@ -13,7 +13,7 @@ export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
     <Sheet open={open} onOpenChange={onClose}>
         <SheetContent side="right" className="max-w-xs w-full bg-[#28325c] border-l border-purple-300/30">
         <Card>
-            <div className="flex items-center bg-[#ecebdc] rounded-lg">
+            <div className="flex items-center bg-card rounded-lg">
                 {/* Profile Picture */}
                 <div className="w-16 h-16 bg-[#d2d1b0] rounded-md flex items-center justify-center text-center text-xs font-serif text-[#333] mr-4">
                     {user?.user_metadata?.avatar_url ? (
