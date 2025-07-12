@@ -9,16 +9,16 @@
 @layer base {
   :root {
     /* New theme using RGB/HEX-like HSL approximations */
-    --background: 226 38% 26%;           /* #28325c */
+    --background: #28325c;           /* #28325c */
     --foreground: 0 0% 100%;             /* #ffffff */
 
-    --card: 49 63% 88%;                 /* #f1ecce */
+    --card: #f1ecce;                 /* #f1ecce */
     --card-foreground: 0 0% 100%;
 
-    --popover: 33 42% 19%;
+    --popover: #46351D;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 39 92% 34%;               /* #a16207 for headers */
+    --primary: #a16207;               /* #a16207 for headers */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 39 100% 20%;
@@ -33,7 +33,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 33 42% 19%;               /* #46351D */
+    --border: #46351D;               /*  */
     --input: 226 38% 35%;
     --ring: 33 42% 19%;
 
