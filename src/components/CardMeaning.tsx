@@ -60,14 +60,14 @@ export const CardMeaning = ({ card, isReversed = false }: CardMeaningProps) => {
         {/* Meanings */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className={`p-4 rounded-lg border ${!isReversed ? 'bg-green-500/10 border-green-500/30' : 'bg-muted/50 border-border'}`}>
-            <h3 className="font-semibold text-green-300 mb-2 flex items-center gap-2">
+            <h3 className="font-semibold text-green-700 mb-2 flex items-center gap-2">
               <span>⬆️</span> Upright Meaning
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">{card.uprightMeaning}</p>
           </div>
           
           <div className={`p-4 rounded-lg border ${isReversed ? 'bg-red-500/10 border-red-500/30' : 'bg-muted/50 border-border'}`}>
-            <h3 className="font-semibold text-red-300 mb-2 flex items-center gap-2">
+            <h3 className="font-semibold text-red-700 mb-2 flex items-center gap-2">
               <span>⬇️</span> Reversed Meaning
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">{card.reversedMeaning}</p>
