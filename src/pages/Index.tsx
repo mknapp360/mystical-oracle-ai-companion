@@ -33,7 +33,7 @@ const Index = () => {
 
       <div className="relative z-10">
         {/* Header */}
-        <header className="border-b border-purple-500/20 bg-background backdrop-blur-sm sticky top-0 z-50">
+        <header className="border-b border-border bg-background backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div className="text-center flex-1">
