@@ -154,7 +154,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
   return (
     <div className="space-y-8">
       {/* Question Input */}
-      <Card className="border-border bg-card backdrop-blur-sm">
+      <Card className="border-border bg-muted backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="font-serif text-center text-black">
             Ask the Cards
@@ -165,7 +165,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
             placeholder="What question would you like to ask the cards? (optional)"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="bg-muted border-border min-h-[80px]"
+            className="bg-card border-border min-h-[80px]"
           />
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
