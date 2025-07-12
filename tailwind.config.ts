@@ -30,7 +30,7 @@ const config: Config = {
 			foreground: '#1c1b2e',
 		 },
 		 border: '#4a3d28',
-		 input: '#e0dbc3',
+		 input: '#D8D4D4',
 		 ring: '#d4af37',
 		 buttonPrimaryFrom: '#6a00f4',
 		 buttonPrimaryTo: '#d000ff',

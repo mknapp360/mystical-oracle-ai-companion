@@ -52,7 +52,7 @@ export default function JourneyPage() {
       {readings.map((reading) => (
         <Card
           key={reading.id}
-          className="bg-card/50 backdrop-blur-sm border-border hover:shadow-md transition cursor-pointer"
+          className="bg-card backdrop-blur-sm border-border hover:shadow-md transition cursor-pointer"
           onClick={() => setSelectedReading(reading)}
         >
           <CardContent className="py-4 flex justify-between items-center">
@@ -60,7 +60,7 @@ export default function JourneyPage() {
               <p className="text-sm text-muted-foreground">
                 {new Date(reading.created_at).toLocaleDateString()}
               </p>
-              <p className="text-lg text-purple-200 font-serif mt-1">
+              <p className="text-lg text-black font-serif mt-1">
                 {reading.question || "Untitled Question"}
               </p>
             </div>
@@ -73,7 +73,7 @@ export default function JourneyPage() {
       <Dialog open={!!selectedReading} onOpenChange={() => setSelectedReading(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-border bg-background/95 backdrop-blur-sm">
           <DialogHeader>
-            <DialogTitle className="text-purple-200 font-serif">
+            <DialogTitle className="text-black font-serif">
               Reading from{" "}
               {selectedReading && new Date(selectedReading.created_at).toLocaleDateString()}
             </DialogTitle>
@@ -82,7 +82,7 @@ export default function JourneyPage() {
           {selectedReading && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h3 className="font-serif text-lg text-purple-300">Interpretation</h3>
+                <h3 className="font-serif text-lg text-black">Interpretation</h3>
                 <p className="italic text-muted-foreground">
                   {selectedReading.question || "No question provided."}
                 </p>
@@ -93,7 +93,7 @@ export default function JourneyPage() {
 
               {parsedCards.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="font-serif text-lg text-purple-300">Drawn Cards</h3>
+                  <h3 className="font-serif text-lg text-black">Drawn Cards</h3>
                   <div className="grid grid-cols-3 gap-6 justify-center items-start">
                     {parsedCards.map((entry: any, index: number) => (
                       <div
