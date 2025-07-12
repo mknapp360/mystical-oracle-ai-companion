@@ -22,7 +22,7 @@ const config: Config = {
          background: '#1c1b2e',
 		 foreground: '#ffffff',
 		 card: {
-			DEFAULT: '#e9e5d1',
+			DEFAULT: '#E2DFDF',
 			foreground: '#1c1b2e',
 		 },
 		 primary: {
