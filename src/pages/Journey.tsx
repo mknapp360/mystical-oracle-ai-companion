@@ -54,15 +54,15 @@ export default function JourneyPage() {
       {readings.map((reading) => (
         <Card
           key={reading.id}
-          className="bg-card backdrop-blur-sm border-border hover:shadow-md transition cursor-pointer"
+          className="bg-input backdrop-blur-sm border-border hover:shadow-md transition cursor-pointer"
           onClick={() => setSelectedReading(reading)}
         >
           <CardContent className="py-4 flex justify-between items-center relative">
             <div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-black">
                 {new Date(reading.created_at).toLocaleDateString()}
               </p>
-              <p className="text-lg text-purple-200 font-serif mt-1">
+              <p className="text-lg text-black font-serif mt-1">
                 {reading.question || "Untitled Question"}
               </p>
             </div>
@@ -74,7 +74,7 @@ export default function JourneyPage() {
                 <DropdownMenuTrigger className="focus:outline-none ml-2">
                   <ChevronDown size={18} className="text-muted-foreground hover:text-white transition" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-background border border-purple-500/30 shadow-lg mt-2 p-2 rounded-md">
+                <DropdownMenuContent className="bg-background border border-border shadow-lg mt-2 p-2 rounded-md">
                   <DropdownMenuItem
                     onClick={() => console.log("Share", reading.id)}
                     className="flex items-center gap-2 hover:bg-purple-100/10 text-sm"
