@@ -91,48 +91,58 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
   const getThreeCardLabels = () => ['Past / Situation', 'Present / Challenge', 'Future / Outcome'];
 
   const getAIInterpretation = async (cards: TarotCardType[], reversedStates: boolean[]) => {
-    const formattedCards = cards.map((card, index) => ({
-      card,
-      orientation: reversedStates[index] ? 'reversed' : 'upright',
-    }));
+  const formattedCards = cards.map((card, index) => ({
+    card,
+    orientation: reversedStates[index] ? 'reversed' : 'upright',
+  }));
 
-    try {
-      const response = await fetch('/api/interpret', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, cards: formattedCards }),
-      });
+  // Define default prompt if no user question
+  const effectiveQuestion = question.trim() === ''
+    ? "What do the angels want the user to focus on right now?"
+    : question;
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  try {
+    const response = await fetch('/api/interpret', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: effectiveQuestion, cards: formattedCards }),
+    });
 
-      const data = await response.json();
-      setAiResponse(data.interpretation);
-
-      // Only save to database if user is logged in and supabase is available
-      if (user && supabase) {
-        try {
-          await supabase.from('readings').insert([
-            {
-              user_id: user.id,
-              question,
-              cards: JSON.stringify(formattedCards),
-              interpretation: data.interpretation,
-            },
-          ]);
-        } catch (dbError) {
-          console.error('Database error:', dbError);
-          // Continue without saving to database
-        }
-      }
-    } catch (err) {
-      console.error('Error interpreting reading:', err);
-      setAiResponse('There was an error connecting to the mystical servers. Please try again.');
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+
+    // If user didn't ask a question, prepend message
+    const prefix = question.trim() === ''
+      ? "What the Angels want you to focus on right now is: "
+      : "";
+
+    setAiResponse(prefix + data.interpretation);
+
+    // Only save to database if user is logged in and supabase is available
+    if (user && supabase) {
+      try {
+        await supabase.from('readings').insert([
+          {
+            user_id: user.id,
+            question: effectiveQuestion,
+            cards: JSON.stringify(formattedCards),
+            interpretation: prefix + data.interpretation,
+          },
+        ]);
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+      }
+    }
+  } catch (err) {
+    console.error('Error interpreting reading:', err);
+    setAiResponse('There was an error connecting to the mystical servers. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Add buttons for manual AI interpretation (fallback)
   const interpretReading = () => {
@@ -204,9 +214,9 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
       {/* Question Display */}
       {question && drawnCards.length > 0 && (
-        <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
+        <Card className="border-border bg-card/80 backdrop-blur-sm">
           <CardContent className="pt-6">
-            <h3 className="font-serif text-lg text-purple-200 text-center mb-2">Your Question</h3>
+            <h3 className="font-serif text-lg text-white text-center mb-2">Your Question</h3>
             <p className="text-muted-foreground text-center italic">"{question}"</p>
           </CardContent>
         </Card>
@@ -226,7 +236,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
       {/* Loading State */}
       {loading && (
-        <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
+        <Card className="border-border bg-card/80 backdrop-blur-sm">
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
@@ -238,9 +248,9 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
       {/* AI Response */}
       {aiResponse && (
-        <Card className="border-purple-500/30 bg-card/50 backdrop-blur-sm">
+        <Card className="border-border bg-card/80 backdrop-blur-sm">
           <CardContent className="pt-6">
-            <h3 className="text-lg font-bold mb-4 text-purple-200">Interpretation:</h3>
+            <h3 className="text-lg font-bold mb-4 text-white">Interpretation:</h3>
             <div className="prose prose-purple max-w-none">
               <p className="text-muted-foreground leading-relaxed">{aiResponse}</p>
             </div>
