@@ -19,40 +19,23 @@ const config: Config = {
     },
     extend: {
       colors: {
-        background: "#28325c",
-        foreground: "#ffffff",
-        card: {
-          DEFAULT: "#f1ecce",
-          foreground: "#f1ecce",
-        },
-        popover: {
-          DEFAULT: "#46351D",
-          foreground: "#ffffff",
-        },
-        primary: {
-          DEFAULT: "#a16207",
-          foreground: "#ffffff",
-        },
-        secondary: {
-          DEFAULT: "#3f2600",
-          foreground: "#ffffff",
-        },
-        muted: {
-          DEFAULT: "#e3dcbf",
-          foreground: "#cccccc",
-        },
-        accent: {
-          DEFAULT: "#facc15",
-          foreground: "#1f1f1f",
-        },
-        destructive: {
-          DEFAULT: "#dc2626",
-          foreground: "#fef2f2",
-        },
-        border: "#46351D",
-        input: "#3b4a73",
-        ring: "#332500",
-      },
+         background: '#1c1b2e',
+		 foreground: '#ffffff',
+		 card: {
+			DEFAULT: '#e9e5d1',
+			foreground: '#1c1b2e',
+		 },
+		 primary: {
+			DEFAULT: '#d4af37',
+			foreground: '#1c1b2e',
+		 },
+		 border: '#4a3d28',
+		 input: '#e0dbc3',
+		 ring: '#d4af37',
+		 buttonPrimaryFrom: '#6a00f4',
+		 buttonPrimaryTo: '#d000ff',
+		 buttonSecondary: '#3a2b64',
+		 },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
