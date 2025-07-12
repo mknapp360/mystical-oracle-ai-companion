@@ -33,47 +33,49 @@ export const TarotCard = ({ card, isRevealed = false, onClick, className = "", r
         ) : (
           // Card front
           <div className="w-full h-full relative">
-            {/* Card image - only this gets rotated if reversed */}
-            <img
-              src={card.imageUrl}
-              alt={card.name}
-              className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'} ${reversed ? 'rotate-180' : ''}`}
-              onLoad={() => setImageLoaded(true)}
-            />
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 shimmer" />
-            )}
-            
-            {/* Card overlay with gradient - stays upright */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-            
-            {/* Card info - stays upright */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="secondary" className="bg-purple-600/80 text-white text-xs">
-                  {card.type === 'major' ? 'Major Arcana' : 'Minor Arcana'}
-                </Badge>
-                {card.number !== undefined && (
-                  <Badge variant="outline" className="border-white/30 text-white text-xs">
-                    {card.number}
-                  </Badge>
-                )}
-                {reversed && (
-                  <Badge variant="outline" className="border-red-400/50 text-red-300 text-xs">
-                    Reversed
-                  </Badge>
-                )}
-              </div>
-              <h3 className="font-serif text-lg font-semibold mb-1">{card.name}</h3>
-              <div className="flex flex-wrap gap-1 mb-2">
-                {card.keywords.slice(0, 3).map((keyword) => (
-                  <span key={keyword} className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+  {/* Only the image wrapper gets rotated */}
+  <div className={`w-full h-full ${reversed ? 'rotate-180' : ''}`}>
+    <img
+      src={card.imageUrl}
+      alt={card.name}
+      className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+      onLoad={() => setImageLoaded(true)}
+    />
+    {!imageLoaded && (
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 shimmer" />
+    )}
+  </div>
+
+  {/* Gradient overlay (stays upright) */}
+  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+
+  {/* Card info (stays upright) */}
+  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+    <div className="flex items-center gap-2 mb-2">
+      <Badge variant="secondary" className="bg-purple-600/80 text-white text-xs">
+        {card.type === 'major' ? 'Major Arcana' : 'Minor Arcana'}
+      </Badge>
+      {card.number !== undefined && (
+        <Badge variant="outline" className="border-white/30 text-white text-xs">
+          {card.number}
+        </Badge>
+      )}
+      {reversed && (
+        <Badge variant="outline" className="border-red-400/50 text-red-300 text-xs">
+          Reversed
+        </Badge>
+      )}
+    </div>
+    <h3 className="font-serif text-lg font-semibold mb-1">{card.name}</h3>
+    <div className="flex flex-wrap gap-1 mb-2">
+      {card.keywords.slice(0, 3).map((keyword) => (
+        <span key={keyword} className="text-xs bg-white/20 px-2 py-1 rounded-full">
+          {keyword}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
         )}
       </CardContent>
     </Card>
