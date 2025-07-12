@@ -40,7 +40,7 @@ export default function JourneyPage() {
   const parsedCards = selectedReading ? JSON.parse(selectedReading.cards) : [];
 
   return (
-    <div className="max-w-3xl mx-auto py-12 space-y-6">
+    <div className="max-w-3xl mx-auto py-12 space-y-6 bg-background">
       <h1 className="text-3xl font-serif text-purple-200 text-center">🧭 My Journey</h1>
 
       {readings.length === 0 && (
@@ -52,7 +52,7 @@ export default function JourneyPage() {
       {readings.map((reading) => (
         <Card
           key={reading.id}
-          className="bg-card/50 backdrop-blur-sm border-purple-500/30 hover:shadow-md transition cursor-pointer"
+          className="bg-card/50 backdrop-blur-sm border-border hover:shadow-md transition cursor-pointer"
           onClick={() => setSelectedReading(reading)}
         >
           <CardContent className="py-4 flex justify-between items-center">
@@ -71,7 +71,7 @@ export default function JourneyPage() {
 
       {/* Modal for reading detail */}
       <Dialog open={!!selectedReading} onOpenChange={() => setSelectedReading(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-purple-500/30 bg-background/95 backdrop-blur-sm">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-border bg-background/95 backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="text-purple-200 font-serif">
               Reading from{" "}
