@@ -214,9 +214,9 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
       {/* Question Display */}
       {question && drawnCards.length > 0 && (
-        <Card className="border-border bg-card/80 backdrop-blur-sm">
+        <Card className="border-border bg-input backdrop-blur-sm">
           <CardContent className="pt-6">
-            <h3 className="font-serif text-lg text-white text-center mb-2">Your Question</h3>
+            <h3 className="font-serif text-lg text-black text-center mb-2">Your Question</h3>
             <p className="text-muted-foreground text-center italic">"{question}"</p>
           </CardContent>
         </Card>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { TarotCard as TarotCardType } from '../types/tarot';
 import { Card, CardContent } from './ui/card';
@@ -9,9 +8,10 @@ interface TarotCardProps {
   isRevealed?: boolean;
   onClick?: () => void;
   className?: string;
+  reversed?: boolean;
 }
 
-export const TarotCard = ({ card, isRevealed = false, onClick, className = "" }: TarotCardProps) => {
+export const TarotCard = ({ card, isRevealed = false, onClick, className = "", reversed = false }: TarotCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
@@ -33,20 +33,21 @@ export const TarotCard = ({ card, isRevealed = false, onClick, className = "" }:
         ) : (
           // Card front
           <div className="w-full h-full relative">
+            {/* Card image - only this gets rotated if reversed */}
             <img
               src={card.imageUrl}
               alt={card.name}
-              className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'} ${reversed ? 'rotate-180' : ''}`}
               onLoad={() => setImageLoaded(true)}
             />
             {!imageLoaded && (
               <div className="absolute inset-0 bg-gradient-to-br from-purple-900 to-indigo-900 shimmer" />
             )}
             
-            {/* Card overlay with gradient */}
+            {/* Card overlay with gradient - stays upright */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
             
-            {/* Card info */}
+            {/* Card info - stays upright */}
             <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="secondary" className="bg-purple-600/80 text-white text-xs">
@@ -55,6 +56,11 @@ export const TarotCard = ({ card, isRevealed = false, onClick, className = "" }:
                 {card.number !== undefined && (
                   <Badge variant="outline" className="border-white/30 text-white text-xs">
                     {card.number}
+                  </Badge>
+                )}
+                {reversed && (
+                  <Badge variant="outline" className="border-red-400/50 text-red-300 text-xs">
+                    Reversed
                   </Badge>
                 )}
               </div>
