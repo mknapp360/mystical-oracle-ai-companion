@@ -48,6 +48,23 @@ const Index = () => {
           </div>
         </header>
 
+      
+        <div className="text-center py-12">
+          <img
+            src="/images/sunburst.png"
+            alt="Sunburst"
+            className="w-32 h-32 mb-6 mx-auto"
+            onError={(e) => {
+              // Hide image if it fails to load
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+          <h2 className="font-serif text-2xl text-purple-200 mb-4">Welcome to Your Tarot Reading</h2>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Focus on your question and draw a card to receive guidance from the mystical realm.
+          </p>
+        </div>
+
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           {activeTab === 'reading' && <CardReader cards={allCards} user={user} />}
