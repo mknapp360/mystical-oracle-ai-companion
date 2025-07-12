@@ -59,7 +59,7 @@ const Index = () => {
               e.currentTarget.style.display = 'none';
             }}
           />
-          <h2 className="font-serif text-2xl text-purple-200 mb-4">Welcome to Your Tarot Reading</h2>
+          <h2 className="font-serif text-2xl text-headerText mb-4">Welcome to Your Tarot Reading</h2>
           <p className="text-muted-foreground max-w-md mx-auto">
             Focus on your question and draw a card to receive guidance from the mystical realm.
           </p>

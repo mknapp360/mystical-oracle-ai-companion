@@ -35,6 +35,7 @@ const config: Config = {
 		 buttonPrimaryFrom: '#6a00f4',
 		 buttonPrimaryTo: '#d000ff',
 		 buttonSecondary: '#3a2b64',
+		 headerText: '#d4af37',
 		 },
       borderRadius: {
         lg: "var(--radius)",

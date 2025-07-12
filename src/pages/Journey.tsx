@@ -41,7 +41,7 @@ export default function JourneyPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-12 space-y-6 bg-background">
-      <h1 className="text-3xl font-serif text-purple-200 text-center">🧭 My Journey</h1>
+      <h1 className="text-3xl font-serif text-headerText text-center">🧭 My Journey</h1>
 
       {readings.length === 0 && (
         <p className="text-center text-muted-foreground">
@@ -73,7 +73,7 @@ export default function JourneyPage() {
       <Dialog open={!!selectedReading} onOpenChange={() => setSelectedReading(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-border bg-background/95 backdrop-blur-sm">
           <DialogHeader>
-            <DialogTitle className="text-black font-serif">
+            <DialogTitle className="text-white font-serif">
               Reading from{" "}
               {selectedReading && new Date(selectedReading.created_at).toLocaleDateString()}
             </DialogTitle>
@@ -82,7 +82,7 @@ export default function JourneyPage() {
           {selectedReading && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h3 className="font-serif text-lg text-black">Interpretation</h3>
+                <h3 className="font-serif text-lg text-white">Interpretation</h3>
                 <p className="italic text-muted-foreground">
                   {selectedReading.question || "No question provided."}
                 </p>
@@ -93,7 +93,7 @@ export default function JourneyPage() {
 
               {parsedCards.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="font-serif text-lg text-black">Drawn Cards</h3>
+                  <h3 className="font-serif text-lg text-white">Drawn Cards</h3>
                   <div className="grid grid-cols-3 gap-6 justify-center items-start">
                     {parsedCards.map((entry: any, index: number) => (
                       <div
