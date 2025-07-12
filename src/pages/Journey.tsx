@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TarotCard as TarotCardComponent } from "@/components/TarotCard";
 import { ChevronDown, Share2, Download, Trash } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 
 interface Reading {
   id: string;
@@ -90,12 +90,51 @@ export default function JourneyPage() {
                   <ChevronDown size={18} className="text-muted-foreground hover:text-white transition" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-background border border-border shadow-lg mt-2 p-2 rounded-md">
-                  <DropdownMenuItem
-                    onClick={() => console.log("Share", reading.id)}
-                    className="flex items-center gap-2 hover:bg-purple-100/10 text-sm"
-                  >
-                    <Share2 size={14} /> Share
-                  </DropdownMenuItem>
+                  <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem
+                        onClick={() => {
+                          const text = encodeURIComponent(`🧿 Tarot Reading: "${reading.question}"\n\n${reading.interpretation}`);
+                          const url = `https://wa.me/?text=${text}`;
+                          window.open(url, '_blank');
+                        }}
+                      >
+                        WhatsApp
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => {
+                          const text = encodeURIComponent(`🧿 Tarot Reading: "${reading.question}"\n\n${reading.interpretation}`);
+                          const url = `https://www.facebook.com/sharer/sharer.php?u=https://yourapp.com&quote=${text}`;
+                          window.open(url, '_blank');
+                        }}
+                      >
+                        Facebook
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => {
+                          const text = encodeURIComponent(`🧿 Tarot Reading: "${reading.question}" — ${reading.interpretation}`);
+                          const url = `https://twitter.com/intent/tweet?text=${text}`;
+                          window.open(url, '_blank');
+                        }}
+                      >
+                        X (Twitter)
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => {
+                          navigator.clipboard.writeText(`🧿 Tarot Reading:\n"${reading.question}"\n\n${reading.interpretation}`);
+                        }}
+                      >
+                        Copy Link/Text
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
                   <DropdownMenuItem
                     onClick={() => console.log("Download", reading.id)}
                     className="flex items-center gap-2 hover:bg-purple-100/10 text-sm"
