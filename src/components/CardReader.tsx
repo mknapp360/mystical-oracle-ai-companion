@@ -294,7 +294,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
 
           {/* Card Meaning Modal */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-border bg-input backdrop-blur-sm">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border-border bg-background backdrop-blur-sm">
               <DialogHeader>
                 <DialogTitle className="font-serif text-center text-headerText">Card Meaning</DialogTitle>
               </DialogHeader>
