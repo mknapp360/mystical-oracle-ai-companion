@@ -283,7 +283,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
                   <TarotCard
                     card={card}
                     isRevealed={revealedCards[index]}
-                    className={isReversed[index] && revealedCards[index] ? 'rotate-180' : ''}
+                    reversed={isReversed[index] && revealedCards[index]}
                   />
                 </div>
               </div>
