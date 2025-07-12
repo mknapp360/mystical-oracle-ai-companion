@@ -39,6 +39,21 @@ export default function JourneyPage() {
     fetchUserAndReadings();
   }, []);
 
+  const deleteReading = async (id: string) => {
+  const { error } = await supabase
+    .from("readings")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to delete reading:", error.message);
+    alert("Something went wrong while deleting.");
+  } else {
+    // Update UI after delete
+    setReadings((prev) => prev.filter((reading) => reading.id !== id));
+  }
+};
+
   const parsedCards = selectedReading ? JSON.parse(selectedReading.cards) : [];
 
   return (
@@ -88,7 +103,7 @@ export default function JourneyPage() {
                     <Download size={14} /> Download
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => console.log("Delete", reading.id)}
+                    onClick={() => deleteReading(reading.id)}
                     className="flex items-center gap-2 text-red-500 hover:bg-red-100/10 text-sm"
                   >
                     <Trash size={14} /> Delete
