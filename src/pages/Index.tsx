@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { CardLibrary } from '../components/CardLibrary';
 import { CardReader } from '../components/CardReader';
+import SkyCard from "../components/SkyCard";
 import { allCards } from '../data/tarotCards';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -68,7 +69,7 @@ const Index = () => {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           {activeTab === 'reading' && <CardReader cards={allCards} user={user} />}
-          {activeTab === 'library' && <CardLibrary cards={allCards} />}
+          { <SkyCard /> }
         </main>
 
         {/* Footer */}
