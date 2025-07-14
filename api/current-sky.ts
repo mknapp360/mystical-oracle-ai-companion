@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { julian, planetposition, solar, moonposition, sexagesimal as sexa, sidereal, coord } from 'astronomia';
 
+// Initialize Express app
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -37,7 +38,7 @@ type AstroHouses = {
 };
 
 // Convert decimal degrees to zodiac sign and degree
-function degreesToZodiac(degrees) {
+function degreesToZodiac(degrees: number): ZodiacPosition {
   const normalizedDegrees = ((degrees % 360) + 360) % 360;
   const signIndex = Math.floor(normalizedDegrees / 30);
   const degreesInSign = normalizedDegrees % 30;
@@ -53,7 +54,7 @@ function degreesToZodiac(degrees) {
 }
 
 // Convert right ascension to ecliptic longitude
-function raToEclipticLongitude(ra, dec, jd) {
+function raToEclipticLongitude(ra: number, dec: number, jd: number): number {
   try {
     const obliquity = coord.obliquity(jd);
     const ecl = coord.eqToEcl(ra, dec, obliquity);
@@ -92,7 +93,7 @@ function calculateAstroHouses(jd: number, lat: number, lon: number): AstroHouses
     }
     
     // Calculate MC (Midheaven)
-const mc = (lst * 15) % 360;
+    const mc = (lst * 15) % 360;
     const mcZodiac = degreesToZodiac(mc);
     const ascZodiac = degreesToZodiac(ascDegrees);
     
@@ -116,8 +117,6 @@ const mc = (lst * 15) % 360;
     };
   }
 }
-
-
 
 // Get current planetary positions
 function getCurrentPlanets(lat: number, lon: number) {
@@ -199,7 +198,6 @@ function getCurrentPlanets(lat: number, lon: number) {
       result.ascendant = houses.ascendant;
       result.midheaven = houses.midheaven;
     }
-    // ... (rest of the function remains the same)
   } catch (error) {
     console.error('Error in getCurrentPlanets:', error);
   }
@@ -210,11 +208,11 @@ function getCurrentPlanets(lat: number, lon: number) {
 // API Routes
 app.get('/api/current-planets', (req, res) => {
   try {
-    const latStr = req.query.lat;
-    const lonStr = req.query.lon;
+    const latStr = req.query.lat as string | undefined;
+    const lonStr = req.query.lon as string | undefined;
     
-    const lat = latStr ? parseFloat(String(latStr)) : 0;
-    const lon = lonStr ? parseFloat(String(lonStr)) : 0;
+    const lat = latStr ? parseFloat(latStr) : 0;
+    const lon = lonStr ? parseFloat(lonStr) : 0;
     
     const planets = getCurrentPlanets(lat, lon);
     res.json(planets);
@@ -227,11 +225,11 @@ app.get('/api/current-planets', (req, res) => {
 // Get simplified current sky
 app.get('/api/sky-now', (req, res) => {
   try {
-    const latStr = req.query.lat;
-    const lonStr = req.query.lon;
+    const latStr = req.query.lat as string | undefined;
+    const lonStr = req.query.lon as string | undefined;
     
-    const lat = latStr ? parseFloat(String(latStr)) : 0;
-    const lon = lonStr ? parseFloat(String(lonStr)) : 0;
+    const lat = latStr ? parseFloat(latStr) : 0;
+    const lon = lonStr ? parseFloat(lonStr) : 0;
     
     const now = new Date();
     const jd = julian.DateToJD(now);
@@ -288,13 +286,5 @@ app.get('/api/info', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🌟 Astrological API server running on port ${PORT}`);
-  console.log(`📍 Current planets: http://localhost:${PORT}/api/current-planets`);
-  console.log(`🌍 With location: http://localhost:${PORT}/api/current-planets?lat=40.7128&lon=-74.0060`);
-  console.log(`⭐ Quick sky: http://localhost:${PORT}/api/sky-now`);
-  console.log(`ℹ️  API info: http://localhost:${PORT}/api/info`);
-});
-
+// Export the handler for Vercel
 export default app;

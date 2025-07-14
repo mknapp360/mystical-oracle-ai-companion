@@ -22,18 +22,23 @@ interface AstroData {
 
 const SkyCard: React.FC = () => {
   const [data, setData] = useState<AstroData | null>(null);
+  const apiBaseUrl = process.env.REACT_APP_API_URL || 'https://tarotpathwork-personal-oracle.vercel.app'; // Replace with your Vercel URL
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async (position) => {
-      const res = await axios.get<AstroData>(`/api/current-planets`, {
-        params: {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude
-        }
-      });
-      setData(res.data);
+      try {
+        const res = await axios.get<AstroData>(`${apiBaseUrl}/api/current-planets`, {
+          params: {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          }
+        });
+        setData(res.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     });
-  }, []);
+  }, [apiBaseUrl]);
 
   if (!data) return <div>Loading chart...</div>;
 
