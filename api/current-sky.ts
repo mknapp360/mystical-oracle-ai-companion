@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import { julian, planetposition, solar, moonposition, sexagesimal as sexa, sidereal, coord } from 'astronomia';
 
-// Initialize Express app
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -39,18 +38,28 @@ type AstroHouses = {
 
 // Convert decimal degrees to zodiac sign and degree
 function degreesToZodiac(degrees: number): ZodiacPosition {
-  const normalizedDegrees = ((degrees % 360) + 360) % 360;
-  const signIndex = Math.floor(normalizedDegrees / 30);
-  const degreesInSign = normalizedDegrees % 30;
-  
-  const zodiacInfo = {
-    sign: zodiacSigns[signIndex],
-    degrees: Math.floor(degreesInSign),
-    minutes: Math.floor((degreesInSign % 1) * 60),
-    decimal: degreesInSign
-  };
-  
-  return zodiacInfo;
+  try {
+    const normalizedDegrees = ((degrees % 360) + 360) % 360;
+    const signIndex = Math.floor(normalizedDegrees / 30);
+    const degreesInSign = normalizedDegrees % 30;
+    
+    if (signIndex >= zodiacSigns.length) {
+      console.error('Invalid signIndex:', signIndex);
+      return null;
+    }
+
+    const zodiacInfo = {
+      sign: zodiacSigns[signIndex],
+      degrees: Math.floor(degreesInSign),
+      minutes: Math.floor((degreesInSign % 1) * 60),
+      decimal: degreesInSign
+    };
+    
+    return zodiacInfo;
+  } catch (error) {
+    console.error('Error in degreesToZodiac:', error);
+    return null;
+  }
 }
 
 // Convert right ascension to ecliptic longitude
@@ -61,7 +70,7 @@ function raToEclipticLongitude(ra: number, dec: number, jd: number): number {
     const longitude = (ecl.lon * 180 / Math.PI + 360) % 360;
     return longitude;
   } catch (error) {
-    console.error('Error converting coordinates:', error);
+    console.error('Error in raToEclipticLongitude:', error);
     return 0;
   }
 }
@@ -75,16 +84,13 @@ function calculateAstroHouses(jd: number, lat: number, lon: number): AstroHouses
     const latRad = lat * Math.PI / 180;
     const obliquity = coord.obliquity(jd);
     
-    // Calculate ASC (Ascendant)
     const lstRad = lst * Math.PI / 12;
     const asc = Math.atan2(Math.cos(lstRad), -Math.sin(lstRad) * Math.cos(obliquity) - Math.tan(latRad) * Math.sin(obliquity));
     const ascDegrees = ((asc * 180 / Math.PI) + 360) % 360;
     
-    // Create 12 houses (equal house system)
     for (let i = 0; i < 12; i++) {
       const cusp = (ascDegrees + (i * 30)) % 360;
       const cuspZodiac = degreesToZodiac(cusp);
-      
       housesList.push({
         house: i + 1,
         cusp: cusp,
@@ -92,7 +98,6 @@ function calculateAstroHouses(jd: number, lat: number, lon: number): AstroHouses
       });
     }
     
-    // Calculate MC (Midheaven)
     const mc = (lst * 15) % 360;
     const mcZodiac = degreesToZodiac(mc);
     const ascZodiac = degreesToZodiac(ascDegrees);
@@ -109,7 +114,7 @@ function calculateAstroHouses(jd: number, lat: number, lon: number): AstroHouses
       }
     };
   } catch (error) {
-    console.error('Error calculating houses:', error);
+    console.error('Error in calculateAstroHouses:', error);
     return {
       houses: [],
       ascendant: null,
@@ -134,7 +139,6 @@ function getCurrentPlanets(lat: number, lon: number) {
   };
   
   try {
-    // Calculate Sun position
     const sunPos = solar.apparentEquatorial(earth, jd);
     const sunLon = raToEclipticLongitude(sunPos.ra, sunPos.dec, jd);
     const sunZodiac = degreesToZodiac(sunLon);
@@ -148,7 +152,6 @@ function getCurrentPlanets(lat: number, lon: number) {
       }
     };
     
-    // Calculate Moon position
     const moonPos = moonposition.equatorial(jd);
     const moonLon = raToEclipticLongitude(moonPos.ra, moonPos.dec, jd);
     const moonZodiac = degreesToZodiac(moonLon);
@@ -162,7 +165,6 @@ function getCurrentPlanets(lat: number, lon: number) {
       }
     };
     
-    // Calculate other planets
     const planetNames = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
     
     for (const planetName of planetNames) {
@@ -172,8 +174,6 @@ function getCurrentPlanets(lat: number, lon: number) {
           const pos = planet.position(jd);
           const lon = (pos.lon * 180 / Math.PI + 360) % 360;
           const zodiac = degreesToZodiac(lon);
-          
-          // Convert to equatorial for RA/Dec
           const eqPos = coord.eclToEq(pos.lon, pos.lat, coord.obliquity(jd));
           
           const capitalizedName = planetName.charAt(0).toUpperCase() + planetName.slice(1);
@@ -191,7 +191,6 @@ function getCurrentPlanets(lat: number, lon: number) {
       }
     }
     
-    // Calculate houses if location provided
     if (lat !== 0 || lon !== 0) {
       const houses = calculateAstroHouses(jd, lat, lon);
       result.houses = houses.houses;
@@ -217,13 +216,13 @@ app.get('/api/current-planets', (req, res) => {
     const planets = getCurrentPlanets(lat, lon);
     res.json(planets);
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Error in /api/current-planets:', error);
     res.status(500).json({ error: 'Failed to calculate planetary positions' });
   }
 });
 
 // Get simplified current sky
-app.get('/api/sky-now', (req, res) => {
+app.get('/api/current-sky', (req, res) => {
   try {
     const latStr = req.query.lat as string | undefined;
     const lonStr = req.query.lon as string | undefined;
@@ -235,7 +234,6 @@ app.get('/api/sky-now', (req, res) => {
     const jd = julian.DateToJD(now);
     const earth = planetposition.earth;
     
-    // Get Sun and Moon positions
     const sunPos = solar.apparentEquatorial(earth, jd);
     const moonPos = moonposition.equatorial(jd);
     
@@ -262,29 +260,38 @@ app.get('/api/sky-now', (req, res) => {
     
     res.json(skyData);
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Error in /api/current-sky:', error);
     res.status(500).json({ error: 'Failed to calculate sky positions' });
   }
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  try {
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('API Error in /api/health:', error);
+    res.status(500).json({ error: 'Health check failed' });
+  }
 });
 
 // Basic info endpoint
 app.get('/api/info', (req, res) => {
-  res.json({
-    name: 'Astrological API',
-    version: '1.0.0',
-    endpoints: [
-      'GET /api/current-planets?lat=40.7128&lon=-74.0060',
-      'GET /api/sky-now?lat=40.7128&lon=-74.0060',
-      'GET /api/health',
-      'GET /api/info'
-    ]
-  });
+  try {
+    res.json({
+      name: 'Astrological API',
+      version: '1.0.0',
+      endpoints: [
+        'GET /api/current-planets?lat=40.7128&lon=-74.0060',
+        'GET /api/current-sky?lat=40.7128&lon=-74.0060',
+        'GET /api/health',
+        'GET /api/info'
+      ]
+    });
+  } catch (error) {
+    console.error('API Error in /api/info:', error);
+    res.status(500).json({ error: 'Failed to retrieve info' });
+  }
 });
 
-// Export the handler for Vercel
 export default app;
