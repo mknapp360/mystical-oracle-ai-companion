@@ -27,7 +27,7 @@ const SkyCard: React.FC = () => {
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async (position) => {
       try {
-        const res = await axios.get<AstroData>(`${apiBaseUrl}/api/current-planets`, {
+        const res = await axios.get<AstroData>(`${apiBaseUrl}/api/current-sky`, {
           params: {
             lat: position.coords.latitude,
             lon: position.coords.longitude
