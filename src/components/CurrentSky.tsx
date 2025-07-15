@@ -87,6 +87,7 @@ const CurrentSky: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors', // Explicitly set CORS mode
       });
 
       console.log(`API Response status: ${response.status}`);
