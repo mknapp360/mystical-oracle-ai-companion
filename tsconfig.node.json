@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es2018",              // Target Node.js-compatible ECMAScript version
-    "module": "commonjs",            // Use CommonJS for Node.js compatibility
-    "outDir": "./dist/api",          // Output directory for compiled JavaScript
-    "rootDir": "./api",              // Source directory for TypeScript files
-    "strict": true,                  // Enable all strict type-checking options
-    "esModuleInterop": true,         // Enable interop between CommonJS and ES Modules
-    "skipLibCheck": true,            // Skip type checking of declaration files
-    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
-    "composite": true,               // Enable composite project for incremental builds
-    "noEmitOnError": false,          // Allow emission even if errors occur (for debugging)
-    "sourceMap": true               // Generate source maps for easier debugging
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["api/**/*"],           // Include all TypeScript files in the api directory
-  "exclude": ["node_modules"]        // Exclude node_modules from compilation
+  "include": ["vite.config.ts"]
 }

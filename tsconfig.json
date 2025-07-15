@@ -14,14 +14,6 @@
     "skipLibCheck": true,
     "allowJs": true,
     "noUnusedLocals": false,
-    "strictNullChecks": false,
-    "target": "es2018",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["api/**/*", "src/**/*"],
-  "exclude": ["node_modules"]
+    "strictNullChecks": false
+  }
 }
