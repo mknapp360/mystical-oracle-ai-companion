@@ -30,19 +30,22 @@ const CurrentSky: React.FC = () => {
     const { address } = geocodeResponse;
     if (!address) return geocodeResponse.display_name;
 
-    // Prioritize the most specific meaningful locality
-    const locality = address.city || address.town || address.village || address.hamlet;
+    // Get the most appropriate locality
+    const locality = address.city || address.town || address.village;
     
-    // For region, prefer state over county, but use county if no state
+    // Get region (state/county) and country
     const region = address.state || address.county;
+    const country = address.country;
 
-    // Build simplified name - just locality and region
-    if (locality && region) {
+    // Build clean name: Town, State, Country
+    if (locality && region && country) {
+      return `${locality}, ${region}, ${country}`;
+    } else if (locality && region) {
       return `${locality}, ${region}`;
+    } else if (locality && country) {
+      return `${locality}, ${country}`;
     } else if (locality) {
       return locality;
-    } else if (region) {
-      return region;
     }
 
     // Last resort fallback
@@ -61,8 +64,12 @@ const CurrentSky: React.FC = () => {
       }
       
       const json = await res.json();
+      console.log("Full geocode response:", json);
+      console.log("Address object:", json.address);
+      
       const location = extractLocationName(json);
       
+      console.log(`Original display_name: ${json.display_name}`);
       console.log(`Extracted location: ${location}`);
       
       await fetchSkyData(location);
@@ -112,6 +119,7 @@ const CurrentSky: React.FC = () => {
 
       const result = await response.json();
       console.log("API Response:", result);
+      console.log("API returned location:", result.location);
       
       setData(result);
     } catch (err) {
