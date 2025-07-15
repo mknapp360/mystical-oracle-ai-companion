@@ -55,15 +55,15 @@ const CurrentSky: React.FC = () => {
   if (!data) return <div>Loading current sky...</div>;
 
   return (
-    <div className="p-4 border rounded-xl shadow-lg bg-white max-w-xl mx-auto mt-6">
-      <h2 className="text-xl font-semibold mb-2">Current Sky over {data.location}</h2>
-      <p><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
-      <p><strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString()}</p>
-      <p><strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString()}</p>
+    <div className="p-4 border rounded-xl shadow-lg bg-card max-w-xl mx-auto mt-6">
+      <h2 className="text-xl font-semibold mb-2 text-black">Current Sky over {data.location}</h2>
+      <p className="text-black"><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
+      <p className="text-black"><strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString()}</p>
+      <p className="text-black"><strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString()}</p>
 
       <div className="mt-4">
-        <h3 className="font-medium">Planets</h3>
-        <ul className="grid grid-cols-2 gap-2 mt-2">
+        <h3 className="text-l font-semibold mb-2 text-black">Planets</h3>
+        <ul className="grid grid-cols-2 gap-2 mt-2 text-black">
           {Object.entries(data.planets).map(([planet, details]) => (
             <li key={planet}>
               <strong>{planet}:</strong> {details.sign} {details.degree_in_sign}° ({details.house})
