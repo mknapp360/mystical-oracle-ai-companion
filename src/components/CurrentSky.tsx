@@ -171,7 +171,8 @@ const extractLocationName = (geocodeResponse: any): string => {
 
   return (
     <div className="p-4 border rounded-xl shadow-lg bg-white max-w-xl mx-auto mt-6">
-      <h2 className="text-xl font-semibold mb-2 text-black">Current Sky over {data.location}</h2>
+      <h2 className="text-xl text-center font-semibold mb-2 text-black">Current Celestial Energy for</h2>
+      <h2 className="text-xl text-center font-semibold mb-2 text-black">{data.location}</h2>
       <p className="text-black"><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
       <p className="text-black"><strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString()}</p>
       <p className="text-black"><strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString()}</p>
