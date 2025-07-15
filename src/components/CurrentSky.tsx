@@ -35,16 +35,14 @@ const CurrentSky: React.FC = () => {
     // Get the most appropriate locality - prioritize town/city over village
     const locality = address.town || address.city || address.village || address.hamlet;
     
-    // Get region (prefer state, then county, avoid district)
-    const region = address.state || address.county;
+    // Get the proper county/state - avoid country-level regions
+    const region = address.county || address.state;
     const country = address.country;
 
     console.log(`Locality: ${locality}, Region: ${region}, Country: ${country}`);
 
-    // Build clean name: Town, State/County, Country
-    if (locality && region && country) {
-      return `${locality}, ${region}, ${country}`;
-    } else if (locality && region) {
+    // Build clean name: Town, County, Country (skip country for UK since county is meaningful)
+    if (locality && region) {
       return `${locality}, ${region}`;
     } else if (locality && country) {
       return `${locality}, ${country}`;
@@ -178,7 +176,8 @@ const CurrentSky: React.FC = () => {
 
   return (
     <div className="p-4 border rounded-xl shadow-lg bg-white max-w-xl mx-auto mt-6">
-      <h2 className="text-xl font-semibold mb-2 text-black">Current Sky over {data.location}</h2>
+      <h2 className="text-xl text-center font-semibold mb-2 text-black">Current Sky over</h2>
+      <h2 className="text-xl text-center font-semibold mb-2 text-black">{data.location}</h2>
       <p className="text-black"><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
       <p className="text-black"><strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString()}</p>
       <p className="text-black"><strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString()}</p>
