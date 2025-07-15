@@ -30,14 +30,18 @@ const CurrentSky: React.FC = () => {
     const { address } = geocodeResponse;
     if (!address) return geocodeResponse.display_name;
 
-    // Get the most appropriate locality
-    const locality = address.city || address.town || address.village;
+    console.log("Available address fields:", Object.keys(address));
     
-    // Get region (state/county) and country
+    // Get the most appropriate locality - prioritize town/city over village
+    const locality = address.town || address.city || address.village || address.hamlet;
+    
+    // Get region (prefer state, then county, avoid district)
     const region = address.state || address.county;
     const country = address.country;
 
-    // Build clean name: Town, State, Country
+    console.log(`Locality: ${locality}, Region: ${region}, Country: ${country}`);
+
+    // Build clean name: Town, State/County, Country
     if (locality && region && country) {
       return `${locality}, ${region}, ${country}`;
     } else if (locality && region) {
