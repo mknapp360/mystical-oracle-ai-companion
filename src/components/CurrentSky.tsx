@@ -31,7 +31,7 @@ const extractLocationName = (geocodeResponse: any): string => {
   if (!address) return geocodeResponse.display_name;
 
   // Prefer village, then town, then city
-  const locality = address.village || address.town || address.city;
+  const locality = address.town || address.city;
   const region = address.state || address.county; // East Sussex should appear here
 
   // Build simplified name (drop district, country, etc.)
