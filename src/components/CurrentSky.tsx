@@ -26,24 +26,31 @@ const CurrentSky: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   // Extract a cleaner location name from OpenStreetMap response
-  const extractLocationName = (geocodeResponse: any): string => {
+const extractLocationName = (geocodeResponse: any): string => {
     const { address } = geocodeResponse;
     if (!address) return geocodeResponse.display_name;
 
-    // Try to build a cleaner location string
-    const city = address.city || address.town || address.village;
+    const hamlet = address.hamlet;
+    const village = address.village;
+    const town = address.town;
+    const suburb = address.suburb;
+    const city = address.city;
+    const county = address.county;
     const state = address.state;
     const country = address.country;
 
-    if (city && state) {
-      return `${city}, ${state}`;
+    const locality = hamlet || village || suburb || town || city || county;
+
+    if (locality && country) {
+      return `${locality}, ${country}`;
+    } else if (locality && state) {
+      return `${locality}, ${state}`;
     } else if (city && country) {
       return `${city}, ${country}`;
     } else if (state && country) {
       return `${state}, ${country}`;
     }
 
-    // Fallback to full display name
     return geocodeResponse.display_name;
   };
 
