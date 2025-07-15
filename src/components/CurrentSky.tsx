@@ -175,7 +175,7 @@ const CurrentSky: React.FC = () => {
   if (!data) return null;
 
   return (
-    <div className="p-4 border rounded-xl shadow-lg bg-white max-w-xl mx-auto mt-6">
+    <div className="p-4 border rounded-xl shadow-lg bg-card max-w-xl mx-auto mt-6">
       <h2 className="text-xl text-center font-semibold mb-2 text-black">Current Sky over</h2>
       <h2 className="text-xl text-center font-semibold mb-2 text-black">{data.location}</h2>
       <p className="text-black"><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
