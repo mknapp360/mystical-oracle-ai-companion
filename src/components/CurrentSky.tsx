@@ -19,40 +19,68 @@ interface CurrentSkyData {
 }
 
 const API_BASE_URL = "https://ephemeris-api-jmjjqa-production.up.railway.app";
-const LOCATION = "Battle, East Sussex, UK";
 
 const CurrentSky: React.FC = () => {
   const [data, setData] = useState<CurrentSkyData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchCurrentSky = async () => {
+  // Fetch location name from lat/lon
+  const fetchLocationNameAndSky = async (lat: number, lon: number) => {
     try {
-      // Method 1: Using URLSearchParams (recommended)
-      const params = new URLSearchParams({
-        location: LOCATION
-      });
-      
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+      const json = await res.json();
+      const location = json.display_name;
+
+      fetchSkyData(location);
+    } catch (err) {
+      setError("Could not determine your location.");
+      setLoading(false);
+    }
+  };
+
+  // Fetch ephemeris data
+  const fetchSkyData = async (location: string) => {
+    try {
+      const params = new URLSearchParams({ location });
       const url = `${API_BASE_URL}/current-sky?${params.toString()}`;
-      
+
       const response = await fetch(url);
-      
       if (!response.ok) {
         throw new Error(`Failed to fetch current sky: ${response.status} ${response.statusText}`);
       }
-      
+
       const result = await response.json();
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCurrentSky();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          fetchLocationNameAndSky(latitude, longitude);
+        },
+        error => {
+          console.error("Geolocation error:", error);
+          setError("Location access denied.");
+          setLoading(false);
+        }
+      );
+    } else {
+      setError("Geolocation not supported in this browser.");
+      setLoading(false);
+    }
   }, []);
 
+  if (loading) return <div>Loading current sky...</div>;
   if (error) return <div className="text-red-600">Error: {error}</div>;
-  if (!data) return <div>Loading current sky...</div>;
+  if (!data) return null;
 
   return (
     <div className="p-4 border rounded-xl shadow-lg bg-card max-w-xl mx-auto mt-6">
