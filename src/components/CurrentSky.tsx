@@ -26,23 +26,28 @@ const CurrentSky: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   // Extract a cleaner location name from OpenStreetMap response
-const extractLocationName = (geocodeResponse: any): string => {
-  const { address } = geocodeResponse;
-  if (!address) return geocodeResponse.display_name;
+  const extractLocationName = (geocodeResponse: any): string => {
+    const { address } = geocodeResponse;
+    if (!address) return geocodeResponse.display_name;
 
-  // Prefer village, then town, then city
-  const locality = address.village || address.town || address.hamlet || address.suburb || address.city;
-  const region = address.state || address.county; // East Sussex should appear here
+    // Prioritize the most specific meaningful locality
+    const locality = address.city || address.town || address.village || address.hamlet;
+    
+    // For region, prefer state over county, but use county if no state
+    const region = address.state || address.county;
 
-  // Build simplified name (drop district, country, etc.)
-  if (locality && region) {
-    return `${locality}, ${region}`;
-  } else if (locality) {
-    return locality;
-  }
+    // Build simplified name - just locality and region
+    if (locality && region) {
+      return `${locality}, ${region}`;
+    } else if (locality) {
+      return locality;
+    } else if (region) {
+      return region;
+    }
 
-  return geocodeResponse.display_name;
-};
+    // Last resort fallback
+    return geocodeResponse.display_name;
+  };
 
   // Fetch location name from lat/lon
   const fetchLocationNameAndSky = async (lat: number, lon: number) => {
@@ -161,8 +166,7 @@ const extractLocationName = (geocodeResponse: any): string => {
 
   return (
     <div className="p-4 border rounded-xl shadow-lg bg-white max-w-xl mx-auto mt-6">
-      <h2 className="text-xl text-center font-semibold mb-2 text-black">Current Celestial Energy for</h2>
-      <h2 className="text-xl text-center font-semibold mb-2 text-black">{data.location}</h2>
+      <h2 className="text-xl font-semibold mb-2 text-black">Current Sky over {data.location}</h2>
       <p className="text-black"><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
       <p className="text-black"><strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString()}</p>
       <p className="text-black"><strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString()}</p>
