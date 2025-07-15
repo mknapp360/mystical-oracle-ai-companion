@@ -18,21 +18,37 @@ interface CurrentSkyData {
   };
 }
 
-const API_BASE_URL = "https://ephemeris-api-jmjjqa-production.up.railway.app"; // Replace with your actual Railway URL
+const API_BASE_URL = "https://ephemeris-api-jmjjqa-production.up.railway.app";
 const LOCATION = "Battle, East Sussex, UK";
 
 const CurrentSky: React.FC = () => {
   const [data, setData] = useState<CurrentSkyData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchCurrentSky = async () => {
+    try {
+      // Method 1: Using URLSearchParams (recommended)
+      const params = new URLSearchParams({
+        location: LOCATION
+      });
+      
+      const url = `${API_BASE_URL}/current-sky?${params.toString()}`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch current sky: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    }
+  };
+
   useEffect(() => {
-    fetch(`${API_BASE_URL}/current-sky?location=${encodeURIComponent(LOCATION)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch current sky.");
-        return res.json();
-      })
-      .then(setData)
-      .catch((err) => setError(err.message));
+    fetchCurrentSky();
   }, []);
 
   if (error) return <div className="text-red-600">Error: {error}</div>;
