@@ -14,6 +14,7 @@ interface CardLibraryProps {
   cards: TarotCardType[];
 }
 
+
 export const CardLibrary = ({ cards }: CardLibraryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCard, setSelectedCard] = useState<TarotCardType | null>(null);
@@ -86,7 +87,6 @@ export const CardLibrary = ({ cards }: CardLibraryProps) => {
             isRevealed={true}
             onClick={() => handleCardClick(card)}
             className="float"
-            style={{ animationDelay: `${Math.random() * 2}s` }}
           />
         ))}
       </div>
