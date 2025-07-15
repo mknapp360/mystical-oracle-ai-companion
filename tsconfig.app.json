@@ -1,30 +1,35 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+    "target": "es2018",              // Target a modern ECMAScript version
+    "module": "esnext",              // Use ESNext modules for Vite/React compatibility
+    "outDir": "./dist/app",          // Output directory (for reference, though noEmit is true)
+    "rootDir": "./src",              // Source directory for TypeScript files
+    "strict": true,                  // Enable all strict type-checking options
+    "esModuleInterop": true,         // Enable interop between CommonJS and ES Modules
+    "skipLibCheck": true,            // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file casing
+    "composite": true,               // Enable composite project for incremental builds
+    "jsx": "react-jsx",              // Support JSX with React 17+ syntax
+    "noEmit": false,                  // Disable emission since Vite handles it
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+    /* Bundler mode (Vite-specific) */
+    "moduleResolution": "bundler",   // Use bundler module resolution for Vite
+    "allowImportingTsExtensions": true, // Allow importing .ts/.tsx files directly
+    "isolatedModules": true,         // Ensure compatibility with Vite's transformation
+    "moduleDetection": "force",      // Force module detection for better tree-shaking
+    "declaration": true,             
 
-    /* Linting */
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
-    "noFallthroughCasesInSwitch": false,
+    /* Linting and Strictness */
+    "noImplicitAny": false,          // Allow implicit any types
+    "noUnusedLocals": false,         // Allow unused local variables
+    "noUnusedParameters": false,     // Allow unused parameters
+    "noFallthroughCasesInSwitch": false, // Allow fallthrough cases in switch statements
 
-    "baseUrl": ".",
+    "baseUrl": ".",                  // Base URL for path mappings
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"]             // Path alias for importing from src
     }
   },
-  "include": ["src"]
+  "include": ["src/**/*"],           // Include all TypeScript files in the src directory
+  "exclude": ["node_modules"]        // Exclude node_modules from compilation
 }

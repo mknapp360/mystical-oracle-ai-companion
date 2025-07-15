@@ -9,6 +9,8 @@ import { Card, CardContent } from '../components/ui/card';
 import { supabase } from '../lib/supabaseClient';
 import { loginWithGoogle, logout } from '../components/Auth';
 import { NavBar } from '../components/NavBar';
+import React from "react";
+import CurrentSky from "@/components/CurrentSky";
 
 type ActiveTab = 'reading' | 'library';
 
@@ -69,7 +71,7 @@ const Index = () => {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           {activeTab === 'reading' && <CardReader cards={allCards} user={user} />}
-          { <SkyCard /> }
+          { <CurrentSky /> }
         </main>
 
         {/* Footer */}
