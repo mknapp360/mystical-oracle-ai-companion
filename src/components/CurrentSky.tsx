@@ -27,32 +27,22 @@ const CurrentSky: React.FC = () => {
 
   // Extract a cleaner location name from OpenStreetMap response
 const extractLocationName = (geocodeResponse: any): string => {
-    const { address } = geocodeResponse;
-    if (!address) return geocodeResponse.display_name;
+  const { address } = geocodeResponse;
+  if (!address) return geocodeResponse.display_name;
 
-    const hamlet = address.hamlet;
-    const village = address.village;
-    const town = address.town;
-    const suburb = address.suburb;
-    const city = address.city;
-    const county = address.county;
-    const state = address.state;
-    const country = address.country;
+  // Prefer village, then town, then city
+  const locality = address.village || address.town || address.hamlet || address.suburb || address.city;
+  const region = address.state || address.county; // East Sussex should appear here
 
-    const locality = hamlet || village || suburb || town || city || county;
+  // Build simplified name (drop district, country, etc.)
+  if (locality && region) {
+    return `${locality}, ${region}`;
+  } else if (locality) {
+    return locality;
+  }
 
-    if (locality && country) {
-      return `${locality}, ${country}`;
-    } else if (locality && state) {
-      return `${locality}, ${state}`;
-    } else if (city && country) {
-      return `${city}, ${country}`;
-    } else if (state && country) {
-      return `${state}, ${country}`;
-    }
-
-    return geocodeResponse.display_name;
-  };
+  return geocodeResponse.display_name;
+};
 
   // Fetch location name from lat/lon
   const fetchLocationNameAndSky = async (lat: number, lon: number) => {
