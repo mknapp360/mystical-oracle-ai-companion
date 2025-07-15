@@ -25,15 +25,47 @@ const CurrentSky: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Extract a cleaner location name from OpenStreetMap response
+  const extractLocationName = (geocodeResponse: any): string => {
+    const { address } = geocodeResponse;
+    if (!address) return geocodeResponse.display_name;
+
+    // Try to build a cleaner location string
+    const city = address.city || address.town || address.village;
+    const state = address.state;
+    const country = address.country;
+
+    if (city && state) {
+      return `${city}, ${state}`;
+    } else if (city && country) {
+      return `${city}, ${country}`;
+    } else if (state && country) {
+      return `${state}, ${country}`;
+    }
+
+    // Fallback to full display name
+    return geocodeResponse.display_name;
+  };
+
   // Fetch location name from lat/lon
   const fetchLocationNameAndSky = async (lat: number, lon: number) => {
     try {
+      console.log(`Fetching location for coordinates: ${lat}, ${lon}`);
+      
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+      
+      if (!res.ok) {
+        throw new Error(`Geocoding failed: ${res.status} ${res.statusText}`);
+      }
+      
       const json = await res.json();
-      const location = json.display_name;
-
-      fetchSkyData(location);
+      const location = extractLocationName(json);
+      
+      console.log(`Extracted location: ${location}`);
+      
+      await fetchSkyData(location);
     } catch (err) {
+      console.error("Location fetch error:", err);
       setError("Could not determine your location.");
       setLoading(false);
     }
@@ -42,18 +74,46 @@ const CurrentSky: React.FC = () => {
   // Fetch ephemeris data
   const fetchSkyData = async (location: string) => {
     try {
-      const params = new URLSearchParams({ location });
+      console.log(`Fetching sky data for: ${location}`);
+      
+      // Properly encode the location parameter
+      const params = new URLSearchParams({ location: location.trim() });
       const url = `${API_BASE_URL}/current-sky?${params.toString()}`;
+      
+      console.log(`API URL: ${url}`);
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log(`API Response status: ${response.status}`);
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch current sky: ${response.status} ${response.statusText}`);
+        // Try to get error details from response
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        try {
+          const errorBody = await response.text();
+          if (errorBody) {
+            errorMessage += ` - ${errorBody}`;
+          }
+        } catch (e) {
+          // If we can't read the error body, just use the status
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
+      console.log("API Response:", result);
+      
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      console.error("Sky data fetch error:", err);
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -68,8 +128,27 @@ const CurrentSky: React.FC = () => {
         },
         error => {
           console.error("Geolocation error:", error);
-          setError("Location access denied.");
+          let errorMessage = "Location access denied.";
+          
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "Location access denied. Please allow location access and refresh.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Location information unavailable.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "Location request timed out.";
+              break;
+          }
+          
+          setError(errorMessage);
           setLoading(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // 5 minutes
         }
       );
     } else {
@@ -83,14 +162,14 @@ const CurrentSky: React.FC = () => {
   if (!data) return null;
 
   return (
-    <div className="p-4 border rounded-xl shadow-lg bg-card max-w-xl mx-auto mt-6">
+    <div className="p-4 border rounded-xl shadow-lg bg-white max-w-xl mx-auto mt-6">
       <h2 className="text-xl font-semibold mb-2 text-black">Current Sky over {data.location}</h2>
       <p className="text-black"><strong>Moon Phase:</strong> {data.sun_moon.moon_phase}</p>
       <p className="text-black"><strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString()}</p>
       <p className="text-black"><strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString()}</p>
 
       <div className="mt-4">
-        <h3 className="text-l font-semibold mb-2 text-black">Planets</h3>
+        <h3 className="text-lg font-semibold mb-2 text-black">Planets</h3>
         <ul className="grid grid-cols-2 gap-2 mt-2 text-black">
           {Object.entries(data.planets).map(([planet, details]) => (
             <li key={planet}>
