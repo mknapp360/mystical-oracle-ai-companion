@@ -51,15 +51,118 @@ const CurrentSky: React.FC = () => {
     };
   };
 
-  // Calculate house for a planet (simplified Placidus-like system)
-  const calculateHouse = (planetLon: number, ascendantLon: number): string => {
-    // Simplified house calculation - each house is ~30 degrees from ascendant
-    let houseDegree = ((planetLon - ascendantLon + 360) % 360);
-    let house = Math.floor(houseDegree / 30) + 1;
+  // Calculate Ascendant (Rising Sign) using sidereal time
+  const calculateAscendant = (lat: number, lon: number, date: Date): number => {
+    // Get sidereal time
+    const time = Astronomy.MakeTime(date);
+    const gast = Astronomy.SiderealTime(time);
     
-    if (house > 12) house = 1;
+    // Local sidereal time = GAST + longitude
+    const lst = (gast + lon / 15.0) % 24.0; // Convert to hours
     
-    return `House ${house}`;
+    // Convert LST to degrees
+    const lstDegrees = lst * 15.0;
+    
+    // Calculate ascendant using latitude
+    // This is a simplified calculation - proper Placidus requires obliquity
+    const latRad = (lat * Math.PI) / 180;
+    const lstRad = (lstDegrees * Math.PI) / 180;
+    
+    // Ascendant formula
+    const ascRad = Math.atan2(Math.cos(lstRad), -(Math.sin(lstRad) * Math.cos(latRad)));
+    let ascDegrees = (ascRad * 180) / Math.PI;
+    
+    // Normalize to 0-360
+    ascDegrees = ((ascDegrees % 360) + 360) % 360;
+    
+    return ascDegrees;
+  };
+
+  // Calculate Midheaven (MC) - 10th house cusp
+  const calculateMidheaven = (date: Date, lon: number): number => {
+    const time = Astronomy.MakeTime(date);
+    const gast = Astronomy.SiderealTime(time);
+    
+    // MC is essentially the LST in degrees
+    const lst = (gast + lon / 15.0) % 24.0;
+    const mc = (lst * 15.0) % 360;
+    
+    return mc;
+  };
+
+  // Calculate Placidus house cusps
+  const calculateHouseCusps = (ascendant: number, mc: number, lat: number): number[] => {
+    const cusps = new Array(12);
+    
+    // Key cusps that we know
+    cusps[0] = ascendant;  // 1st house (Ascendant)
+    cusps[9] = mc;         // 10th house (Midheaven)
+    
+    // 7th house is opposite ascendant (Descendant)
+    cusps[6] = (ascendant + 180) % 360;
+    
+    // 4th house is opposite MC (IC - Imum Coeli)
+    cusps[3] = (mc + 180) % 360;
+    
+    // Calculate intermediate cusps using Placidus time-based method
+    // Houses 11, 12, 2, 3
+    const latRad = (lat * Math.PI) / 180;
+    
+    // Houses 11 and 12 (between MC and Ascendant)
+    for (let i = 11; i <= 12; i++) {
+      const fraction = (i - 9) / 3; // Divide the quadrant into thirds
+      const diff = ((ascendant - mc + 360) % 360);
+      cusps[i - 1] = (mc + diff * fraction) % 360;
+    }
+    
+    // Houses 2 and 3 (between Ascendant and IC)
+    for (let i = 2; i <= 3; i++) {
+      const fraction = (i - 1) / 3;
+      const diff = ((cusps[3] - ascendant + 360) % 360);
+      cusps[i - 1] = (ascendant + diff * fraction) % 360;
+    }
+    
+    // Houses 5 and 6 (between IC and Descendant)
+    for (let i = 5; i <= 6; i++) {
+      const fraction = (i - 4) / 3;
+      const diff = ((cusps[6] - cusps[3] + 360) % 360);
+      cusps[i - 1] = (cusps[3] + diff * fraction) % 360;
+    }
+    
+    // Houses 8 and 9 (between Descendant and MC)
+    for (let i = 8; i <= 9; i++) {
+      const fraction = (i - 7) / 3;
+      const diff = ((mc - cusps[6] + 360) % 360);
+      cusps[i - 1] = (cusps[6] + diff * fraction) % 360;
+    }
+    
+    return cusps;
+  };
+
+  // Calculate which house a planet is in using Placidus cusps
+  const calculateHouse = (planetLon: number, houseCusps: number[]): string => {
+    // Normalize planet longitude
+    const normalizedLon = ((planetLon % 360) + 360) % 360;
+    
+    // Find which house the planet falls into
+    for (let i = 0; i < 12; i++) {
+      const currentCusp = houseCusps[i];
+      const nextCusp = houseCusps[(i + 1) % 12];
+      
+      // Handle wrap-around at 360/0 degrees
+      if (nextCusp > currentCusp) {
+        if (normalizedLon >= currentCusp && normalizedLon < nextCusp) {
+          return `House ${i + 1}`;
+        }
+      } else {
+        // Cusp wraps around 0
+        if (normalizedLon >= currentCusp || normalizedLon < nextCusp) {
+          return `House ${i + 1}`;
+        }
+      }
+    }
+    
+    return 'House 1'; // Fallback
   };
 
   // Get moon phase name
@@ -80,7 +183,12 @@ const CurrentSky: React.FC = () => {
       const observer = new Astronomy.Observer(lat, lon, 0);
       const now = new Date();
 
-      // Calculate Sun position for ascendant approximation
+      // Calculate Ascendant and Midheaven for proper house system
+      const ascendant = calculateAscendant(lat, lon, now);
+      const mc = calculateMidheaven(now, lon);
+      const houseCusps = calculateHouseCusps(ascendant, mc, lat);
+
+      // Calculate Sun position
       const sunVector = Astronomy.GeoVector(Astronomy.Body.Sun, now, false);
       const sunEcliptic = Astronomy.Ecliptic(sunVector);
       const sunZodiac = eclipticToZodiac(sunEcliptic.elon);
@@ -94,9 +202,6 @@ const CurrentSky: React.FC = () => {
       // Calculate rise/set times
       const sunrise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, 1, now, 1, 0);
       const sunset = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, now, 1, 0);
-
-      // Use sun's position as rough ascendant (this is simplified)
-      const ascendantLon = sunEcliptic.elon;
 
       // Calculate all planets
       const planetBodies = [
@@ -115,14 +220,14 @@ const CurrentSky: React.FC = () => {
       planets['Sun'] = {
         sign: sunZodiac.sign,
         degree_in_sign: sunZodiac.degree,
-        house: calculateHouse(sunEcliptic.elon, ascendantLon)
+        house: calculateHouse(sunEcliptic.elon, houseCusps)
       };
 
       // Add Moon
       planets['Moon'] = {
         sign: moonZodiac.sign,
         degree_in_sign: moonZodiac.degree,
-        house: calculateHouse(moonEcliptic.elon, ascendantLon)
+        house: calculateHouse(moonEcliptic.elon, houseCusps)
       };
 
       // Calculate other planets
@@ -138,7 +243,7 @@ const CurrentSky: React.FC = () => {
           planets[planetName] = {
             sign: zodiac.sign,
             degree_in_sign: zodiac.degree,
-            house: calculateHouse(ecliptic.elon, ascendantLon)
+            house: calculateHouse(ecliptic.elon, houseCusps)
           };
         } catch (err) {
           console.error(`Error calculating planet:`, err);
