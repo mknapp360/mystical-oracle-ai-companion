@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/current-sky.ts": {
+      "runtime": "edge"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/current-sky",
+      "destination": "/api/current-sky"
+    }
+  ]
+}
