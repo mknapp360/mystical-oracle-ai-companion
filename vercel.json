@@ -1,9 +1,6 @@
 {
-  "functions": {
-    "api/current-sky.ts": {
-      "runtime": "edge"
-    }
-  },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/api/current-sky",
