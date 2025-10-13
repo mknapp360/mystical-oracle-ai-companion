@@ -23,7 +23,7 @@ interface CurrentSkyData {
 }
 
 // Use proxy API to avoid CORS issues
-const API_BASE_URL = "/api";
+const API_BASE_URL = "https://corsproxy.io/?https://ephemeris-api-jmjjqa-production.up.railway.app";
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const GEOLOCATION_TIMEOUT = 10000;
 
