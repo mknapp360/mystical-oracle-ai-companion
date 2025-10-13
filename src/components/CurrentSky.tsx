@@ -22,8 +22,7 @@ interface CurrentSkyData {
   };
 }
 
-// Use proxy API to avoid CORS issues
-const API_BASE_URL = "https://corsproxy.io/?https://ephemeris-api-jmjjqa-production.up.railway.app";
+// Constants
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const GEOLOCATION_TIMEOUT = 10000;
 
@@ -150,8 +149,11 @@ const CurrentSky: React.FC = () => {
 
       console.log(`Fetching sky data for: ${location}`);
       
-      const params = new URLSearchParams({ location: location.trim() });
-      const url = `${API_BASE_URL}/current-sky?${params.toString()}`;
+      // Build the Railway URL first
+      const railwayUrl = `https://ephemeris-api-jmjjqa-production.up.railway.app/current-sky?location=${encodeURIComponent(location.trim())}`;
+      
+      // Then wrap it in the CORS proxy
+      const url = `https://corsproxy.io/?${encodeURIComponent(railwayUrl)}`;
 
       const response = await fetchWithRetry(url, {
         method: 'GET',
