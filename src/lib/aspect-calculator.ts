@@ -200,6 +200,113 @@ export function calculateAllAspects(
   return aspects.sort((a, b) => a.orb - b.orb);
 }
 
+// Poetic descriptions for illuminated Sephirot
+const ILLUMINATED_DESCRIPTIONS: Record<string, string[]> = {
+  Kether: [
+    'The Crown blazes with divine unity, bathed in celestial light',
+    'Pure consciousness radiates from the highest point',
+    'The source of all flows freely, unobstructed'
+  ],
+  Chokmah: [
+    'Wisdom overflows from multiple streams of grace',
+    'Raw creative potential bursts forth like spring water',
+    'The Father principle expands with blessed generosity'
+  ],
+  Binah: [
+    'Understanding receives abundant cosmic support',
+    'The Divine Mother shapes reality with ease and wisdom',
+    'Form crystallizes beautifully under harmonious influence'
+  ],
+  Chesed: [
+    'Mercy pours forth like a river of blessing',
+    'Grace upon grace builds infinite expansion',
+    'Jupiter\'s benevolence multiplies through harmonious channels'
+  ],
+  Geburah: [
+    'Strength flows with righteous power, clarified and true',
+    'Holy boundaries form with grace and precision',
+    'The sacred "No" speaks clearly without resistance'
+  ],
+  Tiphereth: [
+    'The Heart Center shines like the sun in splendor',
+    'Beauty harmonizes all forces with radiant integration',
+    'Christ consciousness illuminates the center of the Tree'
+  ],
+  Netzach: [
+    'Victory dances with joy, passion flows unimpeded',
+    'The realm of feeling and instinct blessed with ease',
+    'Venus sings through channels of harmonious desire'
+  ],
+  Hod: [
+    'Splendor articulates truth with crystalline clarity',
+    'The mind perceives patterns illuminated by grace',
+    'Mercury\'s quicksilver flows through blessed pathways'
+  ],
+  Yesod: [
+    'Foundation channels cosmic streams with perfect reception',
+    'The astral blueprint glows with lunar luminosity',
+    'Dreams and visions arrive easily from the upper worlds'
+  ],
+  Malkuth: [
+    'The Kingdom manifests effortlessly, spirit becomes matter',
+    'Earth receives heaven\'s blessing with open arms',
+    'The physical world pulses with sacred vitality'
+  ],
+  Daath: [
+    'The Hidden Sphere reveals mysteries across the abyss',
+    'Knowledge flows freely between conscious and unconscious',
+    'The gateway stands open, illuminated and accessible'
+  ]
+};
+
+// Shadow work descriptions for Sephirot
+const SHADOW_DESCRIPTIONS: Record<string, string[]> = {
+  Kether: [
+    'Unity consciousness requires effort to access today',
+    'The Crown calls for deep meditation to penetrate the veil'
+  ],
+  Chokmah: [
+    'Wisdom meets resistance, creativity requires conscious cultivation',
+    'The spark of "what could be" needs protection and focus'
+  ],
+  Binah: [
+    'Understanding faces limitation, form feels restrictive',
+    'The Mother principle demands patience with necessary constraints'
+  ],
+  Chesed: [
+    'Generosity meets boundaries, mercy requires discernment',
+    'Expansion faces necessary contraction for growth'
+  ],
+  Geburah: [
+    'Strength battles excess force, power needs tempering',
+    'The sword requires wisdom to wield without harm'
+  ],
+  Tiphereth: [
+    'The Heart Center holds tension between opposites',
+    'Beauty seeks integration of warring energies within'
+  ],
+  Netzach: [
+    'Passion faces obstruction, desire meets resistance',
+    'Victory requires persistence through emotional challenge'
+  ],
+  Hod: [
+    'The mind tangles with complexity, analysis creates paralysis',
+    'Clarity demands release of overthinking and mental rigidity'
+  ],
+  Yesod: [
+    'Foundation shakes, subconscious patterns surface for healing',
+    'The astral realm presents shadows requiring conscious light'
+  ],
+  Malkuth: [
+    'Manifestation struggles, the material world resists flow',
+    'Earthly matters demand attention to blockages and delays'
+  ],
+  Daath: [
+    'The abyss feels wider, knowledge comes through difficult passage',
+    'Conscious integration of shadow material challenges the psyche'
+  ]
+};
+
 // Determine if a Sephirah is illuminated or in shadow based on aspects
 export function determineSephirahState(
   sephirah: string,
@@ -242,14 +349,28 @@ export function determineSephirahState(
   
   if (totalWeight > 0) {
     state = 'illuminated';
-    description = harmoniousCount > 1 
-      ? 'Radiating with grace, multiple harmonious flows converge'
-      : 'Blessed with supportive energy, flow comes naturally';
+    // Select description based on sephirah and count
+    const descriptions = ILLUMINATED_DESCRIPTIONS[sephirah] || [];
+    if (harmoniousCount >= 3 && descriptions[0]) {
+      description = descriptions[0];
+    } else if (harmoniousCount === 2 && descriptions[1]) {
+      description = descriptions[1];
+    } else if (descriptions[2]) {
+      description = descriptions[2];
+    } else {
+      description = 'Blessed with supportive energy, flow comes naturally';
+    }
   } else if (totalWeight < 0) {
     state = 'shadow';
-    description = challengingCount > 1
-      ? 'Deep shadow work needed, multiple tensions require integration'
-      : 'In creative tension, conscious work transforms challenge into strength';
+    // Select description based on sephirah and count
+    const descriptions = SHADOW_DESCRIPTIONS[sephirah] || [];
+    if (challengingCount >= 2 && descriptions[0]) {
+      description = descriptions[0];
+    } else if (descriptions[1]) {
+      description = descriptions[1];
+    } else {
+      description = 'In creative tension, conscious work transforms challenge into strength';
+    }
   } else {
     state = 'neutral';
     description = 'Balanced between light and shadow, holding the middle way';
@@ -272,7 +393,7 @@ export function generateAspectGuidance(aspects: PlanetaryAspect[]): {
   const harmonious = aspects.filter(a => a.quality === 'harmonious');
   const challenging = aspects.filter(a => a.quality === 'challenging');
   
-   const illuminatedPaths = harmonious.slice(0, 3).map(a => {
+  const illuminatedPaths = harmonious.slice(0, 3).map(a => {
     const aspectDef = ASPECT_DEFINITIONS[a.type];
     return `${a.planet1} ${a.symbol} ${a.planet2} (${a.sephirah1}↔${a.sephirah2}): ${aspectDef.kabbalisticEffect}`;
   });
