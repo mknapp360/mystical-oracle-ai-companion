@@ -505,7 +505,7 @@ const KabbalisticCurrentSky: React.FC = () => {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
               <TabsTrigger value="kabbalistic">Kabbalistic</TabsTrigger>
               <TabsTrigger value="tree">Tree of Life</TabsTrigger>
