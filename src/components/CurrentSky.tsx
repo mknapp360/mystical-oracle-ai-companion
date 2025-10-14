@@ -508,6 +508,7 @@ const KabbalisticCurrentSky: React.FC = () => {
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
               <TabsTrigger value="kabbalistic">Kabbalistic</TabsTrigger>
+              <TabsTrigger value="tree">Tree of Life</TabsTrigger>
               <TabsTrigger value="message">Message</TabsTrigger>
               <TabsTrigger value="personal">
                 Personal {!user && '🔒'}
