@@ -10,6 +10,11 @@ import { TreeOfLifeVisualization } from '@/components/TreeOfLifeVisualization';
 import { DivineMessageDisplay } from '@/components/ShefaDisplay';
 import { generateDivineMessageFromSky } from '@/lib/shefa-calculator';
 import { Scroll } from 'lucide-react';
+import { BirthChartForm } from './BirthChartForm';
+import { PersonalizedTransitDisplay } from './PersonalizedTransitDisplay';
+import { getUserBirthChart, saveTransitReading, type BirthChartData } from '@/lib/birthChartService';
+import { calculateTransitAspects, generatePersonalizedTransitMessage } from '@/lib/transit-calculator';
+import { supabase } from '@/lib/supabaseClient';
 
 // Import the Sephirotic correspondences
 import { 
@@ -55,6 +60,10 @@ const KabbalisticCurrentSky: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [locationName, setLocationName] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("astronomical");
+  const [user, setUser] = useState<any>(null);
+  const [birthChart, setBirthChart] = useState<BirthChartData | null>(null);
+  const [transitReading, setTransitReading] = useState<any>(null);
+  const [loadingChart, setLoadingChart] = useState(true);
 
   // [All the calculation functions from your original CurrentSky.tsx]
   // Copy these exactly: eclipticToZodiac, calculateAscendant, calculateMidheaven, 
@@ -347,6 +356,29 @@ const KabbalisticCurrentSky: React.FC = () => {
   };
 
   useEffect(() => {
+  // Check if user is logged in
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+    
+    if (user) {
+      // Load their birth chart if exists
+      try {
+        const chart = await getUserBirthChart(user.id);
+        setBirthChart(chart);
+      } catch (error) {
+        console.error('Error loading birth chart:', error);
+      }
+    }
+    setLoadingChart(false);
+  };
+  
+  checkUser();
+}, []);
+
+  
+
+  useEffect(() => {
     requestLocation();
   }, []);
 
@@ -393,6 +425,35 @@ const KabbalisticCurrentSky: React.FC = () => {
 
   const worldActivation = calculateWorldActivation(data);
 
+  useEffect(() => {
+  if (data && birthChart && kabbalisticReading && worldActivation) {
+    const transitAspects = calculateTransitAspects(data.planets, birthChart.natal_planets);
+    const personalizedMessage = generatePersonalizedTransitMessage(
+      transitAspects, 
+      worldActivation.dominantWorld
+    );
+    
+    setTransitReading({
+      aspects: transitAspects,
+      message: personalizedMessage,
+      natalInfo: {
+        sunSign: birthChart.natal_planets.Sun.sign,
+        risingSign: birthChart.ascendant_sign,
+        moonSign: birthChart.natal_planets.Moon.sign
+      }
+    });
+    
+    // Optionally save to history
+    saveTransitReading({
+      birth_chart_id: birthChart.id!,
+      transit_date: new Date().toISOString(),
+      transit_planets: data.planets,
+      transit_aspects: transitAspects,
+      personalized_message: personalizedMessage
+    }).catch(err => console.error('Error saving transit reading:', err));
+  }
+}, [data, birthChart, kabbalisticReading, worldActivation]);
+
   const divineMessage = generateDivineMessageFromSky(data, kabbalisticReading, worldActivation);
 
   const treeData: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
@@ -434,18 +495,12 @@ const KabbalisticCurrentSky: React.FC = () => {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4 mb-4">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
-              <TabsTrigger value="kabbalistic">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Kabbalistic
-              </TabsTrigger>
-              <TabsTrigger value="tree">
-                Tree of Life
-              </TabsTrigger>
-              <TabsTrigger value="message">
-                <Scroll className="w-4 h-4 mr-2" />
-                Message
+              <TabsTrigger value="kabbalistic">Kabbalistic</TabsTrigger>
+              <TabsTrigger value="message">Message</TabsTrigger>
+              <TabsTrigger value="personal">
+                Personal {!user && '🔒'}
               </TabsTrigger>
             </TabsList>
 
@@ -604,6 +659,65 @@ const KabbalisticCurrentSky: React.FC = () => {
 
             <TabsContent value="message" className="space-y-4">
               <DivineMessageDisplay message={divineMessage} />
+            </TabsContent>
+
+            <TabsContent value="personal" className="space-y-4">
+              {!user ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center space-y-4">
+                      <p className="text-lg">🔒 Personalized Readings</p>
+                      <p className="text-sm text-gray-600">
+                        Create an account to access your personalized Shefa readings based on your birth chart.
+                      </p>
+                      <Button onClick={() => {/* trigger login */}}>
+                        Sign Up / Log In
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : !birthChart ? (
+                <BirthChartForm 
+                  onSave={setBirthChart} 
+                  userId={user.id}
+                />
+              ) : transitReading ? (
+                <PersonalizedTransitDisplay 
+                  transitMessage={transitReading.message}
+                  natalInfo={transitReading.natalInfo}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-center">Loading your personalized reading...</p>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {birthChart && (
+                <Card className="mt-4">
+                  <CardContent className="pt-4">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm">
+                        <p className="font-semibold">Your Birth Chart</p>
+                        <p className="text-gray-600">
+                          {birthChart.birth_city}, {birthChart.birth_country}
+                        </p>
+                        <p className="text-gray-600">
+                          {new Date(birthChart.birth_date_time).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {/* Show form to edit */}}
+                      >
+                        Edit Chart
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
 
