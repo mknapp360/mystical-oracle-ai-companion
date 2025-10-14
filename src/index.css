@@ -1,44 +1,44 @@
+/* Mystical Tarot App Design System */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Mystical Tarot App Design System */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {
-    /* New theme using RGB/HEX-like HSL approximations */
-    --background: #28325c;           /* #28325c */
-    --foreground: 0 0% 100%;             /* #ffffff */
+    /* New theme using your refined vintage palette */
+    --background: #1f2747;           /* Deep navy - main bg */
+    --foreground: #f2f2f2;           /* Soft off-white - main text */
 
-    --card: #f1ecce;                 /* #f1ecce */
-    --card-foreground: 0 0% 100%;
+    --card: #f2f2f2;                 /* Off-white card backgrounds */
+    --card-foreground: #1f2747;      /* Navy text on cards */
 
-    --popover: #46351D;
-    --popover-foreground: 0 0% 100%;
+    --popover: #252d2f;              /* Charcoal for popovers */
+    --popover-foreground: #f2f2f2;   /* Off-white text */
 
-    --title: #ff8c42;
-    --title-foreground: 0 0% 100%;
+    --title: #bb9258;                /* Antique gold for headers */
+    --title-foreground: #1f2747;     /* Navy text */
 
-    --primary: #a16207;               /* #a16207 for headers */
-    --primary-foreground: 0 0% 100%;
+    --primary: #bb9258;              /* Antique gold - primary actions */
+    --primary-foreground: #1f2747;   /* Dark text on gold buttons */
 
-    --secondary: 39 100% 20%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: #752f3a;            /* Muted burgundy */
+    --secondary-foreground: #f2f2f2; /* Off-white text */
 
-    --muted: #e3dcbf;
-    --muted-foreground: 0 0% 80%;
+    --muted: #252d2f;                /* Charcoal - muted elements */
+    --muted-foreground: #bb9258;     /* Gold text on dark */
 
-    --accent: 45 100% 70%;
-    --accent-foreground: 240 10% 8%;
+    --accent: #752f3a;               /* Burgundy for accents/hovers */
+    --accent-foreground: #f2f2f2;    /* Off-white text */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: #752f3a;          /* Burgundy for destructive actions */
+    --destructive-foreground: #f2f2f2;
 
-    --border: #46351D;               /*  */
-    --input: 226 38% 35%;
-    --ring: 33 42% 19%;
+    --border: #252d2f;               /* Charcoal borders */
+    --input: #1f2747;                /* Navy input backgrounds */
+    --ring: #bb9258;                 /* Gold focus rings */
 
     --radius: 0.75rem;
   }
@@ -52,9 +52,9 @@
   body {
     @apply bg-background text-foreground font-sans;
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(168, 85, 247, 0.1) 0%, transparent 25%),
-      radial-gradient(circle at 75% 75%, rgba(79, 70, 229, 0.1) 0%, transparent 25%),
-      radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 25% 25%, rgba(187, 146, 88, 0.1) 0%, transparent 25%),
+      radial-gradient(circle at 75% 75%, rgba(117, 47, 58, 0.1) 0%, transparent 25%),
+      radial-gradient(circle at 50% 50%, rgba(37, 45, 47, 0.05) 0%, transparent 50%);
   }
 
   .font-serif {

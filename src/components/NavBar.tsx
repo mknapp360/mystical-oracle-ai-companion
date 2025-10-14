@@ -14,7 +14,7 @@ export const NavBar = ({ user }: NavBarProps) => {
   return (
     <>
       {/* Bottom NavBar container - always fixed to bottom */}
-      <nav className="fixed bottom-0 w-full bg-[#28325c] border-t border-purple-700/20 z-50">
+      <nav className="fixed bottom-0 w-full bg-background border-t border-border/20 z-50">
         <div className="flex justify-around items-center py-3 px-4 relative">
           <Link to="/" className="text-white hover:text-white flex flex-col items-center">
             <Home size={20} />

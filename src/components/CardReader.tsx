@@ -182,7 +182,7 @@ export const CardReader = ({ cards, user }: CardReaderProps) => {
             <Button 
               onClick={drawSingleCard} 
               disabled={isDrawing || loading || cards.length === 0}
-              className="bg-gradient-to-r from-[--tw-color-buttonPrimaryFrom] to-[--tw-color-buttonPrimaryTo] hover:from-[#7a10ff] hover:to-[#e000ff] text-white font-semibold py-2 px-4 rounded shadow-md hover:shadow-lg transition"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-[#d4a872] hover:to-[#8f3d4d] text-white font-semibold py-2 px-4 rounded shadow-md hover:shadow-lg transition"
             >
               <Shuffle className="w-4 h-4 mr-2" />
               {loading && drawnCards.length === 1 ? 'Interpreting...' : 'Draw Single Card'}

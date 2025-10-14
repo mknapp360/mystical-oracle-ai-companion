@@ -1,0 +1,7 @@
+brand color palette:
+
+#1f2747 - Deep navy/midnight blue (grounded, mysterious)
+#752f3a - Muted burgundy/dusty rose (warmth, emotion, vintage elegance)
+#bb9258 - Antique gold/brass (aged wisdom, candlelight)
+#f2f2f2 - Soft off-white (parchment, aged paper)
+#252d2f - Charcoal (shadow, depth)
