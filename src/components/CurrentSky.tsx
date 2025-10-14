@@ -1,9 +1,20 @@
+
 import React, { useEffect, useState } from "react";
 import * as Astronomy from 'astronomy-engine';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MapPin, AlertCircle } from "lucide-react";
+import { RefreshCw, MapPin, AlertCircle, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Import the Sephirotic correspondences
+import { 
+  PLANETARY_SEPHIROT, 
+  ZODIAC_PATHS, 
+  HOUSE_SEPHIROT,
+  generateKabbalisticReading 
+} from '@/lib/sephirotic-correspondences';
 
 interface PlanetData {
   sign: string;
@@ -30,11 +41,12 @@ const ZODIAC_SIGNS = [
   'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
-const CurrentSky: React.FC = () => {
+const KabbalisticCurrentSky: React.FC = () => {
   const [data, setData] = useState<CurrentSkyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [locationName, setLocationName] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("astronomical");
 
   // Convert ecliptic longitude to zodiac sign and degree
   const eclipticToZodiac = (longitude: number): { sign: string; degree: number } => {
@@ -440,60 +452,123 @@ const CurrentSky: React.FC = () => {
   // No data fallback
   if (!data) return null;
 
+  const kabbalisticReading = generateKabbalisticReading(data);
+
   return (
-    <div className="p-4 border rounded-xl shadow-lg bg-card max-w-xl mx-auto mt-6 relative">
-      {/* Refresh button */}
-      <Button
-        onClick={handleRefresh}
-        size="sm"
-        variant="ghost"
-        className="absolute top-2 right-2"
-        disabled={loading}
-      >
-        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-      </Button>
+    <div className="max-w-2xl mx-auto mt-6">
+      <Card className="border-border shadow-lg bg-card relative">
+        <Button
+          onClick={handleRefresh}
+          size="sm"
+          variant="ghost"
+          className="absolute top-2 right-2"
+          disabled={loading}
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
 
-      <div className="flex items-center justify-center gap-2 mb-2">
-        <MapPin className="w-5 h-5 text-muted-foreground" />
-        <h2 className="text-xl text-center font-semibold text-black">Current Sky</h2>
-      </div>
-      
-      <h3 className="text-lg text-center font-medium mb-4 text-black">{data.location}</h3>
+        <CardHeader>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <MapPin className="w-5 h-5 text-muted-foreground" />
+            <CardTitle className="text-xl text-center font-semibold text-black">
+              Current Sky
+            </CardTitle>
+          </div>
+          <h3 className="text-lg text-center font-medium text-black">{data.location}</h3>
+        </CardHeader>
 
-      <div className="space-y-2 mb-4">
-        <p className="text-black">
-          <strong>Moon Phase:</strong> {data.sun_moon.moon_phase}
-        </p>
-        <p className="text-black">
-          <strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
-        </p>
-        <p className="text-black">
-          <strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
-        </p>
-      </div>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
+              <TabsTrigger value="kabbalistic">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Kabbalistic
+              </TabsTrigger>
+            </TabsList>
 
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2 text-black">Planets</h3>
-        <ul className="grid grid-cols-2 gap-2 mt-2 text-sm text-black">
-          {Object.entries(data.planets).map(([planet, details]) => (
-            <li key={planet} className="p-2 bg-muted/50 rounded-md">
-              <strong className="capitalize">{planet}:</strong> {details.sign} {Math.round(details.degree_in_sign)}° ({details.house})
-            </li>
-          ))}
-        </ul>
-      </div>
+            <TabsContent value="astronomical" className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-black">
+                  <strong>Moon Phase:</strong> {data.sun_moon.moon_phase}
+                </p>
+                <p className="text-black">
+                  <strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </p>
+                <p className="text-black">
+                  <strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </p>
+              </div>
 
-      <p className="text-xs text-muted-foreground text-center mt-4">
-        Calculated at {new Date().toLocaleTimeString()}
-      </p>
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-black">Planets</h3>
+                <ul className="grid grid-cols-2 gap-2 text-sm text-black">
+                  {Object.entries(data.planets).map(([planet, details]) => (
+                    <li key={planet} className="p-2 bg-muted/50 rounded-md">
+                      <strong className="capitalize">{planet}:</strong> {details.sign} {Math.round(details.degree_in_sign)}° ({details.house})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="kabbalistic" className="space-y-4">
+              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                <p className="text-sm text-center text-purple-900 dark:text-purple-100 font-medium">
+                  {kabbalisticReading.treeActivation}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-black">Active Sephiroth</h3>
+                {kabbalisticReading.sephirotDetails.map(({ planet, sephirah, sign, house }) => (
+                  <Card key={planet} className="border-l-4" style={{ borderLeftColor: sephirah.color }}>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-black">{planet}</span>
+                            <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
+                              {sephirah.name} {sephirah.hebrew}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            <em>{sephirah.meaning}</em> - {sephirah.archetype}
+                          </p>
+                          <p className="text-sm text-black">
+                            {sephirah.influence}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Expressing through <strong>{sign}</strong> in <strong>{house}</strong>
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground text-center">
+                  💫 This reading shows which spheres of the Tree of Life are activated in the current cosmic moment
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            Calculated at {new Date().toLocaleTimeString()}
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default CurrentSky;
+export default KabbalisticCurrentSky;
