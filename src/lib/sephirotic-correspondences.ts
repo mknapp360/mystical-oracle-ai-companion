@@ -281,6 +281,48 @@ export const HOUSE_SEPHIROT: Record<string, {
   }
 };
 
+// Synthesize contextual interpretation based on planet, sign, and house
+export const synthesizeInfluence = (planet: string, sign: string, house: string): string => {
+  const planetSephirah = PLANETARY_SEPHIROT[planet];
+  const signPath = ZODIAC_PATHS[sign];
+  const houseManifest = HOUSE_SEPHIROT[house];
+
+  if (!planetSephirah || !signPath || !houseManifest) {
+    return planetSephirah?.influence || '';
+  }
+
+  // Create contextual interpretation by combining all three elements
+  const templates: Record<string, (s: PlanetarySephirah, z: typeof signPath, h: typeof houseManifest) => string> = {
+    Sun: (s, z, h) => `${s.name}'s radiant consciousness expresses through ${z.meaning.toLowerCase()}, bringing ${z.letterName}'s quality of clarity to ${h.manifestationArea.toLowerCase()}`,
+    
+    Moon: (s, z, h) => `${s.name}'s intuitive foundation flows through ${z.meaning.toLowerCase()}, channeling ${z.letterName}'s emotional wisdom into ${h.manifestationArea.toLowerCase()}`,
+    
+    Mercury: (s, z, h) => `${s.name}'s intellectual splendor communicates through ${z.meaning.toLowerCase()}, applying ${z.letterName}'s mental acuity to ${h.manifestationArea.toLowerCase()}`,
+    
+    Venus: (s, z, h) => `${s.name}'s eternal victory manifests through ${z.meaning.toLowerCase()}, bringing ${z.letterName}'s beauty and desire to ${h.manifestationArea.toLowerCase()}`,
+    
+    Mars: (s, z, h) => `${s.name}'s divine strength acts through ${z.meaning.toLowerCase()}, directing ${z.letterName}'s willpower toward ${h.manifestationArea.toLowerCase()}`,
+    
+    Jupiter: (s, z, h) => `${s.name}'s boundless mercy expands through ${z.meaning.toLowerCase()}, showering ${z.letterName}'s grace upon ${h.manifestationArea.toLowerCase()}`,
+    
+    Saturn: (s, z, h) => `${s.name}'s profound understanding structures through ${z.meaning.toLowerCase()}, applying ${z.letterName}'s discipline to ${h.manifestationArea.toLowerCase()}`,
+    
+    Uranus: (s, z, h) => `${s.name}'s cosmic wisdom revolutionizes through ${z.meaning.toLowerCase()}, awakening ${z.letterName}'s breakthrough potential in ${h.manifestationArea.toLowerCase()}`,
+    
+    Neptune: (s, z, h) => `${s.name}'s transcendent unity dissolves through ${z.meaning.toLowerCase()}, infusing ${z.letterName}'s mystical essence into ${h.manifestationArea.toLowerCase()}`,
+    
+    Pluto: (s, z, h) => `${s.name}'s hidden knowledge transforms through ${z.meaning.toLowerCase()}, revealing ${z.letterName}'s deep power within ${h.manifestationArea.toLowerCase()}`
+  };
+
+  const templateFn = templates[planet];
+  if (templateFn) {
+    return templateFn(planetSephirah, signPath, houseManifest);
+  }
+
+  // Fallback
+  return `${planetSephirah.name}'s energy expresses through ${sign} in ${house}`;
+};
+
 // Helper function to get Sephirotic interpretation
 export const getSephiroticInfluence = (planet: string, sign: string, house: string) => {
   const planetSephirah = PLANETARY_SEPHIROT[planet];
@@ -295,7 +337,7 @@ export const getSephiroticInfluence = (planet: string, sign: string, house: stri
     sephirah: planetSephirah,
     path: signPath,
     manifestation: houseManifest,
-    synthesis: `${planetSephirah.name} (${planet}) expressing through the path of ${signPath.letterName} (${sign}) in the realm of ${houseManifest.manifestationArea}`
+    synthesis: synthesizeInfluence(planet, sign, house)
   };
 };
 

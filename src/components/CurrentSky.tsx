@@ -13,7 +13,8 @@ import {
   PLANETARY_SEPHIROT, 
   ZODIAC_PATHS, 
   HOUSE_SEPHIROT,
-  generateKabbalisticReading 
+  generateKabbalisticReading,
+  synthesizeInfluence
 } from '@/lib/sephirotic-correspondences';
 
 interface PlanetData {
