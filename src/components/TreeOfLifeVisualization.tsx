@@ -6,19 +6,25 @@ interface TreeOfLifeProps {
   activePlanets: Record<string, { sign: string; house: string; sephirah: string; world: World }>;
 }
 
-// Sephirot positions on the Tree (x, y coordinates in SVG viewBox 0 0 400 600)
+// Sephirot positions on the Tree (x, y coordinates in SVG viewBox 0 0 500 700)
+// LEFT = Severity, RIGHT = Mercy, MIDDLE = Balance
 const SEPHIROT_POSITIONS: Record<string, { x: number; y: number }> = {
-  Kether: { x: 200, y: 40 },
-  Chokmah: { x: 120, y: 120 },
-  Binah: { x: 280, y: 120 },
-  Chesed: { x: 120, y: 220 },
-  Geburah: { x: 280, y: 220 },
-  Tiphereth: { x: 200, y: 280 },
-  Netzach: { x: 120, y: 380 },
-  Hod: { x: 280, y: 380 },
-  Yesod: { x: 200, y: 480 },
-  Malkuth: { x: 200, y: 560 },
-  Daath: { x: 200, y: 180 }
+  // Middle Pillar (Balance)
+  Kether: { x: 250, y: 50 },
+  Daath: { x: 250, y: 160 },
+  Tiphereth: { x: 250, y: 340 },
+  Yesod: { x: 250, y: 550 },
+  Malkuth: { x: 250, y: 650 },
+  
+  // Right Pillar (Mercy) - Masculine/Expanding
+  Chokmah: { x: 380, y: 130 },
+  Chesed: { x: 380, y: 260 },
+  Netzach: { x: 380, y: 450 },
+  
+  // Left Pillar (Severity) - Feminine/Contracting
+  Binah: { x: 120, y: 130 },
+  Geburah: { x: 120, y: 260 },
+  Hod: { x: 120, y: 450 }
 };
 
 // Path connections between Sephiroth
@@ -88,8 +94,8 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
       </CardHeader>
       <CardContent>
         <svg 
-          viewBox="0 0 400 600" 
-          className="w-full h-auto max-h-[600px]"
+          viewBox="0 0 500 700" 
+          className="w-full h-auto max-h-[700px]"
           style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
         >
           {/* Background gradient */}
@@ -101,7 +107,7 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
             
             {/* Glow effect for active spheres */}
             <filter id="glow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
               <feMerge>
                 <feMergeNode in="coloredBlur"/>
                 <feMergeNode in="SourceGraphic"/>
@@ -109,7 +115,7 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
             </filter>
           </defs>
 
-          <rect width="400" height="600" fill="url(#treeGlow)" />
+          <rect width="500" height="700" fill="url(#treeGlow)" />
 
           {/* Draw paths first (so they appear behind spheres) */}
           {TREE_PATHS.map(([from, to], i) => {
@@ -165,7 +171,7 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
                   <circle
                     cx={pos.x}
                     cy={pos.y}
-                    r={28}
+                    r={35}
                     fill={color}
                     opacity={0.3}
                     filter="url(#glow)"
@@ -176,7 +182,7 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={22}
+                  r={28}
                   fill={isActive ? color : '#f3f4f6'}
                   stroke={isActive ? color : '#d1d5db'}
                   strokeWidth={isActive ? 3 : 2}
@@ -190,9 +196,9 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
                 {/* Sephirah name */}
                 <text
                   x={pos.x}
-                  y={pos.y - 32}
+                  y={pos.y - 38}
                   fill={isActive ? '#1f2937' : '#9ca3af'}
-                  fontSize="12"
+                  fontSize="13"
                   fontWeight={isActive ? 'bold' : 'normal'}
                   textAnchor="middle"
                   fontFamily="serif"
@@ -207,9 +213,9 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
                       <text
                         key={planet}
                         x={pos.x}
-                        y={pos.y + (idx * 12) - (planetsHere.length * 6) + 6}
+                        y={pos.y + (idx * 14) - (planetsHere.length * 7) + 7}
                         fill="white"
-                        fontSize="10"
+                        fontSize="11"
                         fontWeight="bold"
                         textAnchor="middle"
                         dominantBaseline="middle"
@@ -224,9 +230,9 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
                 {sephirahData && (
                   <text
                     x={pos.x}
-                    y={pos.y + 38}
+                    y={pos.y + 45}
                     fill={isActive ? '#7c3aed' : '#9ca3af'}
-                    fontSize="14"
+                    fontSize="15"
                     textAnchor="middle"
                     opacity={isActive ? 1 : 0.5}
                   >
@@ -238,9 +244,9 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
           })}
 
           {/* Three Pillars labels */}
-          <text x="50" y="590" fill="#6b7280" fontSize="11" fontStyle="italic">Pillar of Severity</text>
-          <text x="140" y="590" fill="#6b7280" fontSize="11" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
-          <text x="280" y="590" fill="#6b7280" fontSize="11" fontStyle="italic">Pillar of Mercy</text>
+          <text x="120" y="690" fill="#6b7280" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
+          <text x="250" y="690" fill="#6b7280" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
+          <text x="380" y="690" fill="#6b7280" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
         </svg>
 
         {/* Legend */}
