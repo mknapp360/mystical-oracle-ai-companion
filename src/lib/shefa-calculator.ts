@@ -1,13 +1,21 @@
-// src/lib/divine-message-synthesizer.ts
+// src/lib/shefa-calculator.ts
 
 import { 
   PLANETARY_SEPHIROT, 
   ZODIAC_PATHS, 
-  FOUR_WORLDS,
-  determineWorld, 
+  FOUR_WORLDS, 
   type World,
   type PlanetarySephirah 
 } from './sephirotic-correspondences';
+
+import {
+  calculateAllAspects,
+  determineSephirahState,
+  generateAspectGuidance,
+  type PlanetaryAspect
+} from './aspect-calculator';
+
+import { determineWorld } from './sephirotic-correspondences';
 
 interface DivinePattern {
   activeSephirot: string[];
@@ -21,13 +29,18 @@ interface DivinePattern {
     house: string;
     world: World;
   }>;
+  aspects: PlanetaryAspect[];
+  sephirotStates: Map<string, ReturnType<typeof determineSephirahState>>;
 }
 
-interface DivineMessage {
+export interface DivineMessage {
   title: string;
   opening: string;
   shefaFlow: string;
   pathwayGuidance: string;
+  aspectGuidance: string;
+  illuminatedSpheres: string;
+  shadowWork: string;
   worldManifestation: string;
   practicalWisdom: string;
   closingBlessing: string;
@@ -35,7 +48,7 @@ interface DivineMessage {
 
 // Synthesize the complete divine message from the pattern
 export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
-  const { activeSephirot, activePaths, dominantWorld, worldPercentages, planetaryPlacements } = pattern;
+  const { activeSephirot, activePaths, dominantWorld, worldPercentages, planetaryPlacements, aspects, sephirotStates } = pattern;
   
   // Determine the primary flow pattern
   const primaryFlow = analyzePrimaryFlow(planetaryPlacements);
@@ -43,13 +56,19 @@ export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
   // Identify key path connections
   const keyPaths = identifyKeyPaths(activePaths, activeSephirot);
   
+  // Generate aspect guidance
+  const aspectInfo = generateAspectGuidance(aspects);
+  
   // Generate message sections
   const title = generateTitle(dominantWorld, primaryFlow);
   const opening = generateOpening(dominantWorld, worldPercentages);
   const shefaFlow = generateShefaFlow(primaryFlow, activeSephirot);
   const pathwayGuidance = generatePathwayGuidance(keyPaths);
+  const aspectGuidance = aspectInfo.summary;
+  const illuminatedSpheres = generateIlluminatedSpheres(sephirotStates);
+  const shadowWork = generateShadowWork(sephirotStates, aspects);
   const worldManifestation = generateWorldManifestation(dominantWorld, worldPercentages);
-  const practicalWisdom = generatePracticalWisdom(primaryFlow, dominantWorld, keyPaths);
+  const practicalWisdom = generatePracticalWisdom(primaryFlow, dominantWorld, keyPaths, aspectInfo);
   const closingBlessing = generateClosingBlessing(dominantWorld);
 
   return {
@@ -57,6 +76,9 @@ export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
     opening,
     shefaFlow,
     pathwayGuidance,
+    aspectGuidance,
+    illuminatedSpheres,
+    shadowWork,
     worldManifestation,
     practicalWisdom,
     closingBlessing
@@ -69,14 +91,12 @@ function analyzePrimaryFlow(placements: DivinePattern['planetaryPlacements']): {
   centralSephirah: string;
   theme: string;
 } {
-  // Find highest and most central activated spheres
   const hierarchy = ['Kether', 'Chokmah', 'Binah', 'Chesed', 'Geburah', 'Tiphereth', 'Netzach', 'Hod', 'Yesod', 'Malkuth', 'Daath'];
   const activeSephirahNames = placements.map(p => p.sephirah);
   
   const topSephirah = hierarchy.find(s => activeSephirahNames.includes(s)) || 'Tiphereth';
   const centralSephirah = activeSephirahNames.includes('Tiphereth') ? 'Tiphereth' : topSephirah;
   
-  // Determine theme based on which spheres are active
   let theme = 'integration and balance';
   if (activeSephirahNames.includes('Kether')) theme = 'divine union and transcendence';
   else if (activeSephirahNames.includes('Chokmah') && activeSephirahNames.includes('Binah')) theme = 'wisdom through polarity';
@@ -87,7 +107,6 @@ function analyzePrimaryFlow(placements: DivinePattern['planetaryPlacements']): {
   return { topSephirah, centralSephirah, theme };
 }
 
-// Identify the most significant pathways
 function identifyKeyPaths(
   paths: DivinePattern['activePaths'], 
   activeSephirot: string[]
@@ -97,7 +116,7 @@ function identifyKeyPaths(
       activeSephirot.includes(path.connects[0]) && 
       activeSephirot.includes(path.connects[1])
     )
-    .slice(0, 3) // Top 3 most significant
+    .slice(0, 3)
     .map(path => ({
       letter: path.letter,
       sign: path.sign,
@@ -154,37 +173,74 @@ function generatePathwayGuidance(paths: ReturnType<typeof identifyKeyPaths>): st
     return 'The paths between spheres shimmer with potential, waiting for conscious engagement.';
   }
   
+  const hebrewMeanings: Record<string, string> = {
+    Aleph: 'the breath of creation, teaching unity in multiplicity',
+    Beth: 'the vessel of containment, building sacred structures',
+    Gimel: 'the bridge of giving, connecting higher to lower',
+    Daleth: 'the door of receptivity, opening to divine nourishment',
+    Heh: 'the window of revelation, seeing with divine eyes',
+    Vav: 'the nail of connection, joining heaven to earth',
+    Zayin: 'the sword of discernment, cutting through illusion',
+    Cheth: 'the fence of protection, creating holy boundaries',
+    Teth: 'the serpent of transformation, kundalini rising',
+    Yod: 'the hand of manifestation, divine action through you',
+    Kaph: 'the palm of receptivity, holding divine gifts',
+    Lamed: 'the ox-goad of learning, teaching through experience',
+    Mem: 'the waters of consciousness, flowing and adapting',
+    Nun: 'the fish of faith, swimming in unseen depths',
+    Samekh: 'the prop of support, divine assistance available',
+    Ayin: 'the eye of witness, seeing from higher perspective',
+    Peh: 'the mouth of expression, speaking truth into being',
+    Tzaddi: 'the fish-hook of insight, catching spiritual understanding',
+    Qoph: 'the back of the head, intuition and dreamwork',
+    Resh: 'the head of intellect, illuminating consciousness',
+    Shin: 'the tooth of transformation, holy fire refining',
+    Tav: 'the cross of manifestation, sealing intention into form'
+  };
+  
   const pathGuidance = paths.map(path => {
-    const hebrewMeanings: Record<string, string> = {
-      Aleph: 'the breath of creation, teaching unity in multiplicity',
-      Beth: 'the vessel of containment, building sacred structures',
-      Gimel: 'the bridge of giving, connecting higher to lower',
-      Daleth: 'the door of receptivity, opening to divine nourishment',
-      Heh: 'the window of revelation, seeing with divine eyes',
-      Vav: 'the nail of connection, joining heaven to earth',
-      Zayin: 'the sword of discernment, cutting through illusion',
-      Cheth: 'the fence of protection, creating holy boundaries',
-      Teth: 'the serpent of transformation, kundalini rising',
-      Yod: 'the hand of manifestation, divine action through you',
-      Kaph: 'the palm of receptivity, holding divine gifts',
-      Lamed: 'the ox-goad of learning, teaching through experience',
-      Mem: 'the waters of consciousness, flowing and adapting',
-      Nun: 'the fish of faith, swimming in unseen depths',
-      Samekh: 'the prop of support, divine assistance available',
-      Ayin: 'the eye of witness, seeing from higher perspective',
-      Peh: 'the mouth of expression, speaking truth into being',
-      Tzaddi: 'the fish-hook of insight, catching spiritual understanding',
-      Qoph: 'the back of the head, intuition and dreamwork',
-      Resh: 'the head of intellect, illuminating consciousness',
-      Shin: 'the tooth of transformation, holy fire refining',
-      Tav: 'the cross of manifestation, sealing intention into form'
-    };
-    
     const meaning = hebrewMeanings[path.letter] || path.meaning.toLowerCase();
     return `The path of ${path.letter} (${path.sign}) connects ${path.from} to ${path.to}, activating ${meaning}`;
   }).join('. ');
   
   return `Sacred pathways illuminate the Tree today. ${pathGuidance}. Walk these paths consciously—they are invitations to specific spiritual work.`;
+}
+
+function generateIlluminatedSpheres(states: Map<string, ReturnType<typeof determineSephirahState>>): string {
+  const illuminated: string[] = [];
+  
+  states.forEach((state, sephirah) => {
+    if (state.state === 'illuminated') {
+      illuminated.push(`${sephirah}: ${state.description}`);
+    }
+  });
+  
+  if (illuminated.length === 0) {
+    return 'All spheres rest in balance today, neither fully illuminated nor in shadow.';
+  }
+  
+  return `Spheres bathed in divine light: ${illuminated.join('; ')}. These are your greatest gifts today—channels of grace and effortless flow.`;
+}
+
+function generateShadowWork(states: Map<string, ReturnType<typeof determineSephirahState>>, aspects: PlanetaryAspect[]): string {
+  const shadows: string[] = [];
+  
+  states.forEach((state, sephirah) => {
+    if (state.state === 'shadow') {
+      shadows.push(`${sephirah}: ${state.description}`);
+    }
+  });
+  
+  if (shadows.length === 0) {
+    return 'No spheres require deep shadow work today. Rest in this blessing of clarity.';
+  }
+  
+  const challengingAspects = aspects.filter(a => a.quality === 'challenging').slice(0, 2);
+  const aspectDetails = challengingAspects.map(a => 
+    `${a.planet1} ${a.symbol} ${a.planet2} (${a.sephirah1}↔${a.sephirah2})`
+  ).join(', ');
+  
+  return `Spheres calling for integration: ${shadows.join('; ')}. The challenging aspects (${aspectDetails}) create friction that is the forge of spiritual gold. Where you feel resistance, lean in with compassion and consciousness.`;
 }
 
 function generateWorldManifestation(world: World, percentages: Record<World, number>): string {
@@ -207,7 +263,8 @@ function generateWorldManifestation(world: World, percentages: Record<World, num
 function generatePracticalWisdom(
   flow: ReturnType<typeof analyzePrimaryFlow>, 
   world: World,
-  paths: ReturnType<typeof identifyKeyPaths>
+  paths: ReturnType<typeof identifyKeyPaths>,
+  aspectInfo: ReturnType<typeof generateAspectGuidance>
 ): string {
   const practices: Record<World, string[]> = {
     Atziluth: [
@@ -238,7 +295,14 @@ function generatePracticalWisdom(
     ? 'Center yourself in your heart—let all decisions flow from this sacred place.'
     : `Honor ${flow.centralSephirah} by aligning with its quality today.`;
   
-  return `Practical ways to align with today's pattern: ${selectedPractices.join('; ')}. ${sephirahPractice} The paths that are active suggest specific work—pay attention to themes of ${paths.map(p => p.sign).join(', ')}.`;
+  let aspectPractice = '';
+  if (aspectInfo.shadowPaths.length > 0) {
+    aspectPractice = ' For shadow work, practice conscious integration: name the tension, breathe into the discomfort, ask what gift it brings.';
+  } else if (aspectInfo.illuminatedPaths.length > 0) {
+    aspectPractice = ' With harmonious aspects supporting you, trust the flow and let things unfold naturally.';
+  }
+  
+  return `Practical ways to align with today's pattern: ${selectedPractices.join('; ')}. ${sephirahPractice}${aspectPractice}`;
 }
 
 function generateClosingBlessing(world: World): string {
@@ -254,6 +318,22 @@ function generateClosingBlessing(world: World): string {
 
 // Main function to generate the complete message from sky data
 export function generateDivineMessageFromSky(skyData: any, kabbalisticReading: any, worldActivation: any): DivineMessage {
+  // Calculate aspects
+  const planetToSephirah: Record<string, string> = {};
+  kabbalisticReading.sephirotDetails.forEach((detail: any) => {
+    planetToSephirah[detail.planet] = detail.sephirah.name;
+  });
+  
+  const aspects = calculateAllAspects(skyData.planets, planetToSephirah);
+  
+  // Determine Sephirah states based on aspects
+  const sephirotStates = new Map<string, ReturnType<typeof determineSephirahState>>();
+  const allSephirot = new Set(Object.values(planetToSephirah));
+  
+  allSephirot.forEach(sephirah => {
+    sephirotStates.set(sephirah, determineSephirahState(sephirah, aspects));
+  });
+  
   // Build the pattern
   const pattern: DivinePattern = {
     activeSephirot: kabbalisticReading.activeSephirot,
@@ -285,7 +365,9 @@ export function generateDivineMessageFromSky(skyData: any, kabbalisticReading: a
         house: planetData.house,
         world: worldData.primary
       };
-    })
+    }),
+    aspects,
+    sephirotStates
   };
 
   return synthesizeDivineMessage(pattern);
