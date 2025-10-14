@@ -6,6 +6,7 @@ import { RefreshCw, MapPin, AlertCircle, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TreeOfLifeVisualization } from '@/components/TreeOfLifeVisualization';
 
 // Import the Sephirotic correspondences
 import { 
@@ -389,6 +390,20 @@ const KabbalisticCurrentSky: React.FC = () => {
 
   const worldActivation = calculateWorldActivation(data);
 
+  const treeData: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
+    Object.entries(data.planets).forEach(([planet, planetData]) => {
+      const sephirah = PLANETARY_SEPHIROT[planet];
+      const worldData = determineWorld(planet, planetData.sign, planetData.house);
+      if (sephirah) {
+        treeData[planet] = {
+          sign: planetData.sign,
+          house: planetData.house,
+          sephirah: sephirah.name,
+          world: worldData.primary
+        };
+      }
+    });
+
   return (
     <div className="max-w-2xl mx-auto mt-6">
       <Card className="border-border shadow-lg bg-card relative">
@@ -414,11 +429,14 @@ const KabbalisticCurrentSky: React.FC = () => {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
               <TabsTrigger value="kabbalistic">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Kabbalistic
+              </TabsTrigger>
+              <TabsTrigger value="tree">
+                Tree of Life
               </TabsTrigger>
             </TabsList>
 
@@ -569,6 +587,10 @@ const KabbalisticCurrentSky: React.FC = () => {
                   💫 This reading shows which spheres of the Tree of Life are activated in the current cosmic moment
                 </p>
               </div>
+            </TabsContent>
+
+            <TabsContent value="tree" className="space-y-4">
+              <TreeOfLifeVisualization activePlanets={treeData} />
             </TabsContent>
           </Tabs>
 
