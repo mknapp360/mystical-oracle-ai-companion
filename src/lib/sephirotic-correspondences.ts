@@ -398,12 +398,12 @@ const ELEMENT_TO_WORLD: Record<string, World> = {
 
 // Get element for zodiac sign
 export const getSignElement = (sign: string): string => {
-  const fireSign = ['Aries', 'Leo', 'Sagittarius'];
+  const fireSigns = ['Aries', 'Leo', 'Sagittarius'];
   const waterSigns = ['Cancer', 'Scorpio', 'Pisces'];
   const airSigns = ['Gemini', 'Libra', 'Aquarius'];
   const earthSigns = ['Taurus', 'Virgo', 'Capricorn'];
   
-  if (fireSign.includes(sign)) return 'Fire';
+  if (fireSigns.includes(sign)) return 'Fire';
   if (waterSigns.includes(sign)) return 'Water';
   if (airSigns.includes(sign)) return 'Air';
   if (earthSigns.includes(sign)) return 'Earth';
@@ -452,10 +452,6 @@ export const determineWorld = (
   }
 
   // 3. HOUSE PLACEMENT (light weight = 1 point)
-  // Houses 1-3: Physical body, resources, communication = Assiah
-  // Houses 4-6: Home, creativity, service = Yetzirah  
-  // Houses 7-9: Relationships, transformation, philosophy = Briah
-  // Houses 10-12: Career, community, spirituality = Atziluth
   if (houseNumber >= 1 && houseNumber <= 3) worldScores.Assiah += 1;
   if (houseNumber >= 4 && houseNumber <= 6) worldScores.Yetzirah += 1;
   if (houseNumber >= 7 && houseNumber <= 9) worldScores.Briah += 1;
@@ -528,6 +524,8 @@ export const calculateWorldActivation = (skyData: any): {
     interpretation
   };
 };
+
+// Generate daily Kabbalistic interpretation
 export const generateKabbalisticReading = (skyData: any) => {
   const activeSephirot = new Set<string>();
   const influences: string[] = [];
