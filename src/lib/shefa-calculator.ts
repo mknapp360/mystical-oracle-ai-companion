@@ -3,7 +3,8 @@
 import { 
   PLANETARY_SEPHIROT, 
   ZODIAC_PATHS, 
-  FOUR_WORLDS, 
+  FOUR_WORLDS,
+  determineWorld, 
   type World,
   type PlanetarySephirah 
 } from './sephirotic-correspondences';
@@ -272,7 +273,7 @@ export function generateDivineMessageFromSky(skyData: any, kabbalisticReading: a
     worldPercentages: worldActivation.worldPercentages,
     planetaryPlacements: kabbalisticReading.sephirotDetails.map((detail: any) => {
       const planetData = skyData.planets[detail.planet];
-      const worldData = require('./sephirotic-correspondences').determineWorld(
+      const worldData = determineWorld(
         detail.planet, 
         planetData.sign, 
         planetData.house
