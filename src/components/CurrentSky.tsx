@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import * as Astronomy from 'astronomy-engine';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MapPin, AlertCircle, Sparkles } from "lucide-react";
+import { RefreshCw, MapPin, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TreeOfLifeVisualization } from '@/components/TreeOfLifeVisualization';
 import { DivineMessageDisplay } from '@/components/ShefaDisplay';
 import { generateDivineMessageFromSky } from '@/lib/shefa-calculator';
-import { Scroll } from 'lucide-react';
 import { BirthChartForm } from './BirthChartForm';
 import { PersonalizedTransitDisplay } from './PersonalizedTransitDisplay';
 import { getUserBirthChart, saveTransitReading, type BirthChartData } from '@/lib/birthChartService';
 import { calculateTransitAspects, generatePersonalizedTransitMessage } from '@/lib/transit-calculator';
 import { supabase } from '@/lib/supabaseClient';
 
-// Import the Sephirotic correspondences
 import { 
   PLANETARY_SEPHIROT, 
   ZODIAC_PATHS, 
@@ -62,12 +60,7 @@ const KabbalisticCurrentSky: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("astronomical");
   const [user, setUser] = useState<any>(null);
   const [birthChart, setBirthChart] = useState<BirthChartData | null>(null);
-  const [transitReading, setTransitReading] = useState<any>(null);
   const [loadingChart, setLoadingChart] = useState(true);
-
-  // [All the calculation functions from your original CurrentSky.tsx]
-  // Copy these exactly: eclipticToZodiac, calculateAscendant, calculateMidheaven, 
-  // calculateHouseCusps, calculateHouse, getMoonPhase, calculateSkyData, etc.
 
   const eclipticToZodiac = (longitude: number): { sign: string; degree: number } => {
     const normalizedLon = ((longitude % 360) + 360) % 360;
@@ -355,32 +348,99 @@ const KabbalisticCurrentSky: React.FC = () => {
     requestLocation();
   };
 
+  // Load user and birth chart on mount
   useEffect(() => {
-  // Check if user is logged in
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-    
-    if (user) {
-      // Load their birth chart if exists
-      try {
-        const chart = await getUserBirthChart(user.id);
-        setBirthChart(chart);
-      } catch (error) {
-        console.error('Error loading birth chart:', error);
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      
+      if (user) {
+        try {
+          const chart = await getUserBirthChart(user.id);
+          setBirthChart(chart);
+        } catch (error) {
+          console.error('Error loading birth chart:', error);
+        }
       }
-    }
-    setLoadingChart(false);
-  };
-  
-  checkUser();
-}, []);
+      setLoadingChart(false);
+    };
+    
+    checkUser();
+  }, []);
 
-  
-
+  // Load location on mount
   useEffect(() => {
     requestLocation();
   }, []);
+
+  // Memoize calculations to prevent re-renders
+  const kabbalisticReading = useMemo(() => {
+    if (!data) return null;
+    return generateKabbalisticReading(data);
+  }, [data]);
+
+  const worldActivation = useMemo(() => {
+    if (!data) return null;
+    return calculateWorldActivation(data);
+  }, [data]);
+
+  const divineMessage = useMemo(() => {
+    if (!data || !kabbalisticReading || !worldActivation) return null;
+    return generateDivineMessageFromSky(data, kabbalisticReading, worldActivation);
+  }, [data, kabbalisticReading, worldActivation]);
+
+  const treeData = useMemo(() => {
+    if (!data) return {};
+    const tree: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
+    Object.entries(data.planets).forEach(([planet, planetData]) => {
+      const sephirah = PLANETARY_SEPHIROT[planet];
+      const worldData = determineWorld(planet, planetData.sign, planetData.house);
+      if (sephirah) {
+        tree[planet] = {
+          sign: planetData.sign,
+          house: planetData.house,
+          sephirah: sephirah.name,
+          world: worldData.primary
+        };
+      }
+    });
+    return tree;
+  }, [data]);
+
+  // Calculate transit reading when needed (only when on personal tab with birth chart)
+  const transitReading = useMemo(() => {
+    if (!data || !birthChart || !worldActivation) return null;
+    
+    try {
+      const transitAspects = calculateTransitAspects(data.planets, birthChart.natal_planets);
+      const personalizedMessage = generatePersonalizedTransitMessage(
+        transitAspects, 
+        worldActivation.dominantWorld
+      );
+      
+      // Save to history (fire and forget)
+      saveTransitReading({
+        birth_chart_id: birthChart.id!,
+        transit_date: new Date().toISOString(),
+        transit_planets: data.planets,
+        transit_aspects: transitAspects,
+        personalized_message: personalizedMessage
+      }).catch(err => console.error('Error saving transit reading:', err));
+
+      return {
+        aspects: transitAspects,
+        message: personalizedMessage,
+        natalInfo: {
+          sunSign: birthChart.natal_planets.Sun.sign,
+          risingSign: birthChart.ascendant_sign,
+          moonSign: birthChart.natal_planets.Moon.sign
+        }
+      };
+    } catch (error) {
+      console.error('Error calculating transits:', error);
+      return null;
+    }
+  }, [data, birthChart, worldActivation]);
 
   if (loading) {
     return (
@@ -418,60 +478,7 @@ const KabbalisticCurrentSky: React.FC = () => {
     );
   }
 
-  if (!data) return null;
-
-  // Generate Kabbalistic interpretation
-
-  useEffect(() => {
-  if (data && birthChart) {
-    // Calculate these INSIDE the useEffect
-    const kabbalisticReading = generateKabbalisticReading(data);
-    const worldActivation = calculateWorldActivation(data);
-    
-    const transitAspects = calculateTransitAspects(data.planets, birthChart.natal_planets);
-    const personalizedMessage = generatePersonalizedTransitMessage(
-      transitAspects, 
-      worldActivation.dominantWorld
-    );
-    
-    setTransitReading({
-      aspects: transitAspects,
-      message: personalizedMessage,
-      natalInfo: {
-        sunSign: birthChart.natal_planets.Sun.sign,
-        risingSign: birthChart.ascendant_sign,
-        moonSign: birthChart.natal_planets.Moon.sign
-      }
-    });
-    
-    // Optionally save to history
-    saveTransitReading({
-      birth_chart_id: birthChart.id!,
-      transit_date: new Date().toISOString(),
-      transit_planets: data.planets,
-      transit_aspects: transitAspects,
-      personalized_message: personalizedMessage
-    }).catch(err => console.error('Error saving transit reading:', err));
-  }
-}, [data, birthChart]);
-
-  const kabbalisticReading = generateKabbalisticReading(data);
-  const worldActivation = calculateWorldActivation(data);
-  const divineMessage = generateDivineMessageFromSky(data, kabbalisticReading, worldActivation);
-
-  const treeData: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
-    Object.entries(data.planets).forEach(([planet, planetData]) => {
-      const sephirah = PLANETARY_SEPHIROT[planet];
-      const worldData = determineWorld(planet, planetData.sign, planetData.house);
-      if (sephirah) {
-        treeData[planet] = {
-          sign: planetData.sign,
-          house: planetData.house,
-          sephirah: sephirah.name,
-          world: worldData.primary
-        };
-      }
-    });
+  if (!data || !kabbalisticReading || !worldActivation || !divineMessage) return null;
 
   return (
     <div className="max-w-2xl mx-auto mt-6">
@@ -539,56 +546,50 @@ const KabbalisticCurrentSky: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="kabbalistic" className="space-y-4">
-
-              <>
-                {/* Four Worlds Overview */}
-                <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
-                  <CardHeader>
-                    <CardTitle className="text-center text-lg font-serif">
-                      The Four Worlds Today
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-center text-purple-900 dark:text-purple-100">
-                      {worldActivation.interpretation}
-                    </p>
-                    
-                    {/* World percentage bars */}
-                    <div className="space-y-2">
-                      {(Object.entries(worldActivation.worldPercentages) as [World, number][])
-                        .sort((a, b) => b[1] - a[1])
-                        .map(([world, percentage]) => {
-                          const worldInfo = FOUR_WORLDS[world];
-                          return (
-                            <div key={world} className="space-y-1">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="font-medium text-black">
-                                  {worldInfo.name} {worldInfo.hebrew}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  {Math.round(percentage)}%
-                                </span>
-                              </div>
-                              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full transition-all duration-500"
-                                  style={{ 
-                                    width: `${percentage}%`,
-                                    backgroundColor: worldInfo.color
-                                  }}
-                                />
-                              </div>
-                              <p className="text-xs text-muted-foreground italic">
-                                {worldInfo.realm} - {worldInfo.meaning}
-                              </p>
+              <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
+                <CardHeader>
+                  <CardTitle className="text-center text-lg font-serif">
+                    The Four Worlds Today
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-center text-purple-900 dark:text-purple-100">
+                    {worldActivation.interpretation}
+                  </p>
+                  
+                  <div className="space-y-2">
+                    {(Object.entries(worldActivation.worldPercentages) as [World, number][])
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([world, percentage]) => {
+                        const worldInfo = FOUR_WORLDS[world];
+                        return (
+                          <div key={world} className="space-y-1">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium text-black">
+                                {worldInfo.name} {worldInfo.hebrew}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {Math.round(percentage)}%
+                              </span>
                             </div>
-                          );
-                        })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-
+                            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full transition-all duration-500"
+                                style={{ 
+                                  width: `${percentage}%`,
+                                  backgroundColor: worldInfo.color
+                                }}
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground italic">
+                              {worldInfo.realm} - {worldInfo.meaning}
+                            </p>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                 <p className="text-sm text-center text-purple-900 dark:text-purple-100 font-medium">
@@ -599,12 +600,10 @@ const KabbalisticCurrentSky: React.FC = () => {
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-black">Active Sephiroth</h3>
                 {kabbalisticReading.sephirotDetails.map(({ planet, sephirah, sign, house }) => {
-                  // Import the data object to get actual planet positions
                   const planetData = data?.planets[planet];
                   if (!planetData) return null;
                   
                   const contextualInfluence = synthesizeInfluence(planet, planetData.sign, planetData.house);
-
                   const worldData = determineWorld(planet, planetData.sign, planetData.house);
                   const primaryWorld = FOUR_WORLDS[worldData.primary];
                   
