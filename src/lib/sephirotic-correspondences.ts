@@ -341,7 +341,193 @@ export const getSephiroticInfluence = (planet: string, sign: string, house: stri
   };
 };
 
-// Generate daily Kabbalistic interpretation
+// Four Worlds Framework
+export type World = 'Atziluth' | 'Briah' | 'Yetzirah' | 'Assiah';
+
+export interface WorldDescription {
+  name: World;
+  hebrew: string;
+  meaning: string;
+  realm: string;
+  description: string;
+  color: string;
+}
+
+export const FOUR_WORLDS: Record<World, WorldDescription> = {
+  Atziluth: {
+    name: 'Atziluth',
+    hebrew: 'אֲצִילוּת',
+    meaning: 'Emanation / Nearness',
+    realm: 'Divine / Archetypal',
+    description: 'The world of pure spiritual essence, divine will, and archetypal fire. Where intention exists before form.',
+    color: '#FFD700' // Gold
+  },
+  Briah: {
+    name: 'Briah',
+    hebrew: 'בְּרִיאָה',
+    meaning: 'Creation',
+    realm: 'Archangelic / Mental',
+    description: 'The world of intellect, ideas, and pure thought. Where divine concepts take their first mental form.',
+    color: '#87CEEB' // Sky blue
+  },
+  Yetzirah: {
+    name: 'Yetzirah',
+    hebrew: 'יְצִירָה',
+    meaning: 'Formation',
+    realm: 'Angelic / Emotional',
+    description: 'The world of emotions, images, and astral forms. Where thoughts become feelings and psychic structures.',
+    color: '#9370DB' // Purple
+  },
+  Assiah: {
+    name: 'Assiah',
+    hebrew: 'עֲשִׂיָּה',
+    meaning: 'Action / Making',
+    realm: 'Material / Physical',
+    description: 'The world of physical manifestation and concrete action. Where energy becomes matter and deed.',
+    color: '#8B4513' // Earth brown
+  }
+};
+
+// Elemental correspondences to worlds
+const ELEMENT_TO_WORLD: Record<string, World> = {
+  Fire: 'Atziluth',    // Pure spiritual will
+  Water: 'Briah',      // Mental/emotional flow
+  Air: 'Yetzirah',     // Formation and movement
+  Earth: 'Assiah'      // Physical manifestation
+};
+
+// Get element for zodiac sign
+export const getSignElement = (sign: string): string => {
+  const fireSign = ['Aries', 'Leo', 'Sagittarius'];
+  const waterSigns = ['Cancer', 'Scorpio', 'Pisces'];
+  const airSigns = ['Gemini', 'Libra', 'Aquarius'];
+  const earthSigns = ['Taurus', 'Virgo', 'Capricorn'];
+  
+  if (fireSign.includes(sign)) return 'Fire';
+  if (waterSigns.includes(sign)) return 'Water';
+  if (airSigns.includes(sign)) return 'Air';
+  if (earthSigns.includes(sign)) return 'Earth';
+  return 'Air'; // default
+};
+
+// Determine which world a planetary position activates
+export const determineWorld = (
+  planet: string, 
+  sign: string, 
+  house: string
+): { primary: World; influences: World[]; strength: number } => {
+  const houseNumber = parseInt(house.replace('House ', ''));
+  const element = getSignElement(sign);
+  
+  // Weight system: each factor contributes points
+  const worldScores: Record<World, number> = {
+    Atziluth: 0,
+    Briah: 0,
+    Yetzirah: 0,
+    Assiah: 0
+  };
+
+  // 1. PLANETARY NATURE (strongest weight = 3 points)
+  const planetaryWorld: Record<string, World> = {
+    Neptune: 'Atziluth',   // Pure transcendence
+    Uranus: 'Atziluth',    // Revolutionary spirit
+    Pluto: 'Atziluth',     // Deep transformation
+    Saturn: 'Briah',       // Structured thought
+    Jupiter: 'Briah',      // Expansive wisdom
+    Mars: 'Yetzirah',      // Emotional/astral will
+    Venus: 'Yetzirah',     // Desire and feeling
+    Mercury: 'Yetzirah',   // Mental formation
+    Sun: 'Yetzirah',       // Conscious ego
+    Moon: 'Assiah'         // Physical/emotional body
+  };
+  
+  if (planetaryWorld[planet]) {
+    worldScores[planetaryWorld[planet]] += 3;
+  }
+
+  // 2. ELEMENTAL NATURE (medium weight = 2 points)
+  const elementWorld = ELEMENT_TO_WORLD[element];
+  if (elementWorld) {
+    worldScores[elementWorld] += 2;
+  }
+
+  // 3. HOUSE PLACEMENT (light weight = 1 point)
+  // Houses 1-3: Physical body, resources, communication = Assiah
+  // Houses 4-6: Home, creativity, service = Yetzirah  
+  // Houses 7-9: Relationships, transformation, philosophy = Briah
+  // Houses 10-12: Career, community, spirituality = Atziluth
+  if (houseNumber >= 1 && houseNumber <= 3) worldScores.Assiah += 1;
+  if (houseNumber >= 4 && houseNumber <= 6) worldScores.Yetzirah += 1;
+  if (houseNumber >= 7 && houseNumber <= 9) worldScores.Briah += 1;
+  if (houseNumber >= 10 && houseNumber <= 12) worldScores.Atziluth += 1;
+
+  // Find primary world (highest score)
+  const sortedWorlds = (Object.entries(worldScores) as [World, number][])
+    .sort((a, b) => b[1] - a[1]);
+  
+  const primaryWorld = sortedWorlds[0][0];
+  const primaryStrength = sortedWorlds[0][1];
+  
+  // Secondary influences (any world with score > 0)
+  const influences = sortedWorlds
+    .filter(([_, score]) => score > 0)
+    .map(([world, _]) => world);
+
+  return {
+    primary: primaryWorld,
+    influences,
+    strength: primaryStrength / 6 // Normalize to 0-1 (max possible = 6)
+  };
+};
+
+// Calculate overall world activation for current sky
+export const calculateWorldActivation = (skyData: any): {
+  worldScores: Record<World, number>;
+  dominantWorld: World;
+  worldPercentages: Record<World, number>;
+  interpretation: string;
+} => {
+  const worldScores: Record<World, number> = {
+    Atziluth: 0,
+    Briah: 0,
+    Yetzirah: 0,
+    Assiah: 0
+  };
+
+  let totalStrength = 0;
+
+  // Analyze each planet
+  Object.entries(skyData.planets).forEach(([planet, data]: [string, any]) => {
+    const worldData = determineWorld(planet, data.sign, data.house);
+    worldScores[worldData.primary] += worldData.strength;
+    totalStrength += worldData.strength;
+  });
+
+  // Calculate percentages
+  const worldPercentages: Record<World, number> = {
+    Atziluth: (worldScores.Atziluth / totalStrength) * 100,
+    Briah: (worldScores.Briah / totalStrength) * 100,
+    Yetzirah: (worldScores.Yetzirah / totalStrength) * 100,
+    Assiah: (worldScores.Assiah / totalStrength) * 100
+  };
+
+  // Find dominant world
+  const dominantWorld = (Object.entries(worldScores) as [World, number][])
+    .sort((a, b) => b[1] - a[1])[0][0];
+
+  // Generate interpretation
+  const worldDesc = FOUR_WORLDS[dominantWorld];
+  const percentage = Math.round(worldPercentages[dominantWorld]);
+  
+  const interpretation = `The ${worldDesc.name} (${worldDesc.hebrew}) is most illuminated today at ${percentage}%, emphasizing ${worldDesc.realm.toLowerCase()} energies. ${worldDesc.description}`;
+
+  return {
+    worldScores,
+    dominantWorld,
+    worldPercentages,
+    interpretation
+  };
+};
 export const generateKabbalisticReading = (skyData: any) => {
   const activeSephirot = new Set<string>();
   const influences: string[] = [];

@@ -13,7 +13,11 @@ import {
   ZODIAC_PATHS, 
   HOUSE_SEPHIROT,
   generateKabbalisticReading,
-  synthesizeInfluence
+  synthesizeInfluence,
+  calculateWorldActivation,
+  determineWorld,
+  FOUR_WORLDS,
+  type World
 } from '@/lib/sephirotic-correspondences';
 
 interface PlanetData {
