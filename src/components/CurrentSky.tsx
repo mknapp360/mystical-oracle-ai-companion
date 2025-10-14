@@ -387,6 +387,8 @@ const KabbalisticCurrentSky: React.FC = () => {
   // Generate Kabbalistic interpretation
   const kabbalisticReading = generateKabbalisticReading(data);
 
+  const worldActivation = calculateWorldActivation(data);
+
   return (
     <div className="max-w-2xl mx-auto mt-6">
       <Card className="border-border shadow-lg bg-card relative">
@@ -452,6 +454,59 @@ const KabbalisticCurrentSky: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="kabbalistic" className="space-y-4">
+
+              const worldActivation = calculateWorldActivation(data);
+
+              <>
+                {/* Four Worlds Overview */}
+                <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
+                  <CardHeader>
+                    <CardTitle className="text-center text-lg font-serif">
+                      The Four Worlds Today
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-center text-purple-900 dark:text-purple-100">
+                      {worldActivation.interpretation}
+                    </p>
+                    
+                    {/* World percentage bars */}
+                    <div className="space-y-2">
+                      {(Object.entries(worldActivation.worldPercentages) as [World, number][])
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([world, percentage]) => {
+                          const worldInfo = FOUR_WORLDS[world];
+                          return (
+                            <div key={world} className="space-y-1">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="font-medium text-black">
+                                  {worldInfo.name} {worldInfo.hebrew}
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {Math.round(percentage)}%
+                                </span>
+                              </div>
+                              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full transition-all duration-500"
+                                  style={{ 
+                                    width: `${percentage}%`,
+                                    backgroundColor: worldInfo.color
+                                  }}
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground italic">
+                                {worldInfo.realm} - {worldInfo.meaning}
+                              </p>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+
+
               <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                 <p className="text-sm text-center text-purple-900 dark:text-purple-100 font-medium">
                   {kabbalisticReading.treeActivation}
@@ -466,6 +521,9 @@ const KabbalisticCurrentSky: React.FC = () => {
                   if (!planetData) return null;
                   
                   const contextualInfluence = synthesizeInfluence(planet, planetData.sign, planetData.house);
+
+                  const worldData = determineWorld(planet, planetData.sign, planetData.house);
+                  const primaryWorld = FOUR_WORLDS[worldData.primary];
                   
                   return (
                     <Card key={planet} className="border-l-4" style={{ borderLeftColor: sephirah.color }}>
@@ -476,6 +534,16 @@ const KabbalisticCurrentSky: React.FC = () => {
                               <span className="font-bold text-black">{planet}</span>
                               <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
                                 {sephirah.name} {sephirah.hebrew}
+                              </span>
+                              <span 
+                                className="text-xs px-2 py-1 rounded font-medium"
+                                style={{ 
+                                  backgroundColor: `${primaryWorld.color}20`,
+                                  color: primaryWorld.color,
+                                  border: `1px solid ${primaryWorld.color}`
+                                }}
+                              >
+                                {primaryWorld.name} {primaryWorld.hebrew}
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">
@@ -488,6 +556,9 @@ const KabbalisticCurrentSky: React.FC = () => {
                               Through <strong>{planetData.sign}</strong> in <strong>{planetData.house}</strong>
                             </p>
                           </div>
+                          <p className="text-xs text-purple-700 dark:text-purple-300 mt-1 italic">
+                            Manifesting in {primaryWorld.realm.toLowerCase()}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
