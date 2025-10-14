@@ -421,12 +421,13 @@ const KabbalisticCurrentSky: React.FC = () => {
   if (!data) return null;
 
   // Generate Kabbalistic interpretation
-  const kabbalisticReading = generateKabbalisticReading(data);
-
-  const worldActivation = calculateWorldActivation(data);
 
   useEffect(() => {
-  if (data && birthChart && kabbalisticReading && worldActivation) {
+  if (data && birthChart) {
+    // Calculate these INSIDE the useEffect
+    const kabbalisticReading = generateKabbalisticReading(data);
+    const worldActivation = calculateWorldActivation(data);
+    
     const transitAspects = calculateTransitAspects(data.planets, birthChart.natal_planets);
     const personalizedMessage = generatePersonalizedTransitMessage(
       transitAspects, 
@@ -452,8 +453,10 @@ const KabbalisticCurrentSky: React.FC = () => {
       personalized_message: personalizedMessage
     }).catch(err => console.error('Error saving transit reading:', err));
   }
-}, [data, birthChart, kabbalisticReading, worldActivation]);
+}, [data, birthChart]);
 
+  const kabbalisticReading = generateKabbalisticReading(data);
+  const worldActivation = calculateWorldActivation(data);
   const divineMessage = generateDivineMessageFromSky(data, kabbalisticReading, worldActivation);
 
   const treeData: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
