@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import * as Astronomy from 'astronomy-engine';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,100 +48,63 @@ const KabbalisticCurrentSky: React.FC = () => {
   const [locationName, setLocationName] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("astronomical");
 
-  // Convert ecliptic longitude to zodiac sign and degree
+  // [All the calculation functions from your original CurrentSky.tsx]
+  // Copy these exactly: eclipticToZodiac, calculateAscendant, calculateMidheaven, 
+  // calculateHouseCusps, calculateHouse, getMoonPhase, calculateSkyData, etc.
+
   const eclipticToZodiac = (longitude: number): { sign: string; degree: number } => {
-    // Normalize longitude to 0-360
     const normalizedLon = ((longitude % 360) + 360) % 360;
-    
-    // Each sign is 30 degrees
     const signIndex = Math.floor(normalizedLon / 30);
     const degree = normalizedLon % 30;
-    
-    return {
-      sign: ZODIAC_SIGNS[signIndex],
-      degree: degree
-    };
+    return { sign: ZODIAC_SIGNS[signIndex], degree: degree };
   };
 
-  // Calculate Ascendant (Rising Sign) using sidereal time
   const calculateAscendant = (lat: number, lon: number, date: Date): number => {
-    // Get sidereal time
     const time = Astronomy.MakeTime(date);
     const gast = Astronomy.SiderealTime(time);
-    
-    // Local sidereal time = GAST + longitude
-    const lst = (gast + lon / 15.0) % 24.0; // Convert to hours
-    
-    // Convert LST to degrees
+    const lst = (gast + lon / 15.0) % 24.0;
     const lstDegrees = lst * 15.0;
-    
-    // Calculate ascendant using latitude
-    // This is a simplified calculation - proper Placidus requires obliquity
     const latRad = (lat * Math.PI) / 180;
     const lstRad = (lstDegrees * Math.PI) / 180;
-    
-    // Ascendant formula
     const ascRad = Math.atan2(Math.cos(lstRad), -(Math.sin(lstRad) * Math.cos(latRad)));
     let ascDegrees = (ascRad * 180) / Math.PI;
-    
-    // Normalize to 0-360
     ascDegrees = ((ascDegrees % 360) + 360) % 360;
-    
     return ascDegrees;
   };
 
-  // Calculate Midheaven (MC) - 10th house cusp
   const calculateMidheaven = (date: Date, lon: number): number => {
     const time = Astronomy.MakeTime(date);
     const gast = Astronomy.SiderealTime(time);
-    
-    // MC is essentially the LST in degrees
     const lst = (gast + lon / 15.0) % 24.0;
     const mc = (lst * 15.0) % 360;
-    
     return mc;
   };
 
-  // Calculate Placidus house cusps
   const calculateHouseCusps = (ascendant: number, mc: number, lat: number): number[] => {
     const cusps = new Array(12);
-    
-    // Key cusps that we know
-    cusps[0] = ascendant;  // 1st house (Ascendant)
-    cusps[9] = mc;         // 10th house (Midheaven)
-    
-    // 7th house is opposite ascendant (Descendant)
+    cusps[0] = ascendant;
+    cusps[9] = mc;
     cusps[6] = (ascendant + 180) % 360;
-    
-    // 4th house is opposite MC (IC - Imum Coeli)
     cusps[3] = (mc + 180) % 360;
     
-    // Calculate intermediate cusps using Placidus time-based method
-    // Houses 11, 12, 2, 3
-    const latRad = (lat * Math.PI) / 180;
-    
-    // Houses 11 and 12 (between MC and Ascendant)
     for (let i = 11; i <= 12; i++) {
-      const fraction = (i - 9) / 3; // Divide the quadrant into thirds
+      const fraction = (i - 9) / 3;
       const diff = ((ascendant - mc + 360) % 360);
       cusps[i - 1] = (mc + diff * fraction) % 360;
     }
     
-    // Houses 2 and 3 (between Ascendant and IC)
     for (let i = 2; i <= 3; i++) {
       const fraction = (i - 1) / 3;
       const diff = ((cusps[3] - ascendant + 360) % 360);
       cusps[i - 1] = (ascendant + diff * fraction) % 360;
     }
     
-    // Houses 5 and 6 (between IC and Descendant)
     for (let i = 5; i <= 6; i++) {
       const fraction = (i - 4) / 3;
       const diff = ((cusps[6] - cusps[3] + 360) % 360);
       cusps[i - 1] = (cusps[3] + diff * fraction) % 360;
     }
     
-    // Houses 8 and 9 (between Descendant and MC)
     for (let i = 8; i <= 9; i++) {
       const fraction = (i - 7) / 3;
       const diff = ((mc - cusps[6] + 360) % 360);
@@ -152,33 +114,27 @@ const KabbalisticCurrentSky: React.FC = () => {
     return cusps;
   };
 
-  // Calculate which house a planet is in using Placidus cusps
   const calculateHouse = (planetLon: number, houseCusps: number[]): string => {
-    // Normalize planet longitude
     const normalizedLon = ((planetLon % 360) + 360) % 360;
     
-    // Find which house the planet falls into
     for (let i = 0; i < 12; i++) {
       const currentCusp = houseCusps[i];
       const nextCusp = houseCusps[(i + 1) % 12];
       
-      // Handle wrap-around at 360/0 degrees
       if (nextCusp > currentCusp) {
         if (normalizedLon >= currentCusp && normalizedLon < nextCusp) {
           return `House ${i + 1}`;
         }
       } else {
-        // Cusp wraps around 0
         if (normalizedLon >= currentCusp || normalizedLon < nextCusp) {
           return `House ${i + 1}`;
         }
       }
     }
     
-    return 'House 1'; // Fallback
+    return 'House 1';
   };
 
-  // Get moon phase name
   const getMoonPhase = (illumination: number): string => {
     if (illumination < 0.05) return 'New Moon';
     if (illumination < 0.25) return 'Waxing Crescent';
@@ -190,33 +146,27 @@ const KabbalisticCurrentSky: React.FC = () => {
     return 'Waning Crescent';
   };
 
-  // Calculate planetary positions
   const calculateSkyData = (lat: number, lon: number, location: string) => {
     try {
       const observer = new Astronomy.Observer(lat, lon, 0);
       const now = new Date();
 
-      // Calculate Ascendant and Midheaven for proper house system
       const ascendant = calculateAscendant(lat, lon, now);
       const mc = calculateMidheaven(now, lon);
       const houseCusps = calculateHouseCusps(ascendant, mc, lat);
 
-      // Calculate Sun position
       const sunVector = Astronomy.GeoVector(Astronomy.Body.Sun, now, false);
       const sunEcliptic = Astronomy.Ecliptic(sunVector);
       const sunZodiac = eclipticToZodiac(sunEcliptic.elon);
 
-      // Calculate Moon
       const moonVector = Astronomy.GeoVector(Astronomy.Body.Moon, now, true);
       const moonEcliptic = Astronomy.Ecliptic(moonVector);
       const moonZodiac = eclipticToZodiac(moonEcliptic.elon);
       const moonIllumination = Astronomy.Illumination(Astronomy.Body.Moon, now);
 
-      // Calculate rise/set times
       const sunrise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, 1, now, 1, 0);
       const sunset = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, -1, now, 1, 0);
 
-      // Calculate all planets
       const planetBodies = [
         Astronomy.Body.Mercury,
         Astronomy.Body.Venus,
@@ -229,28 +179,23 @@ const KabbalisticCurrentSky: React.FC = () => {
       ];
       const planets: { [key: string]: PlanetData } = {};
 
-      // Add Sun
       planets['Sun'] = {
         sign: sunZodiac.sign,
         degree_in_sign: sunZodiac.degree,
         house: calculateHouse(sunEcliptic.elon, houseCusps)
       };
 
-      // Add Moon
       planets['Moon'] = {
         sign: moonZodiac.sign,
         degree_in_sign: moonZodiac.degree,
         house: calculateHouse(moonEcliptic.elon, houseCusps)
       };
 
-      // Calculate other planets
       planetBodies.forEach(body => {
         try {
           const geoVector = Astronomy.GeoVector(body, now, true);
           const ecliptic = Astronomy.Ecliptic(geoVector);
           const zodiac = eclipticToZodiac(ecliptic.elon);
-
-          // Get planet name from body enum
           const planetName = Astronomy.Body[body];
 
           planets[planetName] = {
@@ -283,7 +228,6 @@ const KabbalisticCurrentSky: React.FC = () => {
     }
   };
 
-  // Extract location name
   const extractLocationName = (geocodeResponse: any): string => {
     const { address } = geocodeResponse;
     if (!address) return geocodeResponse.display_name;
@@ -302,7 +246,6 @@ const KabbalisticCurrentSky: React.FC = () => {
     return parts.join(', ') || geocodeResponse.display_name;
   };
 
-  // Fetch location name from coordinates
   const fetchLocationName = async (lat: number, lon: number) => {
     try {
       const res = await fetch(
@@ -321,19 +264,15 @@ const KabbalisticCurrentSky: React.FC = () => {
       const json = await res.json();
       const location = extractLocationName(json);
       setLocationName(location);
-      
-      // Calculate sky data with location
       calculateSkyData(lat, lon, location);
     } catch (err) {
       console.error("Location fetch error:", err);
-      // Use coordinates as fallback
       const location = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
       setLocationName(location);
       calculateSkyData(lat, lon, location);
     }
   };
 
-  // Check geolocation permission
   const checkLocationPermission = async (): Promise<boolean> => {
     if ('permissions' in navigator) {
       try {
@@ -346,7 +285,6 @@ const KabbalisticCurrentSky: React.FC = () => {
     return true;
   };
 
-  // Request geolocation
   const requestLocation = async () => {
     setLoading(true);
     setError(null);
@@ -396,20 +334,17 @@ const KabbalisticCurrentSky: React.FC = () => {
     );
   };
 
-  // Manual refresh
   const handleRefresh = () => {
     requestLocation();
   };
 
-  // Initial load
   useEffect(() => {
     requestLocation();
   }, []);
 
-  // Loading skeleton
   if (loading) {
     return (
-      <div className="p-4 border rounded-xl shadow-lg bg-card max-w-xl mx-auto mt-6">
+      <div className="p-4 border rounded-xl shadow-lg bg-card max-w-2xl mx-auto mt-6">
         <Skeleton className="h-6 w-3/4 mx-auto mb-4" />
         <Skeleton className="h-6 w-2/3 mx-auto mb-6" />
         <div className="space-y-2 mb-6">
@@ -417,20 +352,13 @@ const KabbalisticCurrentSky: React.FC = () => {
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
         </div>
-        <Skeleton className="h-5 w-1/3 mb-2" />
-        <div className="grid grid-cols-2 gap-2">
-          {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="h-8 w-full" />
-          ))}
-        </div>
       </div>
     );
   }
 
-  // Error state with retry
   if (error) {
     return (
-      <div className="max-w-xl mx-auto mt-6">
+      <div className="max-w-2xl mx-auto mt-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
@@ -450,9 +378,9 @@ const KabbalisticCurrentSky: React.FC = () => {
     );
   }
 
-  // No data fallback
   if (!data) return null;
 
+  // Generate Kabbalistic interpretation
   const kabbalisticReading = generateKabbalisticReading(data);
 
   return (
@@ -528,31 +456,39 @@ const KabbalisticCurrentSky: React.FC = () => {
 
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-black">Active Sephiroth</h3>
-                {kabbalisticReading.sephirotDetails.map(({ planet, sephirah, sign, house }) => (
-                  <Card key={planet} className="border-l-4" style={{ borderLeftColor: sephirah.color }}>
-                    <CardContent className="pt-4">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-black">{planet}</span>
-                            <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
-                              {sephirah.name} {sephirah.hebrew}
-                            </span>
+                {kabbalisticReading.sephirotDetails.map(({ planet, sephirah, sign, house }) => {
+                  // Import the data object to get actual planet positions
+                  const planetData = data?.planets[planet];
+                  if (!planetData) return null;
+                  
+                  const contextualInfluence = synthesizeInfluence(planet, planetData.sign, planetData.house);
+                  
+                  return (
+                    <Card key={planet} className="border-l-4" style={{ borderLeftColor: sephirah.color }}>
+                      <CardContent className="pt-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-black">{planet}</span>
+                              <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
+                                {sephirah.name} {sephirah.hebrew}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              <em>{sephirah.meaning}</em> - {sephirah.archetype}
+                            </p>
+                            <p className="text-sm text-black leading-relaxed">
+                              {contextualInfluence}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Through <strong>{planetData.sign}</strong> in <strong>{planetData.house}</strong>
+                            </p>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            <em>{sephirah.meaning}</em> - {sephirah.archetype}
-                          </p>
-                          <p className="text-sm text-black">
-                            {sephirah.influence}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Expressing through <strong>{sign}</strong> in <strong>{house}</strong>
-                          </p>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
 
               <div className="mt-4 p-3 bg-muted/30 rounded-lg">
