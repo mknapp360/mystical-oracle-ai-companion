@@ -455,8 +455,6 @@ const KabbalisticCurrentSky: React.FC = () => {
 
             <TabsContent value="kabbalistic" className="space-y-4">
 
-              const worldActivation = calculateWorldActivation(data);
-
               <>
                 {/* Four Worlds Overview */}
                 <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
