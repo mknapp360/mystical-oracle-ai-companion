@@ -7,6 +7,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TreeOfLifeVisualization } from '@/components/TreeOfLifeVisualization';
+import { DivineMessageDisplay } from '@/components/ShefaDisplay';
+import { generateDivineMessageFromSky } from '@/lib/shefa-calculator';
+import { Scroll } from 'lucide-react';
 
 // Import the Sephirotic correspondences
 import { 
@@ -390,6 +393,8 @@ const KabbalisticCurrentSky: React.FC = () => {
 
   const worldActivation = calculateWorldActivation(data);
 
+  const divineMessage = generateDivineMessageFromSky(data, kabbalisticReading, worldActivation);
+
   const treeData: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
     Object.entries(data.planets).forEach(([planet, planetData]) => {
       const sephirah = PLANETARY_SEPHIROT[planet];
@@ -429,7 +434,7 @@ const KabbalisticCurrentSky: React.FC = () => {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
               <TabsTrigger value="kabbalistic">
                 <Sparkles className="w-4 h-4 mr-2" />
@@ -437,6 +442,10 @@ const KabbalisticCurrentSky: React.FC = () => {
               </TabsTrigger>
               <TabsTrigger value="tree">
                 Tree of Life
+              </TabsTrigger>
+              <TabsTrigger value="message">
+                <Scroll className="w-4 h-4 mr-2" />
+                Message
               </TabsTrigger>
             </TabsList>
 
@@ -591,6 +600,10 @@ const KabbalisticCurrentSky: React.FC = () => {
 
             <TabsContent value="tree" className="space-y-4">
               <TreeOfLifeVisualization activePlanets={treeData} />
+            </TabsContent>
+
+            <TabsContent value="message" className="space-y-4">
+              <DivineMessageDisplay message={divineMessage} />
             </TabsContent>
           </Tabs>
 
