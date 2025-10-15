@@ -25,46 +25,62 @@ const TIMEZONE_OFFSETS: Record<string, number> = {
 /**
  * CRITICAL FIX: Determine if date is in DST for US timezones
  */
-function isDST(date: Date): boolean {
-  const month = date.getMonth();
-  // Simplified: March (2) through October (10)
-  return month >= 2 && month <= 10;
+function isDST(month: number, day: number, year: number): boolean {
+  // More accurate DST calculation for US
+  // DST starts 2nd Sunday in March, ends 1st Sunday in November
+  
+  if (month < 2 || month > 10) return false; // Jan, Feb, Dec = no DST
+  if (month > 2 && month < 10) return true;  // Apr-Oct = DST
+  
+  // For March and November, need to check the specific date
+  // Simplified: assume DST for March 10+ and November 1-6
+  if (month === 2) return day >= 10; // March
+  if (month === 10) return day <= 6;  // November
+  
+  return false;
 }
 
 /**
- * CRITICAL FIX: Convert local time to UTC
+ * CRITICAL FIX: Parse date/time components and create UTC date
+ * This avoids browser timezone interpretation issues
  */
-function localToUTC(localDate: Date, timezoneString: string): Date {
-  let offset: number;
+function parseLocalDateTime(dateStr: string, timeStr: string, timezone: string): Date {
+  // Parse components
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hours, minutes] = timeStr.split(':').map(Number);
   
-  if (timezoneString.includes('E')) {
-    offset = isDST(localDate) ? -4 : -5; // Eastern
-  } else if (timezoneString.includes('C')) {
-    offset = isDST(localDate) ? -5 : -6; // Central
-  } else if (timezoneString.includes('M')) {
-    offset = isDST(localDate) ? -6 : -7; // Mountain
-  } else if (timezoneString.includes('P')) {
-    offset = isDST(localDate) ? -7 : -8; // Pacific
+  // Determine timezone offset
+  let offset: number;
+  if (timezone.includes('E')) {
+    offset = isDST(month - 1, day, year) ? -4 : -5; // Eastern
+  } else if (timezone.includes('C')) {
+    offset = isDST(month - 1, day, year) ? -5 : -6; // Central
+  } else if (timezone.includes('M')) {
+    offset = isDST(month - 1, day, year) ? -6 : -7; // Mountain
+  } else if (timezone.includes('P')) {
+    offset = isDST(month - 1, day, year) ? -7 : -8; // Pacific
   } else {
-    offset = TIMEZONE_OFFSETS[timezoneString] || 0;
+    offset = TIMEZONE_OFFSETS[timezone] || 0;
   }
   
-  const utcTime = localDate.getTime() - (offset * 60 * 60 * 1000);
-  return new Date(utcTime);
+  // Create UTC date directly using Date.UTC()
+  // This avoids browser timezone interpretation
+  const utcMs = Date.UTC(year, month - 1, day, hours, minutes, 0);
+  
+  // Adjust for the timezone offset
+  const adjustedMs = utcMs - (offset * 60 * 60 * 1000);
+  
+  return new Date(adjustedMs);
 }
 
 /**
- * CRITICAL FIX: Proper ascendant calculation with timezone handling
+ * CRITICAL FIX: Proper ascendant calculation
  */
 function calculateAscendantCorrected(
-  localDateTime: Date,
+  utcDateTime: Date,
   latitude: number,
-  longitude: number,
-  timezone: string
+  longitude: number
 ): { ascendant: number; mc: number; lst: number } {
-  
-  // Convert to UTC
-  const utcDateTime = localToUTC(localDateTime, timezone);
   
   // Calculate Julian Date
   const jd = (utcDateTime.getTime() / 86400000) + 2440587.5;
@@ -152,34 +168,40 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
     setSuccess(false);
 
     try {
-      const localDateTime = new Date(`${formData.birthDate}T${formData.birthTime}:00`);
       const lat = parseFloat(formData.latitude);
       const lon = parseFloat(formData.longitude);
 
-      console.log('Calculating chart for:', {
-        localTime: localDateTime.toISOString(),
-        lat, lon,
-        timezone: formData.timezone
-      });
-
-      // CORRECTED: Use proper timezone-aware calculation
-      const { ascendant: ascDegrees, mc } = calculateAscendantCorrected(
-        localDateTime,
-        lat,
-        lon,
+      // CRITICAL FIX: Parse datetime without browser timezone interference
+      const utcDateTime = parseLocalDateTime(
+        formData.birthDate,
+        formData.birthTime,
         formData.timezone
       );
 
+      console.log('Calculating chart for:', {
+        date: formData.birthDate,
+        time: formData.birthTime,
+        timezone: formData.timezone,
+        utcDateTime: utcDateTime.toISOString(),
+        lat, lon
+      });
+
+      // Calculate ascendant and MC
+      const { ascendant: ascDegrees, mc } = calculateAscendantCorrected(
+        utcDateTime,
+        lat,
+        lon
+      );
+
       console.log('Calculated:', {
-        ascendant: ascDegrees,
-        mc: mc
+        ascendant: ascDegrees.toFixed(2),
+        mc: mc.toFixed(2)
       });
 
       // Calculate house cusps
       const houseCusps = calculateHouseCusps(ascDegrees, mc, lat);
 
       // Calculate natal planets using UTC time
-      const utcDateTime = localToUTC(localDateTime, formData.timezone);
       const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
       const natalPlanets: any = {};
 
