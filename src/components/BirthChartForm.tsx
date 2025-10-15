@@ -195,8 +195,12 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
   };
 
   const calculateBirthChart = async () => {
+    console.log('=== CALCULATE BIRTH CHART CLICKED ===');
+    console.log('Form data:', formData);
+    
     if (!formData.birthDate || !formData.birthTime || !formData.latitude || !formData.longitude) {
       setError('Please fill in all required fields');
+      console.error('Missing required fields');
       return;
     }
 
@@ -284,15 +288,34 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
       };
 
       setSaving(true);
+      console.log('Attempting to save chart data:', {
+        ascendant_sign: chartData.ascendant_sign,
+        ascendant_degree: chartData.ascendant_degree,
+        birth_date_time: chartData.birth_date_time,
+        birth_timezone: chartData.birth_timezone
+      });
+      
       const savedChart = await saveBirthChart(chartData);
+      
+      console.log('Chart saved successfully! Returned data:', {
+        ascendant_sign: savedChart.ascendant_sign,
+        ascendant_degree: savedChart.ascendant_degree,
+        id: savedChart.id
+      });
       
       onSave(savedChart);
       setSuccess(true);
       setCalculating(false);
       setSaving(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Birth chart calculation error:', err);
-      setError('Failed to calculate or save birth chart. Please check your inputs.');
+      console.error('Error details:', {
+        message: err.message,
+        code: err.code,
+        details: err.details,
+        hint: err.hint
+      });
+      setError(`Failed to save: ${err.message || 'Unknown error'}`);
       setCalculating(false);
       setSaving(false);
     }
