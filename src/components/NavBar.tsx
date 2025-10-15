@@ -1,4 +1,4 @@
-import { Home, Book, BookOpen, History, LogIn, LogOut, Menu } from 'lucide-react';
+import { Home, Book, BookOpen, History, LogIn, LogOut, Menu, Sparkles } from 'lucide-react';
 import { logout, loginWithGoogle } from './Auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -19,6 +19,11 @@ export const NavBar = ({ user }: NavBarProps) => {
           <Link to="/" className="text-white hover:text-white flex flex-col items-center">
             <Home size={20} />
             <span className="text-xs">Home</span>
+          </Link>
+
+          <Link to="/signature" className="text-white hover:text-white flex flex-col items-center">
+            <Sparkles size={20} />
+            <span className="text-xs">Signature</span>
           </Link>
 
           <Link to="/library" className="text-white hover:text-white flex flex-col items-center">

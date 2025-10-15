@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/Layout';
 import Index from "./pages/Index";
+import EnergeticSignaturePage from "./pages/EnergeticSignaturePage";
 import NotFound from "./pages/NotFound";
 import JourneyPage from "./pages/Journey";
 import { CardLibrary } from './components/CardLibrary';
@@ -45,6 +46,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/library" element={<CardLibrary cards={allCards} />} />
               <Route path="*" element={<NotFound />} />
+              <Route path="/signature" element={<EnergeticSignaturePage />} />
               <Route path="/journey" element={<JourneyPage />} />
             </Routes>
           </Layout>

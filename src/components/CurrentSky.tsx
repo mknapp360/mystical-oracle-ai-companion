@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import * as Astronomy from 'astronomy-engine';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MapPin, AlertCircle } from "lucide-react";
+import { RefreshCw, MapPin, AlertCircle, Sun, Moon, ChevronRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,15 +52,38 @@ const ZODIAC_SIGNS = [
   'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
+// Generate guidance text based on top emanations
+const generateGuidance = (emanations: Record<World, number>): { text: string; worlds: [World, number][] } => {
+  const sorted = (Object.entries(emanations) as [World, number][])
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 2);
+  
+  const [top] = sorted;
+  const topWorld = top[0];
+  
+  const guidance = {
+    Atziluth: "Ideal for vision-setting, meditation, and connecting with your highest purpose.",
+    Briah: "Perfect for planning, strategizing, and letting divine intelligence flow through thought.",
+    Yetzirah: "Best time to honor emotions, create art, and let feelings guide your actions.",
+    Assiah: "Optimal for concrete action, building tangible results, and physical manifestation."
+  };
+  
+  return {
+    text: guidance[topWorld],
+    worlds: sorted
+  };
+};
+
 const KabbalisticCurrentSky: React.FC = () => {
   const [data, setData] = useState<CurrentSkyData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [locationName, setLocationName] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("astronomical");
+  const [activeTab, setActiveTab] = useState<string>("current");
   const [user, setUser] = useState<any>(null);
   const [birthChart, setBirthChart] = useState<BirthChartData | null>(null);
   const [loadingChart, setLoadingChart] = useState(true);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const eclipticToZodiac = (longitude: number): { sign: string; degree: number } => {
     const normalizedLon = ((longitude % 360) + 360) % 360;
@@ -233,147 +256,94 @@ const KabbalisticCurrentSky: React.FC = () => {
     } catch (err) {
       console.error("Sky calculation error:", err);
       setError("Failed to calculate planetary positions. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const extractLocationName = (geocodeResponse: any): string => {
-    const { address } = geocodeResponse;
-    if (!address) return geocodeResponse.display_name;
-
-    const locality = address.city || address.town || address.village || 
-                     address.hamlet || address.suburb;
-    const region = address.state || address.county || address.region;
-    const country = address.country;
-
-    const parts = [locality, region].filter(Boolean);
-    
-    if (parts.length < 2 && country) {
-      parts.push(country);
-    }
-    
-    return parts.join(', ') || geocodeResponse.display_name;
-  };
-
-  const fetchLocationName = async (lat: number, lon: number) => {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-        {
-          headers: {
-            'User-Agent': 'TarotPathwork/1.0',
-          }
-        }
-      );
-      
-      if (!res.ok) {
-        throw new Error('Geocoding failed');
-      }
-      
-      const json = await res.json();
-      const location = extractLocationName(json);
-      setLocationName(location);
-      calculateSkyData(lat, lon, location);
-    } catch (err) {
-      console.error("Location fetch error:", err);
-      const location = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-      setLocationName(location);
-      calculateSkyData(lat, lon, location);
-    }
-  };
-
-  const checkLocationPermission = async (): Promise<boolean> => {
-    if ('permissions' in navigator) {
-      try {
-        const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-        return result.state !== 'denied';
-      } catch {
-        return true;
-      }
-    }
-    return true;
-  };
-
-  const requestLocation = async () => {
+  const handleRefresh = () => {
     setLoading(true);
     setError(null);
-
-    const canRequest = await checkLocationPermission();
-    if (!canRequest) {
-      setError("Location access is blocked. Please enable it in your browser settings.");
-      setLoading(false);
-      return;
-    }
-
+    
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser.");
       setLoading(false);
       return;
     }
 
+    const timeoutId = setTimeout(() => {
+      setError("Location request timed out. Using default location.");
+      setLocationName("Default Location");
+      calculateSkyData(51.5074, -0.1278, "London, England");
+      setLoading(false);
+    }, GEOLOCATION_TIMEOUT);
+
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        clearTimeout(timeoutId);
         const { latitude, longitude } = position.coords;
-        fetchLocationName(latitude, longitude);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        let errorMessage = "Location access denied.";
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied. Please allow location access in your browser settings.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information unavailable. Please try again.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out. Please try again.";
-            break;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const geoData = await response.json();
+          const location = geoData.address?.city || geoData.address?.town || geoData.address?.village || "Unknown Location";
+          setLocationName(location);
+          calculateSkyData(latitude, longitude, location);
+        } catch (err) {
+          console.error("Reverse geocoding error:", err);
+          setLocationName("Unknown Location");
+          calculateSkyData(latitude, longitude, "Unknown Location");
         }
-        
-        setError(errorMessage);
+
+        setLoading(false);
+      },
+      (err) => {
+        clearTimeout(timeoutId);
+        console.error("Geolocation error:", err);
+        setError(`Location error: ${err.message}. Using default location.`);
+        setLocationName("Default Location");
+        calculateSkyData(51.5074, -0.1278, "London, England");
         setLoading(false);
       },
       {
         enableHighAccuracy: true,
-        timeout: GEOLOCATION_TIMEOUT,
-        maximumAge: 300000,
+        timeout: GEOLOCATION_TIMEOUT - 1000,
+        maximumAge: 0
       }
     );
   };
 
-  const handleRefresh = () => {
-    requestLocation();
-  };
-
-  // Load user and birth chart on mount
   useEffect(() => {
+    handleRefresh();
+
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
       
-      if (user) {
-        try {
-          const chart = await getUserBirthChart(user.id);
-          setBirthChart(chart);
-        } catch (error) {
-          console.error('Error loading birth chart:', error);
-        }
+      if (session?.user) {
+        const chart = await getUserBirthChart(session.user.id);
+        setBirthChart(chart);
       }
       setLoadingChart(false);
     };
-    
+
     checkUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setUser(session?.user || null);
+      if (session?.user) {
+        const chart = await getUserBirthChart(session.user.id);
+        setBirthChart(chart);
+      } else {
+        setBirthChart(null);
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
-  // Load location on mount
-  useEffect(() => {
-    requestLocation();
-  }, []);
-
-  // Memoize calculations to prevent re-renders
   const kabbalisticReading = useMemo(() => {
     if (!data) return null;
     return generateKabbalisticReading(data);
@@ -391,7 +361,7 @@ const KabbalisticCurrentSky: React.FC = () => {
 
   const treeData = useMemo(() => {
     if (!data) return {};
-    const tree: Record<string, { sign: string; house: string; sephirah: string; world: World }> = {};
+    const tree: any = {};
     Object.entries(data.planets).forEach(([planet, planetData]) => {
       const sephirah = PLANETARY_SEPHIROT[planet];
       const worldData = determineWorld(planet, planetData.sign, planetData.house);
@@ -407,7 +377,6 @@ const KabbalisticCurrentSky: React.FC = () => {
     return tree;
   }, [data]);
 
-  // Calculate transit reading when needed (only when on personal tab with birth chart)
   const transitReading = useMemo(() => {
     if (!data || !birthChart || !worldActivation) return null;
     
@@ -418,7 +387,6 @@ const KabbalisticCurrentSky: React.FC = () => {
         worldActivation.dominantWorld
       );
       
-      // Save to history (fire and forget)
       saveTransitReading({
         birth_chart_id: birthChart.id!,
         transit_date: new Date().toISOString(),
@@ -441,6 +409,60 @@ const KabbalisticCurrentSky: React.FC = () => {
       return null;
     }
   }, [data, birthChart, worldActivation]);
+
+  const guidanceInfo = useMemo(() => {
+    if (!worldActivation) return null;
+    return generateGuidance(worldActivation.worldPercentages);
+  }, [worldActivation]);
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  const worldColors: Record<World, string> = {
+    Atziluth: '#FFD700',
+    Briah: '#87CEEB', 
+    Yetzirah: '#9370DB',
+    Assiah: '#8B4513'
+  };
+
+  // Sky arc calculations
+  const getSkyArcData = () => {
+    if (!data) return null;
+    
+    const sunrise = new Date(data.sun_moon.sunrise);
+    const sunset = new Date(data.sun_moon.sunset);
+    const now = new Date();
+    
+    const totalDayMinutes = (sunset.getTime() - sunrise.getTime()) / (1000 * 60);
+    const elapsedMinutes = (now.getTime() - sunrise.getTime()) / (1000 * 60);
+    const dayProgress = Math.max(0, Math.min(1, elapsedMinutes / totalDayMinutes));
+    
+    const isDaytime = now >= sunrise && now <= sunset;
+    
+    const arcRadius = 140;
+    const centerX = 180;
+    const baseY = 160;
+    
+    const angle = Math.PI - (dayProgress * Math.PI);
+    const iconX = centerX + arcRadius * Math.cos(angle);
+    const iconY = baseY - arcRadius * Math.sin(angle);
+    
+    return {
+      sunrise,
+      sunset,
+      isDaytime,
+      iconX,
+      iconY,
+      arcRadius,
+      centerX,
+      baseY
+    };
+  };
 
   if (loading) {
     return (
@@ -478,7 +500,10 @@ const KabbalisticCurrentSky: React.FC = () => {
     );
   }
 
-  if (!data || !kabbalisticReading || !worldActivation || !divineMessage) return null;
+  if (!data || !kabbalisticReading || !worldActivation || !divineMessage || !guidanceInfo) return null;
+
+  const skyArc = getSkyArcData();
+  if (!skyArc) return null;
 
   return (
     <div className="max-w-2xl mx-auto mt-6">
@@ -487,247 +512,374 @@ const KabbalisticCurrentSky: React.FC = () => {
           onClick={handleRefresh}
           size="sm"
           variant="ghost"
-          className="absolute top-2 right-2"
+          className="absolute top-2 right-2 z-10"
           disabled={loading}
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </Button>
 
-        <CardHeader>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <MapPin className="w-5 h-5 text-muted-foreground" />
-            <CardTitle className="text-xl text-center font-semibold text-black">
-              Current Sky
-            </CardTitle>
-          </div>
-          <h3 className="text-lg text-center font-medium text-black">{data.location}</h3>
-        </CardHeader>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-5 mx-6 mt-4">
+            <TabsTrigger value="current">Current</TabsTrigger>
+            <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
+            <TabsTrigger value="kabbalistic">Kabbalistic</TabsTrigger>
+            <TabsTrigger value="tree">Tree of Life</TabsTrigger>
+            <TabsTrigger value="message">Message</TabsTrigger>
+            {/* Uncomment to enable personal tab */}
+            {/* <TabsTrigger value="personal">Personal {!user && '🔒'}</TabsTrigger> */}
+          </TabsList>
 
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
-              <TabsTrigger value="kabbalistic">Kabbalistic</TabsTrigger>
-              <TabsTrigger value="tree">Tree of Life</TabsTrigger>
-              <TabsTrigger value="message">Message</TabsTrigger>
-              <TabsTrigger value="personal">
-                Personal {!user && '🔒'}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="astronomical" className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-black">
-                  <strong>Moon Phase:</strong> {data.sun_moon.moon_phase}
-                </p>
-                <p className="text-black">
-                  <strong>Sunrise:</strong> {new Date(data.sun_moon.sunrise).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </p>
-                <p className="text-black">
-                  <strong>Sunset:</strong> {new Date(data.sun_moon.sunset).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
+          {/* NEW CURRENT TAB - Main View */}
+          <TabsContent value="current" className="mt-0">
+            <div className="w-full bg-gradient-to-b from-slate-50 to-white">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-slate-200">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                  <h2 className="text-2xl font-semibold text-center text-slate-800">
+                    Current Sky
+                  </h2>
+                </div>
+                <p className="text-sm text-center text-slate-600">
+                  {data.location}
                 </p>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2 text-black">Planets</h3>
-                <ul className="grid grid-cols-2 gap-2 text-sm text-black">
-                  {Object.entries(data.planets).map(([planet, details]) => (
-                    <li key={planet} className="p-2 bg-muted/50 rounded-md">
-                      <strong className="capitalize">{planet}:</strong> {details.sign} {Math.round(details.degree_in_sign)}° ({details.house})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="kabbalistic" className="space-y-4">
-              <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
-                <CardHeader>
-                  <CardTitle className="text-center text-lg font-serif">
-                    The Four Worlds Today
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-center text-purple-900 dark:text-purple-100">
-                    {worldActivation.interpretation}
-                  </p>
+              
+              {/* Sky Arc Visualization */}
+              <div className="relative px-4 py-6">
+                <svg 
+                  viewBox="0 0 360 180" 
+                  className="w-full h-auto"
+                  style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))' }}
+                >
+                  <defs>
+                    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor={skyArc.isDaytime ? "#87CEEB" : "#1a1a2e"} />
+                      <stop offset="100%" stopColor={skyArc.isDaytime ? "#f0f4f8" : "#16213e"} />
+                    </linearGradient>
+                    
+                    <pattern id="clouds" x="0" y="0" width="100" height="60" patternUnits="userSpaceOnUse">
+                      <ellipse cx="20" cy="30" rx="25" ry="15" fill="rgba(255,255,255,0.3)" />
+                      <ellipse cx="60" cy="25" rx="30" ry="18" fill="rgba(255,255,255,0.25)" />
+                      <ellipse cx="85" cy="35" rx="20" ry="12" fill="rgba(255,255,255,0.2)" />
+                    </pattern>
+                  </defs>
                   
-                  <div className="space-y-2">
-                    {(Object.entries(worldActivation.worldPercentages) as [World, number][])
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([world, percentage]) => {
-                        const worldInfo = FOUR_WORLDS[world];
-                        return (
-                          <div key={world} className="space-y-1">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="font-medium text-black">
-                                {worldInfo.name} {worldInfo.hebrew}
-                              </span>
-                              <span className="text-muted-foreground">
-                                {Math.round(percentage)}%
-                              </span>
-                            </div>
-                            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full transition-all duration-500"
-                                style={{ 
-                                  width: `${percentage}%`,
-                                  backgroundColor: worldInfo.color
-                                }}
-                              />
-                            </div>
-                            <p className="text-xs text-muted-foreground italic">
-                              {worldInfo.realm} - {worldInfo.meaning}
-                            </p>
+                  <rect x="0" y="0" width="360" height="180" fill="url(#skyGradient)" />
+                  <rect x="0" y="0" width="360" height="120" fill="url(#clouds)" opacity="0.6" />
+                  
+                  <path
+                    d={`M 20 ${skyArc.baseY} Q ${skyArc.centerX} ${skyArc.baseY - skyArc.arcRadius - 20} ${360 - 20} ${skyArc.baseY}`}
+                    stroke={skyArc.isDaytime ? "#FDB813" : "#C0C0C0"}
+                    strokeWidth="3"
+                    fill="none"
+                    strokeLinecap="round"
+                    opacity="0.6"
+                  />
+                  
+                  <g transform={`translate(20, ${skyArc.baseY})`}>
+                    <circle r="4" fill="#FDB813" />
+                    <text 
+                      y="20" 
+                      textAnchor="start" 
+                      className="text-xs fill-slate-700 font-medium"
+                    >
+                      {formatTime(data.sun_moon.sunrise)}
+                    </text>
+                  </g>
+                  
+                  <g transform={`translate(${360 - 20}, ${skyArc.baseY})`}>
+                    <circle r="4" fill="#FF6B35" />
+                    <text 
+                      y="20" 
+                      textAnchor="end" 
+                      className="text-xs fill-slate-700 font-medium"
+                    >
+                      {formatTime(data.sun_moon.sunset)}
+                    </text>
+                  </g>
+                  
+                  <g transform={`translate(${skyArc.iconX}, ${skyArc.iconY})`}>
+                    <circle 
+                      r="20" 
+                      fill={skyArc.isDaytime ? "#FDB813" : "#F5F5DC"}
+                      filter="drop-shadow(0 0 12px rgba(253, 184, 19, 0.6))"
+                    />
+                    {skyArc.isDaytime ? (
+                      <>
+                        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+                          <line
+                            key={angle}
+                            x1={Math.cos((angle * Math.PI) / 180) * 24}
+                            y1={Math.sin((angle * Math.PI) / 180) * 24}
+                            x2={Math.cos((angle * Math.PI) / 180) * 30}
+                            y2={Math.sin((angle * Math.PI) / 180) * 30}
+                            stroke="#FDB813"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        ))}
+                      </>
+                    ) : (
+                      <path
+                        d="M 0,-15 A 15,15 0 1,1 0,15 A 12,12 0 1,0 0,-15"
+                        fill="#C0C0C0"
+                      />
+                    )}
+                  </g>
+                </svg>
+              </div>
+              
+              {/* Data Tables - Two Column Layout */}
+              <div className="px-6 pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Planets Table */}
+                  <div 
+                    className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer transition-all hover:shadow-md"
+                    onClick={() => setActiveTab('astronomical')}
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50">
+                      <h3 className="text-sm font-semibold text-slate-700">Current Planets</h3>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                    
+                    <div className="px-4 py-3 space-y-2">
+                      {Object.entries(data.planets).slice(0, 4).map(([planet, planetData]) => (
+                        <div key={planet} className="flex justify-between items-center text-sm">
+                          <span className="font-medium text-slate-700">{planet}</span>
+                          <span className="text-slate-600">{planetData.sign} {Math.round(planetData.degree_in_sign)}°</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="px-4 pb-3 text-xs text-slate-500 border-t border-slate-100 pt-3">
+                      Tap to view full astronomical details →
+                    </div>
+                  </div>
+                  
+                  {/* Emanations Table */}
+                  <div 
+                    className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer transition-all hover:shadow-md"
+                    onClick={() => setActiveTab('kabbalistic')}
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50">
+                      <h3 className="text-sm font-semibold text-slate-700">Current Emanation</h3>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                    
+                    <div className="px-4 py-3 space-y-2">
+                      {guidanceInfo.worlds.map(([world, percent]) => (
+                        <div key={world} className="flex justify-between items-center text-sm">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: worldColors[world] }}
+                            />
+                            <span className="font-medium text-slate-700">{world}</span>
                           </div>
-                        );
-                      })}
+                          <span className="text-slate-600 font-semibold">{Math.round(percent)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="px-4 pb-3 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                      {guidanceInfo.text}
+                    </div>
+                    
+                    <div className="px-4 pb-3 text-xs text-slate-500">
+                      Tap to view full kabbalistic reading →
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ASTRONOMICAL TAB */}
+          <TabsContent value="astronomical" className="space-y-4 p-6">
+            <CardHeader className="px-0">
+              <CardTitle className="text-xl text-center font-semibold text-black">
+                Astronomical Data
+              </CardTitle>
+            </CardHeader>
+
+            <div className="space-y-2">
+              <p className="text-black">
+                <strong>Moon Phase:</strong> {data.sun_moon.moon_phase}
+              </p>
+              <p className="text-black">
+                <strong>Sunrise:</strong> {formatTime(data.sun_moon.sunrise)}
+              </p>
+              <p className="text-black">
+                <strong>Sunset:</strong> {formatTime(data.sun_moon.sunset)}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-black">Planets</h3>
+              <ul className="grid grid-cols-2 gap-2 text-sm text-black">
+                {Object.entries(data.planets).map(([planet, details]) => (
+                  <li key={planet} className="p-2 bg-muted/50 rounded-md">
+                    <strong className="capitalize">{planet}:</strong> {details.sign} {Math.round(details.degree_in_sign)}° ({details.house})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </TabsContent>
+
+          {/* KABBALISTIC TAB */}
+          <TabsContent value="kabbalistic" className="space-y-4 p-6">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
+              <CardHeader>
+                <CardTitle className="text-center text-lg font-serif">
+                  The Four Worlds Today
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-center text-purple-900 dark:text-purple-100">
+                  {worldActivation.interpretation}
+                </p>
+                
+                <div className="space-y-2">
+                  {(Object.entries(worldActivation.worldPercentages) as [World, number][])
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([world, percentage]) => {
+                      const worldInfo = FOUR_WORLDS[world];
+                      return (
+                        <div key={world} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium text-black">
+                              {worldInfo.name} {worldInfo.hebrew}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {Math.round(percentage)}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full transition-all duration-500"
+                              style={{ 
+                                width: `${percentage}%`,
+                                backgroundColor: worldInfo.color
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-black">
+                Sephirotic Activations
+              </h3>
+              {kabbalisticReading.sephirotDetails.map((detail: any) => {
+                const planetData = data.planets[detail.planet];
+                const worldData = determineWorld(detail.planet, planetData.sign, planetData.house);
+                const primaryWorld = FOUR_WORLDS[worldData.primary];
+                const sephirah = detail.sephirah;
+                const contextualInfluence = synthesizeInfluence(
+                  detail.planet,
+                  planetData.sign,
+                  planetData.house
+                );
+
+                return (
+                  <Card key={detail.planet} className="border-2 border-primary/20">
+                    <CardContent className="pt-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-lg text-primary">
+                            {detail.planet} → {sephirah.name}
+                          </h4>
+                          <span 
+                            className="px-2 py-1 rounded text-xs font-medium"
+                            style={{ 
+                              backgroundColor: `${primaryWorld.color}20`,
+                              color: primaryWorld.color,
+                              border: `1px solid ${primaryWorld.color}`
+                            }}
+                          >
+                            {primaryWorld.name} {primaryWorld.hebrew}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          <em>{sephirah.meaning}</em> - {sephirah.archetype}
+                        </p>
+                        <p className="text-sm text-black leading-relaxed">
+                          {contextualInfluence}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Through <strong>{planetData.sign}</strong> in <strong>{planetData.house}</strong>
+                        </p>
+                      </div>
+                      <p className="text-xs text-purple-700 dark:text-purple-300 mt-1 italic">
+                        Manifesting in {primaryWorld.realm.toLowerCase()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+              <p className="text-xs text-muted-foreground text-center">
+                💫 This reading shows which spheres of the Tree of Life are activated in the current cosmic moment
+              </p>
+            </div>
+          </TabsContent>
+
+          {/* TREE TAB */}
+          <TabsContent value="tree" className="space-y-4 p-6">
+            <TreeOfLifeVisualization activePlanets={treeData} />
+          </TabsContent>
+
+          {/* MESSAGE TAB */}
+          <TabsContent value="message" className="space-y-4 p-6">
+            <DivineMessageDisplay message={divineMessage} />
+          </TabsContent>
+
+          {/* PERSONAL TAB - Uncomment to enable */}
+          {/* <TabsContent value="personal" className="space-y-4 p-6">
+            {!user ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <p className="text-lg">🔒 Personalized Readings</p>
+                    <p className="text-sm text-gray-600">
+                      Create an account to access your personalized Shefa readings based on your birth chart.
+                    </p>
+                    <Button onClick={() => {}}>
+                      Sign Up / Log In
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-
-              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                <p className="text-sm text-center text-purple-900 dark:text-purple-100 font-medium">
-                  {kabbalisticReading.treeActivation}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-black">Active Sephiroth</h3>
-                {kabbalisticReading.sephirotDetails.map(({ planet, sephirah, sign, house }) => {
-                  const planetData = data?.planets[planet];
-                  if (!planetData) return null;
-                  
-                  const contextualInfluence = synthesizeInfluence(planet, planetData.sign, planetData.house);
-                  const worldData = determineWorld(planet, planetData.sign, planetData.house);
-                  const primaryWorld = FOUR_WORLDS[worldData.primary];
-                  
-                  return (
-                    <Card key={planet} className="border-l-4" style={{ borderLeftColor: sephirah.color }}>
-                      <CardContent className="pt-4">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-bold text-black">{planet}</span>
-                              <span className="text-xs bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
-                                {sephirah.name} {sephirah.hebrew}
-                              </span>
-                              <span 
-                                className="text-xs px-2 py-1 rounded font-medium"
-                                style={{ 
-                                  backgroundColor: `${primaryWorld.color}20`,
-                                  color: primaryWorld.color,
-                                  border: `1px solid ${primaryWorld.color}`
-                                }}
-                              >
-                                {primaryWorld.name} {primaryWorld.hebrew}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              <em>{sephirah.meaning}</em> - {sephirah.archetype}
-                            </p>
-                            <p className="text-sm text-black leading-relaxed">
-                              {contextualInfluence}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Through <strong>{planetData.sign}</strong> in <strong>{planetData.house}</strong>
-                            </p>
-                          </div>
-                          <p className="text-xs text-purple-700 dark:text-purple-300 mt-1 italic">
-                            Manifesting in {primaryWorld.realm.toLowerCase()}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                <p className="text-xs text-muted-foreground text-center">
-                  💫 This reading shows which spheres of the Tree of Life are activated in the current cosmic moment
-                </p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="tree" className="space-y-4">
-              <TreeOfLifeVisualization activePlanets={treeData} />
-            </TabsContent>
-
-            <TabsContent value="message" className="space-y-4">
-              <DivineMessageDisplay message={divineMessage} />
-            </TabsContent>
-
-            <TabsContent value="personal" className="space-y-4">
-              {!user ? (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center space-y-4">
-                      <p className="text-lg">🔒 Personalized Readings</p>
-                      <p className="text-sm text-gray-600">
-                        Create an account to access your personalized Shefa readings based on your birth chart.
-                      </p>
-                      <Button onClick={() => {/* trigger login */}}>
-                        Sign Up / Log In
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : !birthChart ? (
-                <BirthChartForm 
-                  onSave={setBirthChart} 
-                  userId={user.id}
-                />
-              ) : transitReading ? (
-                <PersonalizedTransitDisplay 
-                  transitMessage={transitReading.message}
-                  natalInfo={transitReading.natalInfo}
-                />
-              ) : (
-                <Card>
-                  <CardContent className="pt-6">
-                    <p className="text-center">Loading your personalized reading...</p>
-                  </CardContent>
-                </Card>
-              )}
-              
-              {birthChart && (
-                <Card className="mt-4">
-                  <CardContent className="pt-4">
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm">
-                        <p className="font-semibold">Your Birth Chart</p>
-                        <p className="text-gray-600">
-                          {birthChart.birth_city}, {birthChart.birth_country}
-                        </p>
-                        <p className="text-gray-600">
-                          {new Date(birthChart.birth_date_time).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {/* Show form to edit */}}
-                      >
-                        Edit Chart
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <p className="text-xs text-muted-foreground text-center mt-4">
-            Calculated at {new Date().toLocaleTimeString()}
-          </p>
-        </CardContent>
+            ) : !birthChart ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <BirthChartForm userId={user.id} onSave={(chart) => setBirthChart(chart)} />
+                </CardContent>
+              </Card>
+            ) : transitReading ? (
+              <PersonalizedTransitDisplay 
+                transitMessage={transitReading.message}
+                natalInfo={transitReading.natalInfo}
+                aspects={transitReading.aspects}
+              />
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center">Loading personalized reading...</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent> */}
+        </Tabs>
       </Card>
     </div>
   );
