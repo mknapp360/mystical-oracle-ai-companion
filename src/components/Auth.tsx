@@ -4,7 +4,7 @@ export async function loginWithGoogle() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://tarotpathwork-personal-oracle.vercel.app'
+      redirectTo: 'https://tarotpathwork.app/journey'
     }
   });
   
