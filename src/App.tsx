@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Layout from './components/Layout';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import EnergeticSignaturePage from "./pages/EnergeticSignaturePage";
+import AccountSettings from "./pages/AccountSettings";
 import JourneyPage from "./pages/Journey";
 import { CardLibrary } from './components/CardLibrary';
 import { allCards } from './data/tarotCards';
@@ -52,6 +54,8 @@ function AppContent() {
         <Route path="/" element={<Index />} />
         <Route path="/library" element={<CardLibrary cards={allCards} />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/signature" element={<EnergeticSignaturePage />} />
+        <Route path="/settings" element={<AccountSettings />} />
         <Route path="/journey" element={<JourneyPage />} />
       </Routes>
     </Layout>
