@@ -36,6 +36,15 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+  // Handle OAuth redirect hash
+  const hash = window.location.hash;
+  if (hash && hash.includes('access_token')) {
+    // Remove the hash from URL
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+}, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
