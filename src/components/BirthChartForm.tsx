@@ -111,10 +111,48 @@ function calculateAscendantCorrected(
   return { ascendant, mc, lst };
 }
 
+/**
+ * Convert UTC datetime from database back to local time for form display
+ */
+function utcToLocalDateTime(utcDateStr: string, timezone: string): { date: string; time: string } {
+  const utcDate = new Date(utcDateStr);
+  const [year, month, day] = utcDateStr.split('T')[0].split('-').map(Number);
+  const utcTime = utcDateStr.split('T')[1];
+  const [hours, minutes] = utcTime.split(':').map(Number);
+  
+  // Determine timezone offset
+  let offset: number;
+  if (timezone.includes('E')) {
+    offset = isDST(month - 1, day, year) ? -4 : -5;
+  } else if (timezone.includes('C')) {
+    offset = isDST(month - 1, day, year) ? -5 : -6;
+  } else if (timezone.includes('M')) {
+    offset = isDST(month - 1, day, year) ? -6 : -7;
+  } else if (timezone.includes('P')) {
+    offset = isDST(month - 1, day, year) ? -7 : -8;
+  } else {
+    offset = TIMEZONE_OFFSETS[timezone] || 0;
+  }
+  
+  // Convert UTC to local by adding offset
+  const localMs = utcDate.getTime() + (offset * 60 * 60 * 1000);
+  const localDate = new Date(localMs);
+  
+  const localDateStr = localDate.toISOString().split('T')[0];
+  const localTimeStr = localDate.toISOString().split('T')[1].slice(0, 5);
+  
+  return { date: localDateStr, time: localTimeStr };
+}
+
 export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existingChart, userId }) => {
+  // Convert existing chart UTC time back to local time for display
+  const initDateTime = existingChart?.birth_date_time && existingChart?.birth_timezone
+    ? utcToLocalDateTime(existingChart.birth_date_time, existingChart.birth_timezone)
+    : { date: '', time: '' };
+  
   const [formData, setFormData] = useState({
-    birthDate: existingChart?.birth_date_time ? new Date(existingChart.birth_date_time).toISOString().split('T')[0] : '',
-    birthTime: existingChart?.birth_date_time ? new Date(existingChart.birth_date_time).toISOString().split('T')[1].slice(0, 5) : '',
+    birthDate: initDateTime.date,
+    birthTime: initDateTime.time,
     latitude: existingChart?.birth_latitude ? existingChart.birth_latitude.toString() : '',
     longitude: existingChart?.birth_longitude ? existingChart.birth_longitude.toString() : '',
     city: existingChart?.birth_city || '',
@@ -343,6 +381,15 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
             <CheckCircle className="w-4 h-4 text-green-600" />
             <AlertDescription className="text-green-800">
               Birth chart saved successfully! Your personalized readings are now available.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {existingChart && (
+          <Alert>
+            <AlertDescription className="text-sm">
+              <strong>Note:</strong> If your chart was calculated before the recent timezone fix, 
+              please verify your birth information and recalculate to ensure accuracy.
             </AlertDescription>
           </Alert>
         )}
