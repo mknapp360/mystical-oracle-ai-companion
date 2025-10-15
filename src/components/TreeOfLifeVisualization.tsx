@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PLANETARY_SEPHIROT, ZODIAC_PATHS, FOUR_WORLDS, type World } from '@/lib/sephirotic-correspondences';
 
@@ -65,6 +65,25 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
   
   // Get active zodiac signs to highlight paths
   const activeSigns = new Set(Object.values(activePlanets).map(p => p.sign));
+
+  useEffect(() => {
+    console.log('=== TREE OF LIFE DEBUG ===');
+    console.log('Active Planets:', activePlanets);
+    console.log('Active Sephirot:', Array.from(activeSephirot));
+    console.log('Active Signs:', Array.from(activeSigns));
+    
+    // Check each sign for its path
+    Array.from(activeSigns).forEach(sign => {
+      const pathInfo = ZODIAC_PATHS[sign];
+      if (pathInfo) {
+        console.log(`✓ ${sign} (${pathInfo.letterName}): ${pathInfo.connects[0]} ↔ ${pathInfo.connects[1]}`);
+      } else {
+        console.warn(`✗ ${sign}: NO PATH DEFINED`);
+      }
+    });
+  
+  console.log('=========================');
+}, [activePlanets, activeSephirot, activeSigns]);
   
   // Determine which paths are active based on zodiac signs
   const getPathsForSign = (sign: string) => {
