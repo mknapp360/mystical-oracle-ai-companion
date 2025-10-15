@@ -64,7 +64,13 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
   const activeSephirot = new Set(Object.values(activePlanets).map(p => p.sephirah));
   
   // Get active zodiac signs to highlight paths
-  const activeSigns = new Set(Object.values(activePlanets).map(p => p.sign));
+  const INNER_PLANETS = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'];
+
+  const activeSigns = new Set(
+    Object.entries(activePlanets)
+      .filter(([planet, _]) => INNER_PLANETS.includes(planet))
+      .map(([_, data]) => data.sign)
+  );
 
   useEffect(() => {
     console.log('=== TREE OF LIFE DEBUG ===');
