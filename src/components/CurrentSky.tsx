@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TreeOfLifeVisualization } from '@/components/TreeOfLifeVisualization';
+import { PathwayEmanationsDisplay } from './PathwayEmanationsDisplay';
 import { DivineMessageDisplay } from '@/components/ShefaDisplay';
 import { generateDivineMessageFromSky } from '@/lib/shefa-calculator';
 import { BirthChartForm } from './BirthChartForm';
@@ -519,11 +520,12 @@ const KabbalisticCurrentSky: React.FC = () => {
         </Button>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 mx-6 mt-4">
+          <TabsList className="grid w-full grid-cols-6 mx-6 mt-4">
             <TabsTrigger value="current">Current</TabsTrigger>
             <TabsTrigger value="astronomical">Astronomical</TabsTrigger>
             <TabsTrigger value="kabbalistic">Kabbalistic</TabsTrigger>
             <TabsTrigger value="tree">Tree of Life</TabsTrigger>
+            <TabsTrigger value="pathways">Pathways</TabsTrigger>
             <TabsTrigger value="message">Message</TabsTrigger>
             {/* Uncomment to enable personal tab */}
             {/* <TabsTrigger value="personal">Personal {!user && '🔒'}</TabsTrigger> */}
@@ -836,6 +838,10 @@ const KabbalisticCurrentSky: React.FC = () => {
           {/* TREE TAB */}
           <TabsContent value="tree" className="space-y-4 p-6">
             <TreeOfLifeVisualization activePlanets={treeData} />
+          </TabsContent>
+
+          <TabsContent value="pathways" className="space-y-4 p-6">
+            <PathwayEmanationsDisplay activePlanets={treeData} />
           </TabsContent>
 
           {/* MESSAGE TAB */}
