@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import EnergeticSignaturePage from "./pages/EnergeticSignaturePage";
 import NotFound from "./pages/NotFound";
 import JourneyPage from "./pages/Journey";
+import AccountSettings from "./pages/AccountSettings";
 import { CardLibrary } from './components/CardLibrary';
 import { allCards } from './data/tarotCards';
 import { useEffect, useState } from 'react';
@@ -47,6 +48,7 @@ function App() {
               <Route path="/library" element={<CardLibrary cards={allCards} />} />
               <Route path="*" element={<NotFound />} />
               <Route path="/signature" element={<EnergeticSignaturePage />} />
+              <Route path="/settings" element={<AccountSettings />} />
               <Route path="/journey" element={<JourneyPage />} />
             </Routes>
           </Layout>

@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { getUserBirthChart, type BirthChartData } from '@/lib/birthChartService';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileMenuProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface ProfileMenuProps {
 }
 
 export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
+  const navigate = useNavigate();
   const [birthChart, setBirthChart] = useState<BirthChartData | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +32,11 @@ export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
         });
     }
   }, [user, open]);
+
+  const handleNavigation = (path: string) => {
+    onClose();
+    navigate(path);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -68,7 +75,7 @@ export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
               ) : (
                 <>
                   <p className="text-xs text-gray-500">No birth chart yet</p>
-                  <p className="text-xs text-gray-400">Set up in Current Sky</p>
+                  <p className="text-xs text-gray-400">Add in Account Settings</p>
                 </>
               )}
             </div>
@@ -76,12 +83,28 @@ export default function ProfileMenu({ open, onClose, user }: ProfileMenuProps) {
         </Card>
 
         <div className="mt-6 flex flex-col gap-4 text-left text-white">
-          <button className="hover:text-white mt-6 border-t pt-4">Account Settings</button>
-          <button className="hover:text-white border-t pt-4">Reading Settings</button>
-          <button className="hover:text-white border-t pt-4">About Us</button>
-          <button className="hover:text-white border-t pt-4">Help</button>
-          <button className="hover:text-white border-t pt-4">Feature Requests</button>
-          <button className="hover:text-white border-t border-white pt-4" onClick={onClose}>
+          <button 
+            className="hover:text-white mt-6 border-t pt-4 text-left"
+            onClick={() => handleNavigation('/settings')}
+          >
+            Account Settings
+          </button>
+          <button className="hover:text-white border-t pt-4 text-left">
+            Reading Settings
+          </button>
+          <button className="hover:text-white border-t pt-4 text-left">
+            About Us
+          </button>
+          <button className="hover:text-white border-t pt-4 text-left">
+            Help
+          </button>
+          <button className="hover:text-white border-t pt-4 text-left">
+            Feature Requests
+          </button>
+          <button
+            className="hover:text-white border-t border-white pt-4 text-left"
+            onClick={onClose}
+          >
             Log Out
           </button>
         </div>
