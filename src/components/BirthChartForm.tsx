@@ -49,19 +49,40 @@ function parseLocalDateTime(dateStr: string, timeStr: string, timezone: string):
   const [year, month, day] = dateStr.split('-').map(Number);
   const [hours, minutes] = timeStr.split(':').map(Number);
   
+  // Normalize timezone strings
+  let normalizedTz = timezone;
+  
+  // Convert IANA timezone names to abbreviations
+  if (timezone.includes('America/New_York')) {
+    normalizedTz = isDST(month - 1, day, year) ? 'EDT' : 'EST';
+  } else if (timezone.includes('America/Chicago')) {
+    normalizedTz = isDST(month - 1, day, year) ? 'CDT' : 'CST';
+  } else if (timezone.includes('America/Denver')) {
+    normalizedTz = isDST(month - 1, day, year) ? 'MDT' : 'MST';
+  } else if (timezone.includes('America/Los_Angeles')) {
+    normalizedTz = isDST(month - 1, day, year) ? 'PDT' : 'PST';
+  }
+  
   // Determine timezone offset
   let offset: number;
-  if (timezone.includes('E')) {
+  if (normalizedTz.includes('E')) {
     offset = isDST(month - 1, day, year) ? -4 : -5; // Eastern
-  } else if (timezone.includes('C')) {
+  } else if (normalizedTz.includes('C')) {
     offset = isDST(month - 1, day, year) ? -5 : -6; // Central
-  } else if (timezone.includes('M')) {
+  } else if (normalizedTz.includes('M')) {
     offset = isDST(month - 1, day, year) ? -6 : -7; // Mountain
-  } else if (timezone.includes('P')) {
+  } else if (normalizedTz.includes('P')) {
     offset = isDST(month - 1, day, year) ? -7 : -8; // Pacific
   } else {
-    offset = TIMEZONE_OFFSETS[timezone] || 0;
+    offset = TIMEZONE_OFFSETS[normalizedTz] || 0;
   }
+  
+  console.log('Timezone conversion:', {
+    input: timezone,
+    normalized: normalizedTz,
+    offset: offset,
+    isDST: isDST(month - 1, day, year)
+  });
   
   // Create UTC date directly using Date.UTC()
   // This avoids browser timezone interpretation
@@ -150,6 +171,21 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
     ? utcToLocalDateTime(existingChart.birth_date_time, existingChart.birth_timezone)
     : { date: '', time: '' };
   
+  // Normalize timezone from database (convert IANA to abbreviation)
+  let initialTimezone = 'EDT';
+  if (existingChart?.birth_timezone) {
+    if (existingChart.birth_timezone.includes('America/New_York')) {
+      // Check the birth date to determine if DST was in effect
+      const [year, month, day] = (existingChart.birth_date_time || '').split('T')[0].split('-').map(Number);
+      initialTimezone = isDST(month - 1, day, year) ? 'EDT' : 'EST';
+    } else if (existingChart.birth_timezone.includes('America/Chicago')) {
+      const [year, month, day] = (existingChart.birth_date_time || '').split('T')[0].split('-').map(Number);
+      initialTimezone = isDST(month - 1, day, year) ? 'CDT' : 'CST';
+    } else {
+      initialTimezone = existingChart.birth_timezone;
+    }
+  }
+  
   const [formData, setFormData] = useState({
     birthDate: initDateTime.date,
     birthTime: initDateTime.time,
@@ -157,7 +193,7 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
     longitude: existingChart?.birth_longitude ? existingChart.birth_longitude.toString() : '',
     city: existingChart?.birth_city || '',
     country: existingChart?.birth_country || '',
-    timezone: existingChart?.birth_timezone || 'EDT'
+    timezone: initialTimezone
   });
 
   const [calculating, setCalculating] = useState(false);
