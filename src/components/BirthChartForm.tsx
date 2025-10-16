@@ -1,5 +1,4 @@
 // src/components/BirthChartForm.tsx
-// PRODUCTION-READY VERSION WITH CORRECTED ASCENDANT CALCULATION
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -285,40 +284,6 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
       const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
       const natalPlanets: any = {};
       const planetaryPositions: any = {};
-
-      console.log('Calculating natal aspects...');
-      const planetToSephirah: Record<string, string> = {};
-      Object.keys(natalPlanets).forEach(planetName => {
-        const sephirah = PLANETARY_SEPHIROT[planetName];
-        if (sephirah) {
-          planetToSephirah[planetName] = sephirah.name;
-        }
-      });
-
-      const natalAspects = calculateAllAspects(natalPlanets, planetToSephirah);
-
-      console.log('Natal aspects calculated:', {
-        totalAspects: natalAspects.length,
-        byType: {
-          conjunction: natalAspects.filter(a => a.type === 'conjunction').length,
-          opposition: natalAspects.filter(a => a.type === 'opposition').length,
-          trine: natalAspects.filter(a => a.type === 'trine').length,
-          square: natalAspects.filter(a => a.type === 'square').length,
-          sextile: natalAspects.filter(a => a.type === 'sextile').length,
-          quincunx: natalAspects.filter(a => a.type === 'quincunx').length,
-        },
-        tightestAspect: natalAspects[0] ? 
-          `${natalAspects[0].planet1} ${natalAspects[0].symbol} ${natalAspects[0].planet2} (${natalAspects[0].orb.toFixed(2)}°)` 
-          : 'none'
-      });
-
-      // Log retrograde planets
-      const retrogradePlanets = Object.entries(planetaryPositions)
-        .filter(([_, data]: [string, any]) => data.isRetrograde)
-        .map(([name, _]) => name);
-      if (retrogradePlanets.length > 0) {
-        console.log('Retrograde planets:', retrogradePlanets.join(', '));
-      }
       
       planets.forEach(planetName => {
         try {
@@ -378,6 +343,41 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
           console.error(`Error calculating ${planetName}:`, err);
         }
       });
+
+      console.log('Calculating natal aspects...');
+      const planetToSephirah: Record<string, string> = {};
+      Object.keys(natalPlanets).forEach(planetName => {
+        const sephirah = PLANETARY_SEPHIROT[planetName];
+        if (sephirah) {
+          planetToSephirah[planetName] = sephirah.name;
+        }
+      });
+
+      const natalAspects = calculateAllAspects(natalPlanets, planetToSephirah);
+
+      console.log('Natal aspects calculated:', {
+        totalAspects: natalAspects.length,
+        byType: {
+          conjunction: natalAspects.filter(a => a.type === 'conjunction').length,
+          opposition: natalAspects.filter(a => a.type === 'opposition').length,
+          trine: natalAspects.filter(a => a.type === 'trine').length,
+          square: natalAspects.filter(a => a.type === 'square').length,
+          sextile: natalAspects.filter(a => a.type === 'sextile').length,
+          quincunx: natalAspects.filter(a => a.type === 'quincunx').length,
+        },
+        tightestAspect: natalAspects[0] ? 
+          `${natalAspects[0].planet1} ${natalAspects[0].symbol} ${natalAspects[0].planet2} (${natalAspects[0].orb.toFixed(2)}°)` 
+          : 'none'
+      });
+
+      // Log retrograde planets
+      const retrogradePlanets = Object.entries(planetaryPositions)
+        .filter(([_, data]: [string, any]) => data.isRetrograde)
+        .map(([name, _]) => name);
+      if (retrogradePlanets.length > 0) {
+        console.log('Retrograde planets:', retrogradePlanets.join(', '));
+      }
+
       const ascendantSign = eclipticToZodiac(ascDegrees);
       const midheavenSign = eclipticToZodiac(mc);
 
