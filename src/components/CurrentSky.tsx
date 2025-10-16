@@ -602,30 +602,23 @@ const KabbalisticCurrentSky: React.FC = () => {
                   </g>
                   
                   <g transform={`translate(${skyArc.iconX}, ${skyArc.iconY})`}>
-                    <circle 
-                      r="20" 
-                      fill={skyArc.isDaytime ? "#FDB813" : "#F5F5DC"}
-                      filter="drop-shadow(0 0 12px rgba(253, 184, 19, 0.6))"
-                    />
                     {skyArc.isDaytime ? (
-                      <>
-                        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-                          <line
-                            key={angle}
-                            x1={Math.cos((angle * Math.PI) / 180) * 24}
-                            y1={Math.sin((angle * Math.PI) / 180) * 24}
-                            x2={Math.cos((angle * Math.PI) / 180) * 30}
-                            y2={Math.sin((angle * Math.PI) / 180) * 30}
-                            stroke="#FDB813"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                        ))}
-                      </>
+                      <image 
+                        href="/sun.png"
+                        x="-30"
+                        y="-30"
+                        width="60"
+                        height="60"
+                        style={{ filter: 'drop-shadow(0 0 12px rgba(253, 184, 19, 0.5))' }}
+                      />
                     ) : (
-                      <path
-                        d="M 0,-15 A 15,15 0 1,1 0,15 A 12,12 0 1,0 0,-15"
-                        fill="#C0C0C0"
+                      <image 
+                        href="/clouds.png"
+                        x="-35"
+                        y="-20"
+                        width="70"
+                        height="40"
+                        style={{ filter: 'drop-shadow(0 0 8px rgba(100, 100, 120, 0.3))' }}
                       />
                     )}
                   </g>
