@@ -80,9 +80,21 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
     pathDetails[pathKey] = path;
   });
 
+  // Debug: Log path activations
+  React.useEffect(() => {
+    console.log('=== NATAL TREE DEBUG ===');
+    console.log('Path Activations:', pathActivations);
+    console.log('Path Details Keys:', Object.keys(pathDetails));
+    console.log('Active Paths Set:', Array.from(activePaths));
+  }, [pathActivations]);
+
   const isPathActive = (from: string, to: string): any | null => {
     const pathKey = [from, to].sort().join('-');
-    return pathDetails[pathKey] || null;
+    const path = pathDetails[pathKey];
+    if (path) {
+      console.log(`Found active path: ${from} ↔ ${to} (${path.illumination})`);
+    }
+    return path || null;
   };
 
   const getPathColor = (illumination: string) => {
@@ -285,21 +297,33 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
           <h4 className="font-semibold text-sm mb-2 text-gray-900 dark:text-gray-100">
             Active Paths in Your Natal Chart:
           </h4>
-          <div className="space-y-1 text-xs text-gray-700 dark:text-gray-300">
-            {pathActivations.slice(0, 8).map((path, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <span 
-                  className="font-bold"
-                  style={{ color: getPathColor(path.illumination) }}
-                >
-                  {path.hebrewLetter || '•'}
-                </span>
-                <span className="font-medium">{path.planets[0]} {path.aspectType} {path.planets[1]}</span>
-                <span className="text-gray-500">→</span>
-                <span className="italic">{path.sephirah1} ↔ {path.sephirah2}</span>
-              </div>
-            ))}
-          </div>
+          {pathActivations.length > 0 ? (
+            <div className="space-y-1 text-xs text-gray-700 dark:text-gray-300">
+              {pathActivations.slice(0, 8).map((path, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span 
+                    className="font-bold"
+                    style={{ color: getPathColor(path.illumination) }}
+                  >
+                    {path.hebrewLetter || '•'}
+                  </span>
+                  <span className="font-medium">{path.planets[0]} {path.aspectType} {path.planets[1]}</span>
+                  <span className="text-gray-500">→</span>
+                  <span className="italic">{path.sephirah1} ↔ {path.sephirah2}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500 italic">
+              No natal aspects found. Check the browser console for debugging information.
+            </p>
+          )}
+        </div>
+
+        {/* Debug Info */}
+        <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+          <p className="font-mono">Debug: {pathActivations.length} path activations</p>
+          <p className="font-mono">Active sephirot: {Array.from(activeSephirot).join(', ')}</p>
         </div>
       </CardContent>
     </Card>
