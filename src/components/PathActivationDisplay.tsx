@@ -92,6 +92,41 @@ export const PathActivationSection: React.FC<{ paths: PathActivation[] }> = ({ p
           </div>
         )}
 
+        {/* Partially Illuminated Paths */}
+        {partialPaths.length > 0 && (
+          <div>
+            <h4 className="font-semibold mb-3 flex items-center gap-2">
+              <Star className="w-4 h-4 text-blue-500" />
+              Partially Illuminated Paths (Developing Strengths)
+            </h4>
+            <div className="space-y-3">
+              {partialPaths.map((path, idx) => (
+                <div key={idx} className="p-4 bg-blue-50/50 dark:bg-blue-950/10 rounded-lg border border-blue-200/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {getQualityIcon(path.quality)}
+                      <span className="font-medium">{path.sephirah1}</span>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-medium">{path.sephirah2}</span>
+                    </div>
+                    <Badge className={getIlluminationColor(path.illumination)}>
+                      {path.aspectType}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {path.planets[0]} {path.aspectType} {path.planets[1]} ({path.orb.toFixed(1)}° orb)
+                  </div>
+                  {path.hebrewLetter && (
+                    <div className="text-xs bg-white dark:bg-gray-900 p-2 rounded border">
+                      <span className="font-semibold">{path.hebrewLetter}</span> • {path.tarotCard} • {path.meaning}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Shadow Paths */}
         {shadowPaths.length > 0 && (
           <div>
@@ -100,7 +135,7 @@ export const PathActivationSection: React.FC<{ paths: PathActivation[] }> = ({ p
               Shadow Paths (Growth Through Tension)
             </h4>
             <div className="space-y-3">
-              {shadowPaths.slice(0, 3).map((path, idx) => (
+              {shadowPaths.map((path, idx) => (
                 <div key={idx} className="p-4 bg-amber-50/50 dark:bg-amber-950/10 rounded-lg border border-amber-200/50">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
