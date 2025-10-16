@@ -18,6 +18,8 @@ CREATE TABLE public.birth_charts (
   house_cusps ARRAY NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  natal_aspects jsonb DEFAULT '[]'::jsonb,
+  planetary_positions jsonb DEFAULT '{}'::jsonb,
   CONSTRAINT birth_charts_pkey PRIMARY KEY (id),
   CONSTRAINT birth_charts_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

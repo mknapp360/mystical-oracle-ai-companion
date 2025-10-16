@@ -21,6 +21,8 @@ import {
   AspectPatternsSection 
 } from '@/components/PathActivationDisplay';
 import { NatalTreeVisualization } from '@/components/NatalTreeVisualization';
+import { NatalSignatureReport } from '@/components/NatalSignatureReport';
+
 
 interface PlanetaryDetail {
   planet: string;
@@ -369,6 +371,16 @@ const EnergeticSignaturePage: React.FC = () => {
 
           {/* Retrograde Themes */}
           <RetrogradeThemesSection themes={retrogradeThemes} />
+        </TabsContent>
+
+        {/* NEW: Report Tab */}
+        <TabsContent value="report" className="mt-6">
+          <NatalSignatureReport
+            birthChart={birthChart}
+            signature={signature}
+            pathActivations={pathActivations}
+            retrogradeThemes={retrogradeThemes}
+          />
         </TabsContent>
       </Tabs>
     </div>
