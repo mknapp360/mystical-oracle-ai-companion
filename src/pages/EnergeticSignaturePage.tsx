@@ -1,3 +1,6 @@
+// src/pages/EnergeticSignaturePage.tsx
+// ENHANCED with Path Activation, Retrograde Themes, and Aspect Patterns
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, Calendar, MapPin, Flame, Droplet, Wind, Mountain } from 'lucide-react';
@@ -6,6 +9,16 @@ import { getUserBirthChart, type BirthChartData } from '@/lib/birthChartService'
 import { BirthChartForm } from '@/components/BirthChartForm';
 import { supabase } from '@/lib/supabaseClient';
 import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  calculatePathActivations, 
+  identifyRetrogradeThemes, 
+  detectAspectPatterns 
+} from '@/lib/pathActivationCalculator';
+import { 
+  PathActivationSection, 
+  RetrogradeThemesSection, 
+  AspectPatternsSection 
+} from '@/components/PathActivationDisplay';
 
 interface PlanetaryDetail {
   planet: string;
@@ -16,7 +29,6 @@ interface PlanetaryDetail {
   primaryWorld: string;
 }
 
-// Helper to determine pillar based on sephirah name
 const getPillar = (sephirahName: string): string => {
   const leftPillar = ['Binah', 'Geburah', 'Hod'];
   const rightPillar = ['Chokmah', 'Chesed', 'Netzach'];
@@ -185,8 +197,18 @@ const EnergeticSignaturePage: React.FC = () => {
     hour: '2-digit', minute: '2-digit' 
   });
 
+  // Calculate enhanced features
+  const pathActivations = birthChart.natal_aspects 
+    ? calculatePathActivations(birthChart.natal_aspects) 
+    : [];
+  const retrogradeThemes = identifyRetrogradeThemes(birthChart);
+  const aspectPatterns = birthChart.natal_aspects 
+    ? detectAspectPatterns(birthChart.natal_aspects, birthChart) 
+    : [];
+
   return (
     <div className="container mx-auto px-4 py-8 pb-24 space-y-6">
+      {/* Header Card */}
       <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
@@ -206,6 +228,20 @@ const EnergeticSignaturePage: React.FC = () => {
         </CardHeader>
       </Card>
 
+      {/* NEW: Aspect Patterns */}
+      {aspectPatterns.length > 0 && (
+        <AspectPatternsSection patterns={aspectPatterns} />
+      )}
+
+      {/* NEW: Path Activation */}
+      {pathActivations.length > 0 && (
+        <PathActivationSection paths={pathActivations} />
+      )}
+
+      {/* NEW: Retrograde Themes */}
+      <RetrogradeThemesSection themes={retrogradeThemes} />
+
+      {/* EXISTING: Four Worlds Activation */}
       <Card>
         <CardHeader>
           <CardTitle>Four Worlds Activation</CardTitle>
@@ -216,73 +252,21 @@ const EnergeticSignaturePage: React.FC = () => {
           )}
         </CardHeader>
         <CardContent className="space-y-4">
-          {Object.entries(signature.worldPercentages).map(([world, percentage]) => {
-            const pct = parseFloat(percentage);
-            const isDominant = world === signature.dominantWorld;
-            
-            return (
-              <div key={world} className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(signature.worldPercentages).map(([world, percentage]) => (
+              <div key={world} className={`p-4 rounded-lg bg-gradient-to-r ${worldColors[world as keyof typeof worldColors]} text-white`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${worldColors[world as keyof typeof worldColors]}`}>
-                      {worldIcons[world as keyof typeof worldIcons]}
-                    </div>
-                    <div>
-                      <div className="font-semibold flex items-center gap-2">
-                        {world}
-                        {isDominant && !signature.isBalanced && (
-                          <span className="text-xs bg-purple-100 dark:bg-purple-900 px-2 py-0.5 rounded-full">
-                            Dominant
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {FOUR_WORLDS[world as keyof typeof FOUR_WORLDS].meaning}
-                      </div>
-                    </div>
+                    {worldIcons[world as keyof typeof worldIcons]}
+                    <span className="font-bold">{world}</span>
                   </div>
-                  <div className="text-2xl font-bold">{percentage}%</div>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                  <div
-                    className={`h-3 rounded-full bg-gradient-to-r ${worldColors[world as keyof typeof worldColors]}`}
-                    style={{ width: `${pct}%` }}
-                  />
+                  <span className="text-2xl font-bold">{percentage}%</span>
                 </div>
               </div>
-            );
-          })}
-
-          <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-            <h4 className="font-semibold mb-2">
-              {signature.isBalanced ? 'Balanced World Access' : `${signature.dominantWorld} - Primary Mode`}
-            </h4>
-            <p className="text-sm text-muted-foreground">
-              {signature.isBalanced 
-                ? 'Nearly equal access to all four worlds. Move fluidly between archetypal vision, conceptual thought, emotional formation, and physical manifestation.'
-                : `${FOUR_WORLDS[signature.dominantWorld as keyof typeof FOUR_WORLDS].description}`
-              }
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tree of Life Activation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <div className="text-sm text-muted-foreground mb-2">
-              <strong>{signature.activeSephirot.length} of 10</strong> sephirot illuminated
-            </div>
-            {signature.activeSephirot.length === 10 && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950 rounded-lg text-sm">
-                ✨ <strong>Full Tree:</strong> All spheres receiving planetary influx. Gift is synthesis.
-              </div>
-            )}
+            ))}
           </div>
 
+          {/* Planetary Details */}
           <div className="space-y-2">
             {signature.planetaryDetails.map((detail) => (
               <div key={detail.planet} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm">
@@ -304,6 +288,7 @@ const EnergeticSignaturePage: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* EXISTING: Pillar Balance */}
       <Card>
         <CardHeader>
           <CardTitle>Pillar Balance</CardTitle>
@@ -333,32 +318,6 @@ const EnergeticSignaturePage: React.FC = () => {
             {signature.pillarCount.Right > signature.pillarCount.Left + 1 && (
               <p>💫 <strong>Right Emphasis:</strong> Grace & expansion. Visionary archetype.</p>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Guidance</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg">
-              <h5 className="font-semibold mb-2 text-sm">Strengths</h5>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• {signature.activeSephirot.length === 10 ? 'Full Tree access' : 'Multi-sephirot activation'}</li>
-                <li>• {parseFloat(signature.worldPercentages.Assiah) > 20 ? 'Strong grounding' : 'Visionary orientation'}</li>
-                <li>• {signature.isBalanced ? 'Balanced worlds' : `${signature.dominantWorld} mastery`}</li>
-              </ul>
-            </div>
-
-            <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-              <h5 className="font-semibold mb-2 text-sm">Growth Areas</h5>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• {parseFloat(signature.worldPercentages.Assiah) < 15 ? 'Develop grounding' : 'Balance vision with structure'}</li>
-                <li>• {signature.pillarCount.Left > signature.pillarCount.Right + 2 ? 'Allow flow' : signature.pillarCount.Right > signature.pillarCount.Left + 2 ? 'Build structure' : 'Maintain balance'}</li>
-              </ul>
-            </div>
           </div>
         </CardContent>
       </Card>
