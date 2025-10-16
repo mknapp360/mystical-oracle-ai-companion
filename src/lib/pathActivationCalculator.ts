@@ -76,10 +76,16 @@ export function calculatePathActivations(
 ): PathActivation[] {
   const paths: PathActivation[] = [];
 
+  console.log('=== CALCULATE PATH ACTIVATIONS ===');
+  console.log('Total natal aspects:', natalAspects.length);
+
   natalAspects.forEach(aspect => {
     const pathKey = getPathKey(aspect.sephirah1, aspect.sephirah2);
     const pathData = TREE_PATHS[pathKey];
 
+    console.log(`Checking: ${aspect.sephirah1} ↔ ${aspect.sephirah2} (${pathKey})`, pathData ? '✓ TRADITIONAL' : '✗ NOT TRADITIONAL');
+
+    // ONLY include aspects that correspond to traditional Tree of Life paths
     if (!pathData) return;
 
     paths.push({
@@ -95,6 +101,10 @@ export function calculatePathActivations(
       meaning: pathData.meaning,
     });
   });
+
+  console.log('Traditional paths found:', paths.length);
+  console.log('Paths:', paths.map(p => `${p.sephirah1}-${p.sephirah2}`));
+  console.log('===================================');
 
   // Sort by illumination (full > partial > shadow) then by orb tightness
   return paths.sort((a, b) => {
