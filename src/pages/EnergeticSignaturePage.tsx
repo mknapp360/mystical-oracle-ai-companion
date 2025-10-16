@@ -245,6 +245,7 @@ const EnergeticSignaturePage: React.FC = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tree">Tree of Life</TabsTrigger>
           <TabsTrigger value="patterns">Life Patterns</TabsTrigger>
+          <TabsTrigger value="report">Report</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
