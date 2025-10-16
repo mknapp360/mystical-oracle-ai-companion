@@ -241,7 +241,7 @@ const EnergeticSignaturePage: React.FC = () => {
 
       {/* Tabs for different views */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tree">Tree of Life</TabsTrigger>
           <TabsTrigger value="patterns">Life Patterns</TabsTrigger>
