@@ -1,6 +1,24 @@
 // src/lib/birthChartService.ts
+// COMPLETE UPDATED INTERFACE with planetary_positions
 
 import { supabase } from './supabaseClient';
+import { type PlanetaryAspect } from './aspect-calculator';
+
+export interface PlanetaryPosition {
+  absoluteDegree: number;        // 0-360 degrees around the zodiac
+  eclipticLongitude: number;     // Same as absolute degree
+  eclipticLatitude: number;      // Degrees north/south of ecliptic
+  distanceAU: number;            // Distance from Earth in AU
+  sign: string;                  // Zodiac sign
+  degreeInSign: number;          // Degree within the sign (0-30)
+  house: string;                 // Natal house (e.g., "House 7")
+  isRetrograde: boolean;         // Retrograde status
+  geocentricPosition: {          // Raw 3D coordinates
+    x: number;
+    y: number;
+    z: number;
+  };
+}
 
 export interface BirthChartData {
   id?: string;
@@ -12,6 +30,8 @@ export interface BirthChartData {
   birth_longitude: number;
   birth_timezone: string;
   natal_planets: Record<string, { sign: string; degree_in_sign: number; house: string }>;
+  natal_aspects?: PlanetaryAspect[];
+  planetary_positions?: Record<string, PlanetaryPosition>;  // ← ADD THIS
   ascendant_sign: string;
   ascendant_degree: number;
   midheaven_sign: string;
@@ -48,7 +68,6 @@ export async function getUserBirthChart(userId: string): Promise<BirthChartData 
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // No rows returned - user doesn't have a birth chart yet
         return null;
       }
       throw error;
@@ -70,11 +89,10 @@ export async function saveBirthChart(chartData: BirthChartData): Promise<BirthCh
       throw new Error('User must be logged in to save birth chart');
     }
 
-    // Check if chart already exists
     const existingChart = await getUserBirthChart(user.id);
 
     if (existingChart) {
-      // Update existing chart
+      // UPDATE existing chart
       const { data, error } = await supabase
         .from('birth_charts')
         .update({
@@ -85,6 +103,8 @@ export async function saveBirthChart(chartData: BirthChartData): Promise<BirthCh
           birth_longitude: chartData.birth_longitude,
           birth_timezone: chartData.birth_timezone,
           natal_planets: chartData.natal_planets,
+          natal_aspects: chartData.natal_aspects || [],
+          planetary_positions: chartData.planetary_positions || {},  // ← ADD THIS
           ascendant_sign: chartData.ascendant_sign,
           ascendant_degree: chartData.ascendant_degree,
           midheaven_sign: chartData.midheaven_sign,
@@ -98,7 +118,7 @@ export async function saveBirthChart(chartData: BirthChartData): Promise<BirthCh
       if (error) throw error;
       return data;
     } else {
-      // Insert new chart
+      // INSERT new chart
       const { data, error } = await supabase
         .from('birth_charts')
         .insert({
@@ -110,6 +130,8 @@ export async function saveBirthChart(chartData: BirthChartData): Promise<BirthCh
           birth_longitude: chartData.birth_longitude,
           birth_timezone: chartData.birth_timezone,
           natal_planets: chartData.natal_planets,
+          natal_aspects: chartData.natal_aspects || [],
+          planetary_positions: chartData.planetary_positions || {},  // ← ADD THIS
           ascendant_sign: chartData.ascendant_sign,
           ascendant_degree: chartData.ascendant_degree,
           midheaven_sign: chartData.midheaven_sign,
@@ -143,89 +165,36 @@ export async function deleteBirthChart(userId: string): Promise<void> {
   }
 }
 
-// Save transit reading to history
-export async function saveTransitReading(readingData: TransitReadingData): Promise<TransitReadingData> {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('User must be logged in to save transit reading');
-    }
-
-    const { data, error } = await supabase
-      .from('transit_readings')
-      .insert({
-        user_id: user.id,
-        birth_chart_id: readingData.birth_chart_id,
-        transit_date: readingData.transit_date,
-        transit_planets: readingData.transit_planets,
-        transit_aspects: readingData.transit_aspects,
-        personalized_message: readingData.personalized_message,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Error saving transit reading:', error);
-    throw error;
-  }
+// Helper: Get planetary position by name
+export function getPlanetPosition(
+  birthChart: BirthChartData, 
+  planetName: string
+): PlanetaryPosition | null {
+  return birthChart.planetary_positions?.[planetName] || null;
 }
 
-// Get user's transit reading history
-export async function getUserTransitReadings(
-  userId: string,
-  limit: number = 10
-): Promise<TransitReadingData[]> {
-  try {
-    const { data, error } = await supabase
-      .from('transit_readings')
-      .select('*')
-      .eq('user_id', userId)
-      .order('transit_date', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching transit readings:', error);
-    throw error;
-  }
+// Helper: Get all retrograde planets
+export function getRetrogradePlanets(birthChart: BirthChartData): string[] {
+  if (!birthChart.planetary_positions) return [];
+  
+  return Object.entries(birthChart.planetary_positions)
+    .filter(([_, pos]) => pos.isRetrograde)
+    .map(([name, _]) => name);
 }
 
-// Get transit reading by date
-export async function getTransitReadingByDate(
-  userId: string,
-  date: string
-): Promise<TransitReadingData | null> {
-  try {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const { data, error } = await supabase
-      .from('transit_readings')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('transit_date', startOfDay.toISOString())
-      .lte('transit_date', endOfDay.toISOString())
-      .order('transit_date', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // No reading for this date
-      }
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error fetching transit reading by date:', error);
-    throw error;
-  }
+// Helper: Calculate angular distance between two planets
+export function getAngularDistance(
+  birthChart: BirthChartData,
+  planet1: string,
+  planet2: string
+): number | null {
+  const pos1 = birthChart.planetary_positions?.[planet1];
+  const pos2 = birthChart.planetary_positions?.[planet2];
+  
+  if (!pos1 || !pos2) return null;
+  
+  let diff = Math.abs(pos1.absoluteDegree - pos2.absoluteDegree);
+  if (diff > 180) diff = 360 - diff;
+  
+  return diff;
 }

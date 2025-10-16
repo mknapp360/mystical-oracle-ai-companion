@@ -8,6 +8,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar, MapPin, Clock, Save, Sparkles, CheckCircle } from 'lucide-react';
 import * as Astronomy from 'astronomy-engine';
 import { saveBirthChart, type BirthChartData } from '@/lib/birthChartService';
+import { calculateAllAspects, calculateAbsoluteDegree, type PlanetaryAspect } from '@/lib/aspect-calculator';
+import { PLANETARY_SEPHIROT } from '@/lib/sephirotic-correspondences';
 
 interface BirthChartFormProps {
   onSave: (chartData: BirthChartData) => void;
@@ -282,7 +284,42 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
       // Calculate natal planets using UTC time
       const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
       const natalPlanets: any = {};
+      const planetaryPositions: any = {};
 
+      console.log('Calculating natal aspects...');
+      const planetToSephirah: Record<string, string> = {};
+      Object.keys(natalPlanets).forEach(planetName => {
+        const sephirah = PLANETARY_SEPHIROT[planetName];
+        if (sephirah) {
+          planetToSephirah[planetName] = sephirah.name;
+        }
+      });
+
+      const natalAspects = calculateAllAspects(natalPlanets, planetToSephirah);
+
+      console.log('Natal aspects calculated:', {
+        totalAspects: natalAspects.length,
+        byType: {
+          conjunction: natalAspects.filter(a => a.type === 'conjunction').length,
+          opposition: natalAspects.filter(a => a.type === 'opposition').length,
+          trine: natalAspects.filter(a => a.type === 'trine').length,
+          square: natalAspects.filter(a => a.type === 'square').length,
+          sextile: natalAspects.filter(a => a.type === 'sextile').length,
+          quincunx: natalAspects.filter(a => a.type === 'quincunx').length,
+        },
+        tightestAspect: natalAspects[0] ? 
+          `${natalAspects[0].planet1} ${natalAspects[0].symbol} ${natalAspects[0].planet2} (${natalAspects[0].orb.toFixed(2)}°)` 
+          : 'none'
+      });
+
+      // Log retrograde planets
+      const retrogradePlanets = Object.entries(planetaryPositions)
+        .filter(([_, data]: [string, any]) => data.isRetrograde)
+        .map(([name, _]) => name);
+      if (retrogradePlanets.length > 0) {
+        console.log('Retrograde planets:', retrogradePlanets.join(', '));
+      }
+      
       planets.forEach(planetName => {
         try {
           const body = (Astronomy.Body as any)[planetName];
@@ -290,16 +327,57 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
           const ecliptic = Astronomy.Ecliptic(geoVector);
           const zodiac = eclipticToZodiac(ecliptic.elon);
           
+          // Calculate absolute degree (0-360)
+          const absoluteDegree = calculateAbsoluteDegree(zodiac.sign, zodiac.degree);
+          
+          // Check if planet is retrograde (for outer planets)
+          let isRetrograde = false;
+          if (['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(planetName)) {
+            // Simple retrograde check: compare position 1 day before and after
+            const dayBefore = new Date(utcDateTime.getTime() - 86400000);
+            const dayAfter = new Date(utcDateTime.getTime() + 86400000);
+            
+            const vecBefore = Astronomy.GeoVector(body, dayBefore, true);
+            const vecAfter = Astronomy.GeoVector(body, dayAfter, true);
+            
+            const eclBefore = Astronomy.Ecliptic(vecBefore);
+            const eclAfter = Astronomy.Ecliptic(vecAfter);
+            
+            // If longitude decreased, planet is retrograde
+            isRetrograde = eclAfter.elon < eclBefore.elon;
+          }
+          
+          // Store in natal_planets format (for existing compatibility)
           natalPlanets[planetName] = {
             sign: zodiac.sign,
             degree_in_sign: zodiac.degree,
             house: calculateHouse(ecliptic.elon, houseCusps)
           };
+          
+          // Store complete astronomical data in planetary_positions
+          planetaryPositions[planetName] = {
+            absoluteDegree: absoluteDegree,
+            eclipticLongitude: ecliptic.elon,
+            eclipticLatitude: ecliptic.elat,
+            distanceAU: Math.sqrt(geoVector.x * geoVector.x + geoVector.y * geoVector.y + geoVector.z * geoVector.z),
+            sign: zodiac.sign,
+            degreeInSign: zodiac.degree,
+            house: calculateHouse(ecliptic.elon, houseCusps),
+            isRetrograde: isRetrograde,
+            // Store the raw vector for future advanced calculations
+            geocentricPosition: {
+              x: geoVector.x,
+              y: geoVector.y,
+              z: geoVector.z
+            }
+          };
+          
+          console.log(`${planetName}: ${zodiac.sign} ${zodiac.degree.toFixed(2)}° (${absoluteDegree.toFixed(2)}°) ${isRetrograde ? '℞' : ''}`);
+          
         } catch (err) {
           console.error(`Error calculating ${planetName}:`, err);
         }
       });
-
       const ascendantSign = eclipticToZodiac(ascDegrees);
       const midheavenSign = eclipticToZodiac(mc);
 
@@ -316,6 +394,8 @@ export const BirthChartForm: React.FC<BirthChartFormProps> = ({ onSave, existing
         birth_longitude: lon,
         birth_timezone: formData.timezone,
         natal_planets: natalPlanets,
+        natal_aspects: natalAspects,
+        planetary_positions: planetaryPositions,
         ascendant_sign: ascendantSign.sign,
         ascendant_degree: ascendantSign.degree,
         midheaven_sign: midheavenSign.sign,

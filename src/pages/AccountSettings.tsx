@@ -8,6 +8,8 @@ import { getUserBirthChart, type BirthChartData } from '@/lib/birthChartService'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Sparkles } from 'lucide-react';
+import { NatalAspectsDisplay } from '@/components/NatalAspectsDisplay';
+import { PlanetaryPositionsDisplay } from '@/components/PlanetaryPositionsDisplay';
 
 export default function AccountSettings() {
   const navigate = useNavigate();
@@ -150,6 +152,18 @@ export default function AccountSettings() {
             />
           </CardContent>
         </Card>
+
+        {/* ========== ADD PLANETARY POSITIONS HERE ========== */}
+        {birthChart?.planetary_positions && (
+          <PlanetaryPositionsDisplay 
+            planetaryPositions={birthChart.planetary_positions} 
+          />
+        )}
+
+        {/* ========== ADD NATAL ASPECTS HERE ========== */}
+        {birthChart?.natal_aspects && birthChart.natal_aspects.length > 0 && (
+          <NatalAspectsDisplay aspects={birthChart.natal_aspects} />
+        )}
 
         {/* Help Text */}
         <div className="text-center text-sm text-muted-foreground space-y-2 px-4">
