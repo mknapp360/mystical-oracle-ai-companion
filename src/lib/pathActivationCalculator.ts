@@ -77,6 +77,8 @@ export function calculatePathActivations(
     const pathKey = getPathKey(aspect.sephirah1, aspect.sephirah2);
     const pathData = TREE_PATHS[pathKey];
 
+    if (!pathData) return;
+
     paths.push({
       sephirah1: aspect.sephirah1,
       sephirah2: aspect.sephirah2,
@@ -85,9 +87,9 @@ export function calculatePathActivations(
       quality: aspect.quality,
       illumination: aspect.pathIllumination,
       orb: aspect.orb,
-      hebrewLetter: pathData?.letter,
-      tarotCard: pathData?.tarot,
-      meaning: pathData?.meaning || `Connection between ${aspect.sephirah1} and ${aspect.sephirah2}`,
+      hebrewLetter: pathData.letter,
+      tarotCard: pathData.tarot,
+      meaning: pathData.meaning,
     });
   });
 
