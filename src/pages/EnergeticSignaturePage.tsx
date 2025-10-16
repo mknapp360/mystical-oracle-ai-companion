@@ -200,6 +200,11 @@ const EnergeticSignaturePage: React.FC = () => {
   });
 
   // Calculate enhanced features
+  console.log('=== BIRTH CHART DATA ===');
+  console.log('Has natal_aspects?', !!birthChart.natal_aspects);
+  console.log('natal_aspects length:', birthChart.natal_aspects?.length || 0);
+  console.log('natal_aspects:', birthChart.natal_aspects);
+  
   const pathActivations = birthChart.natal_aspects 
     ? calculatePathActivations(birthChart.natal_aspects) 
     : [];
@@ -207,6 +212,8 @@ const EnergeticSignaturePage: React.FC = () => {
   const aspectPatterns = birthChart.natal_aspects 
     ? detectAspectPatterns(birthChart.natal_aspects, birthChart) 
     : [];
+  
+  console.log('Path activations calculated:', pathActivations.length);
 
   return (
     <div className="container mx-auto px-4 py-8 pb-24 space-y-6">
