@@ -37,26 +37,29 @@ export interface RetrogradeTheme {
 
 // Map Tree of Life paths to Hebrew letters and Tarot
 const TREE_PATHS: Record<string, { letter: string; tarot: string; meaning: string }> = {
-  'Kether-Chokmah': { letter: 'Aleph', tarot: 'The Fool', meaning: 'Divine breath initiating wisdom' },
-  'Kether-Binah': { letter: 'Beth', tarot: 'The Magician', meaning: 'Structure emerging from source' },
+  // The 22 Traditional Paths
+  'Chokmah-Kether': { letter: 'Aleph', tarot: 'The Fool', meaning: 'Divine breath initiating wisdom' },
+  'Binah-Kether': { letter: 'Beth', tarot: 'The Magician', meaning: 'Structure emerging from source' },
   'Kether-Tiphereth': { letter: 'Gimel', tarot: 'The High Priestess', meaning: 'Direct divine connection to heart' },
-  'Chokmah-Binah': { letter: 'Daleth', tarot: 'The Empress', meaning: 'Wisdom meets form' },
-  'Chokmah-Tiphereth': { letter: 'Vav', tarot: 'The Hierophant', meaning: 'Teaching flows from wisdom' },
-  'Chokmah-Chesed': { letter: 'He', tarot: 'The Emperor', meaning: 'Cosmic wisdom manifests as mercy' },
-  'Binah-Tiphereth': { letter: 'Zain', tarot: 'The Lovers', meaning: 'Understanding guides the heart' },
+  'Binah-Chokmah': { letter: 'Daleth', tarot: 'The Empress', meaning: 'Wisdom meets form' },
   'Binah-Geburah': { letter: 'Cheth', tarot: 'The Chariot', meaning: 'Structure requires discipline' },
-  'Chesed-Tiphereth': { letter: 'Yod', tarot: 'The Hermit', meaning: 'Grace centering in beauty' },
-  'Chesed-Netzach': { letter: 'Kaph', tarot: 'Wheel of Fortune', meaning: 'Expansion into feeling' },
+  'Binah-Tiphereth': { letter: 'Zain', tarot: 'The Lovers', meaning: 'Understanding guides the heart' },
+  'Chesed-Chokmah': { letter: 'He', tarot: 'The Emperor', meaning: 'Cosmic wisdom manifests as mercy' },
+  'Chokmah-Tiphereth': { letter: 'Vav', tarot: 'The Hierophant', meaning: 'Teaching flows from wisdom' },
+  'Chesed-Geburah': { letter: 'Teth', tarot: 'Strength', meaning: 'Mercy and severity in balance' },
   'Geburah-Tiphereth': { letter: 'Lamed', tarot: 'Justice', meaning: 'Severity balanced by beauty' },
   'Geburah-Hod': { letter: 'Nun', tarot: 'Death', meaning: 'Discipline of thought' },
-  'Tiphereth-Netzach': { letter: 'Samech', tarot: 'Temperance', meaning: 'Heart opens to desire' },
-  'Tiphereth-Hod': { letter: 'Ayin', tarot: 'The Devil', meaning: 'Consciousness and intellect unite' },
+  'Chesed-Tiphereth': { letter: 'Yod', tarot: 'The Hermit', meaning: 'Grace centering in beauty' },
+  'Chesed-Netzach': { letter: 'Kaph', tarot: 'Wheel of Fortune', meaning: 'Expansion into feeling' },
+  'Hod-Tiphereth': { letter: 'Ayin', tarot: 'The Devil', meaning: 'Consciousness and intellect unite' },
   'Tiphereth-Yesod': { letter: 'Peh', tarot: 'The Tower', meaning: 'Truth shatters illusion' },
-  'Netzach-Yesod': { letter: 'Tzaddi', tarot: 'The Star', meaning: 'Emotion grounds in foundation' },
+  'Netzach-Tiphereth': { letter: 'Samech', tarot: 'Temperance', meaning: 'Heart opens to desire' },
+  'Hod-Netzach': { letter: 'Mem', tarot: 'The Hanged Man', meaning: 'Intellect and emotion merge' },
   'Hod-Yesod': { letter: 'Qoph', tarot: 'The Moon', meaning: 'Mind descends to unconscious' },
-  'Yesod-Malkuth': { letter: 'Tau', tarot: 'The World', meaning: 'Foundation manifests in matter' },
-  'Netzach-Malkuth': { letter: 'Resh', tarot: 'The Sun', meaning: 'Desire becomes tangible' },
   'Hod-Malkuth': { letter: 'Shin', tarot: 'Judgement', meaning: 'Thought crystallizes in action' },
+  'Netzach-Yesod': { letter: 'Tzaddi', tarot: 'The Star', meaning: 'Emotion grounds in foundation' },
+  'Malkuth-Netzach': { letter: 'Resh', tarot: 'The Sun', meaning: 'Desire becomes tangible' },
+  'Malkuth-Yesod': { letter: 'Tau', tarot: 'The World', meaning: 'Foundation manifests in matter' },
 };
 
 // Get path key (order doesn't matter)
