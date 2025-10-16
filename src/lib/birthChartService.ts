@@ -1,19 +1,19 @@
 // src/lib/birthChartService.ts
-// COMPLETE UPDATED INTERFACE with planetary_positions
+// COMPLETE FILE - Production Ready
 
 import { supabase } from './supabaseClient';
 import { type PlanetaryAspect } from './aspect-calculator';
 
 export interface PlanetaryPosition {
-  absoluteDegree: number;        // 0-360 degrees around the zodiac
-  eclipticLongitude: number;     // Same as absolute degree
-  eclipticLatitude: number;      // Degrees north/south of ecliptic
-  distanceAU: number;            // Distance from Earth in AU
-  sign: string;                  // Zodiac sign
-  degreeInSign: number;          // Degree within the sign (0-30)
-  house: string;                 // Natal house (e.g., "House 7")
-  isRetrograde: boolean;         // Retrograde status
-  geocentricPosition: {          // Raw 3D coordinates
+  absoluteDegree: number;
+  eclipticLongitude: number;
+  eclipticLatitude: number;
+  distanceAU: number;
+  sign: string;
+  degreeInSign: number;
+  house: string;
+  isRetrograde: boolean;
+  geocentricPosition: {
     x: number;
     y: number;
     z: number;
@@ -31,7 +31,7 @@ export interface BirthChartData {
   birth_timezone: string;
   natal_planets: Record<string, { sign: string; degree_in_sign: number; house: string }>;
   natal_aspects?: PlanetaryAspect[];
-  planetary_positions?: Record<string, PlanetaryPosition>;  // ← ADD THIS
+  planetary_positions?: Record<string, PlanetaryPosition>;
   ascendant_sign: string;
   ascendant_degree: number;
   midheaven_sign: string;
@@ -104,7 +104,7 @@ export async function saveBirthChart(chartData: BirthChartData): Promise<BirthCh
           birth_timezone: chartData.birth_timezone,
           natal_planets: chartData.natal_planets,
           natal_aspects: chartData.natal_aspects || [],
-          planetary_positions: chartData.planetary_positions || {},  // ← ADD THIS
+          planetary_positions: chartData.planetary_positions || {},
           ascendant_sign: chartData.ascendant_sign,
           ascendant_degree: chartData.ascendant_degree,
           midheaven_sign: chartData.midheaven_sign,
@@ -131,7 +131,7 @@ export async function saveBirthChart(chartData: BirthChartData): Promise<BirthCh
           birth_timezone: chartData.birth_timezone,
           natal_planets: chartData.natal_planets,
           natal_aspects: chartData.natal_aspects || [],
-          planetary_positions: chartData.planetary_positions || {},  // ← ADD THIS
+          planetary_positions: chartData.planetary_positions || {},
           ascendant_sign: chartData.ascendant_sign,
           ascendant_degree: chartData.ascendant_degree,
           midheaven_sign: chartData.midheaven_sign,
@@ -161,6 +161,93 @@ export async function deleteBirthChart(userId: string): Promise<void> {
     if (error) throw error;
   } catch (error) {
     console.error('Error deleting birth chart:', error);
+    throw error;
+  }
+}
+
+// Save transit reading to history
+export async function saveTransitReading(readingData: TransitReadingData): Promise<TransitReadingData> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User must be logged in to save transit reading');
+    }
+
+    const { data, error } = await supabase
+      .from('transit_readings')
+      .insert({
+        user_id: user.id,
+        birth_chart_id: readingData.birth_chart_id,
+        transit_date: readingData.transit_date,
+        transit_planets: readingData.transit_planets,
+        transit_aspects: readingData.transit_aspects,
+        personalized_message: readingData.personalized_message,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error saving transit reading:', error);
+    throw error;
+  }
+}
+
+// Get user's transit reading history
+export async function getUserTransitReadings(
+  userId: string,
+  limit: number = 10
+): Promise<TransitReadingData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('transit_readings')
+      .select('*')
+      .eq('user_id', userId)
+      .order('transit_date', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching transit readings:', error);
+    throw error;
+  }
+}
+
+// Get transit reading by date
+export async function getTransitReadingByDate(
+  userId: string,
+  date: string
+): Promise<TransitReadingData | null> {
+  try {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const { data, error } = await supabase
+      .from('transit_readings')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('transit_date', startOfDay.toISOString())
+      .lte('transit_date', endOfDay.toISOString())
+      .order('transit_date', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching transit reading by date:', error);
     throw error;
   }
 }
