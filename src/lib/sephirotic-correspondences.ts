@@ -116,6 +116,16 @@ export const PLANETARY_SEPHIROT: Record<string, PlanetarySephirah> = {
     influence: 'Transformation, shadow work, death and rebirth, occult knowledge',
     color: '#4B0082',
     world: 'Yetzirah'
+  },
+  Earth: {
+    name: 'Malkuth',
+    hebrew: 'מַלְכוּת',
+    meaning: 'Kingdom',
+    archetype: 'The Material World',
+    planet: 'Earth',
+    influence: 'Physical manifestation, grounding, the body, tangible reality, completion of divine energy',
+    color: '#8B4513',
+    world: 'Assiah'
   }
 };
 
