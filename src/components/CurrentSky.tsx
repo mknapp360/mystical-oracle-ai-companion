@@ -53,17 +53,23 @@ const ZODIAC_SIGNS = [
   'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
-// Generate summary of pathway emanations (75 words max)
+// Generate actionable summary of pathway emanations (75 words max)
 const generatePathwaySummary = (activePlanets: Record<string, any>): string => {
-  const signs = Array.from(new Set(Object.values(activePlanets).map((p: any) => p.sign)));
-  const planets = Object.keys(activePlanets).slice(0, 3);
+  const { generateAllActivePathwayInterpretations } = require('@/lib/pathway-interpretations');
+  const interpretations = generateAllActivePathwayInterpretations(activePlanets);
   
-  if (signs.length === 0) return "No active pathways detected.";
+  if (interpretations.length === 0) return "No active pathways detected.";
   
-  const signList = signs.slice(0, 3).join(', ');
-  const planetList = planets.join(', ');
+  // Extract key themes from emanations - take first sentence of top 3 interpretations
+  const keyInsights = interpretations
+    .map(i => i.currentEmanation.split('.')[0])
+    .join('. ');
   
-  return `Energy flows through ${signs.length} pathway${signs.length > 1 ? 's' : ''} (${signList}${signs.length > 3 ? '...' : ''}). ${planetList} ${planets.length > 1 ? 'illuminate' : 'illuminates'} the Tree, channeling divine emanation from wisdom to manifestation. Each path carries specific frequencies of consciousness shaping how grace enters your life today.`;
+  // Truncate to approximately 75 words
+  const words = keyInsights.split(' ');
+  if (words.length <= 75) return keyInsights + '.';
+  
+  return words.slice(0, 75).join(' ') + '...';
 };
 
 const KabbalisticCurrentSky: React.FC = () => {
