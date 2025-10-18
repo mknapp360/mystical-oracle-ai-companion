@@ -36,7 +36,7 @@ export interface RetrogradeTheme {
 }
 
 // Map Tree of Life paths to Hebrew letters and Tarot
-const TREE_PATHS: Record<string, { letter: string; tarot: string; meaning: string }> = {
+export const TREE_PATHS: Record<string, { letter: string; tarot: string; meaning: string }> = {
   // Supernal triad
   'Kether-Chokmah':   { letter: 'Aleph', tarot: 'The Fool',          meaning: 'Divine breath initiating wisdom' },
   'Kether-Binah':     { letter: 'Beth',  tarot: 'The Magician',       meaning: 'Structure emerging from source' },
