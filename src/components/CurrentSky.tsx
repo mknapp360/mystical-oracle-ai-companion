@@ -53,26 +53,17 @@ const ZODIAC_SIGNS = [
   'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
 ];
 
-// Generate guidance text based on top emanations
-const generateGuidance = (emanations: Record<World, number>): { text: string; worlds: [World, number][] } => {
-  const sorted = (Object.entries(emanations) as [World, number][])
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 2);
+// Generate summary of pathway emanations (75 words max)
+const generatePathwaySummary = (activePlanets: Record<string, any>): string => {
+  const signs = Array.from(new Set(Object.values(activePlanets).map((p: any) => p.sign)));
+  const planets = Object.keys(activePlanets).slice(0, 3);
   
-  const [top] = sorted;
-  const topWorld = top[0];
+  if (signs.length === 0) return "No active pathways detected.";
   
-  const guidance = {
-    Atziluth: "Ideal for vision-setting, meditation, and connecting with your highest purpose.",
-    Briah: "Perfect for planning, strategizing, and letting divine intelligence flow through thought.",
-    Yetzirah: "Best time to honor emotions, create art, and let feelings guide your actions.",
-    Assiah: "Optimal for concrete action, building tangible results, and physical manifestation."
-  };
+  const signList = signs.slice(0, 3).join(', ');
+  const planetList = planets.join(', ');
   
-  return {
-    text: guidance[topWorld],
-    worlds: sorted
-  };
+  return `Energy flows through ${signs.length} pathway${signs.length > 1 ? 's' : ''} (${signList}${signs.length > 3 ? '...' : ''}). ${planetList} ${planets.length > 1 ? 'illuminate' : 'illuminates'} the Tree, channeling divine emanation from wisdom to manifestation. Each path carries specific frequencies of consciousness shaping how grace enters your life today.`;
 };
 
 const KabbalisticCurrentSky: React.FC = () => {
@@ -411,10 +402,10 @@ const KabbalisticCurrentSky: React.FC = () => {
     }
   }, [data, birthChart, worldActivation]);
 
-  const guidanceInfo = useMemo(() => {
-    if (!worldActivation) return null;
-    return generateGuidance(worldActivation.worldPercentages);
-  }, [worldActivation]);
+  const pathwaySummary = useMemo(() => {
+    if (!data) return null;
+    return generatePathwaySummary(treeData);
+  }, [data, treeData]);
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString('en-US', { 
@@ -501,7 +492,7 @@ const KabbalisticCurrentSky: React.FC = () => {
     );
   }
 
-  if (!data || !kabbalisticReading || !worldActivation || !divineMessage || !guidanceInfo) return null;
+  if (!data || !kabbalisticReading || !worldActivation || !divineMessage || !pathwaySummary) return null;
 
   const skyArc = getSkyArcData();
   if (!skyArc) return null;
@@ -527,8 +518,6 @@ const KabbalisticCurrentSky: React.FC = () => {
             <TabsTrigger value="tree">Tree of Life</TabsTrigger>
             <TabsTrigger value="pathways">Pathways</TabsTrigger>
             <TabsTrigger value="message">Message</TabsTrigger>
-            {/* Uncomment to enable personal tab */}
-            {/* <TabsTrigger value="personal">Personal {!user && '🔒'}</TabsTrigger> */}
           </TabsList>
 
           {/* NEW CURRENT TAB - Main View */}
@@ -653,37 +642,24 @@ const KabbalisticCurrentSky: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* Emanations Table */}
+                  {/* Pathways Summary */}
                   <div 
                     className="bg-white rounded-lg border border-slate-200 overflow-hidden cursor-pointer transition-all hover:shadow-md"
-                    onClick={() => setActiveTab('kabbalistic')}
+                    onClick={() => setActiveTab('pathways')}
                   >
                     <div className="flex items-center justify-between px-4 py-3 bg-slate-50">
-                      <h3 className="text-sm font-semibold text-slate-700">Current Emanation</h3>
+                      <h3 className="text-sm font-semibold text-slate-700">Active Pathways</h3>
                       <ChevronRight className="w-4 h-4 text-slate-400" />
                     </div>
                     
-                    <div className="px-4 py-3 space-y-2">
-                      {guidanceInfo.worlds.map(([world, percent]) => (
-                        <div key={world} className="flex justify-between items-center text-sm">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: worldColors[world] }}
-                            />
-                            <span className="font-medium text-slate-700">{world}</span>
-                          </div>
-                          <span className="text-slate-600 font-semibold">{Math.round(percent)}%</span>
-                        </div>
-                      ))}
+                    <div className="px-4 py-3">
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {pathwaySummary}
+                      </p>
                     </div>
                     
-                    <div className="px-4 pb-3 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                      {guidanceInfo.text}
-                    </div>
-                    
-                    <div className="px-4 pb-3 text-xs text-slate-500">
-                      Tap to view full kabbalistic reading →
+                    <div className="px-4 pb-3 text-xs text-slate-500 border-t border-slate-100 pt-3">
+                      Tap to view full pathway emanations →
                     </div>
                   </div>
                   
@@ -823,7 +799,7 @@ const KabbalisticCurrentSky: React.FC = () => {
 
             <div className="mt-4 p-3 bg-muted/30 rounded-lg">
               <p className="text-xs text-muted-foreground text-center">
-                💫 This reading shows which spheres of the Tree of Life are activated in the current cosmic moment
+                ✨ This reading shows which spheres of the Tree of Life are activated in the current cosmic moment
               </p>
             </div>
           </TabsContent>
@@ -841,43 +817,6 @@ const KabbalisticCurrentSky: React.FC = () => {
           <TabsContent value="message" className="space-y-4 p-6">
             <DivineMessageDisplay message={divineMessage} />
           </TabsContent>
-
-          {/* PERSONAL TAB - Uncomment to enable */}
-          {/* <TabsContent value="personal" className="space-y-4 p-6">
-            {!user ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center space-y-4">
-                    <p className="text-lg">🔒 Personalized Readings</p>
-                    <p className="text-sm text-gray-600">
-                      Create an account to access your personalized Shefa readings based on your birth chart.
-                    </p>
-                    <Button onClick={() => {}}>
-                      Sign Up / Log In
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : !birthChart ? (
-              <Card>
-                <CardContent className="pt-6">
-                  <BirthChartForm userId={user.id} onSave={(chart) => setBirthChart(chart)} />
-                </CardContent>
-              </Card>
-            ) : transitReading ? (
-              <PersonalizedTransitDisplay 
-                transitMessage={transitReading.message}
-                natalInfo={transitReading.natalInfo}
-                aspects={transitReading.aspects}
-              />
-            ) : (
-              <Card>
-                <CardContent className="pt-6">
-                  <p className="text-center">Loading personalized reading...</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent> */}
         </Tabs>
       </Card>
     </div>
