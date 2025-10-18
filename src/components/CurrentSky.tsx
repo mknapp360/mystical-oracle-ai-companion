@@ -27,6 +27,7 @@ import {
   FOUR_WORLDS,
   type World
 } from '@/lib/sephirotic-correspondences';
+import { generateAllActivePathwayInterpretations } from '@/lib/pathway-interpretations';
 
 interface PlanetData {
   sign: string;
@@ -55,7 +56,6 @@ const ZODIAC_SIGNS = [
 
 // Generate actionable summary of pathway emanations (75 words max)
 const generatePathwaySummary = (activePlanets: Record<string, any>): string => {
-  const { generateAllActivePathwayInterpretations } = require('@/lib/pathway-interpretations');
   const interpretations = generateAllActivePathwayInterpretations(activePlanets);
   
   if (interpretations.length === 0) return "No active pathways detected.";
