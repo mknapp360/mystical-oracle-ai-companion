@@ -214,27 +214,27 @@ function getPathData(pathKey: string): { letter: string; tarot: string; meaning:
   'Chokmah-Binah':    { letter: 'Daleth',tarot: 'The Empress',        meaning: 'Wisdom meets form' },
 
   // Zodiacal diagonals from the Supernals
-  'Chokmah-Tiphereth': { letter: 'He',  tarot: 'The Emperor',         meaning: 'Cosmic wisdom manifests as order (Aries)' },
+  'Chokmah-Tiphereth': { letter: 'He',  tarot: 'The Emperor',         meaning: 'Cosmic wisdom manifests as order (Aries). This path balances the recognition of power within ones self to create what they want. When in shadow, there is unrecngnition of ones power to do so, of a misuse to achieve gains, by yourself or those around you.' },
   'Chokmah-Chesed':    { letter: 'Vav', tarot: 'The Hierophant',      meaning: 'Teaching grounds wisdom in grace (Taurus)' },
-  'Binah-Tiphereth':   { letter: 'Zain',tarot: 'The Lovers',          meaning: 'Understanding guides the heart (Gemini)' },
-  'Binah-Geburah':     { letter: 'Cheth',tarot: 'The Chariot',        meaning: 'Structure requires disciplined strength (Cancer)' },
+  'Binah-Tiphereth':   { letter: 'Zain',tarot: 'The Lovers',          meaning: 'Understanding guides the heart (Gemini). This path provides recognition that there are multiple understandings and perspectives, and also brings in the reliance on intuition, allowing you to trust the flow of the universe. When in shadow, there is a rejection of intuition and a mistrust that the universe will provide.'},
+  'Binah-Geburah':     { letter: 'Cheth',tarot: 'The Chariot',        meaning: 'Structure requires disciplined strength (Cancer). This path shows the need to create boundaries and processes in order to create focus and drive you want. Form creates the pressure that propels personal drive. If in shadow, it causes desire without direction or force.' },
 
   // Upper middle triad
   'Chesed-Geburah':    { letter: 'Teth', tarot: 'Strength',           meaning: 'Mercy and severity in balance (Leo). This path represents the intelligence of the secret of all the activities of spiritual beings. It is the path where the angels of life and death tread, and also the pathway that introduces one to their other self. It is important to remember that you are a spiritual being, so it applies to you as well. In practical terms, when this path is illuminated it is possible to glimpse the extent of ones capabilities, both good and bad. You may come to recognize the lengths to which you will go to in a situation. It is something one realizes through trial and experience, not theory. If this pathway is shadowed, then you are cut off from recognizing such capabilities, and this recognition becomes an obstacle that must be overcome in your life.' },
   'Chesed-Tiphereth':  { letter: 'Yod',  tarot: 'The Hermit',         meaning: 'Grace centering in beauty (Virgo). This path is the recognition one has of ideas and circumstances of hidden potential. It is the glimmer of wisdom that is greater than what is currently contained in a persons own self-limiting beliefs, and the realization that there may be more to life. When in shadow, self-limitations take hold and become the obstacle for their life.' },
   'Chesed-Netzach':    { letter: 'Kaph', tarot: 'Wheel of Fortune',   meaning: 'Expansion into feeling (Jupiter)' },
-  'Geburah-Tiphereth': { letter: 'Lamed',tarot: 'Justice',            meaning: 'Severity balanced by beauty (Libra)' },
+  'Geburah-Tiphereth': { letter: 'Lamed',tarot: 'Justice',            meaning: 'Severity balanced by beauty (Libra) bring the desire for justice in your life. However, to achieve justice, one must ask many questions, which can sometimes rock the boat. You may experience the balance between absolution or closure, and punishment. When in shadow, these are imbalanced by yourself, or others.'},
   'Geburah-Hod':       { letter: 'Mem',  tarot: 'The Hanged Man',     meaning: 'Discipline yields surrender to deeper insight (Water)' },
 
   // Central to Netzach/Hod/Yesod
-  'Tiphereth-Netzach': { letter: 'Nun',    tarot: 'Death',            meaning: 'Heart opens to desire via transformation (Scorpio)' },
+  'Tiphereth-Netzach': { letter: 'Nun',    tarot: 'Death',            meaning: 'Heart opens to desire via transformation (Scorpio). This path shows that you and those around you are open to change, and the things that come with it. When in shadow, there is resistence, no matter the consequence.' },
   'Tiphereth-Yesod':   { letter: 'Samech', tarot: 'Temperance',       meaning: 'Truth supported and integrated below (Sagittarius)' },
   'Tiphereth-Hod':     { letter: 'Ayin',   tarot: 'The Devil',        meaning: 'Consciousness and intellect unite (Capricorn)' },
 
   // Netzach–Hod pillar + lower triad
   'Netzach-Hod':       { letter: 'Peh',  tarot: 'The Tower',          meaning: 'Truth shatters illusion (Mars)' },
-  'Netzach-Yesod':     { letter: 'Tzaddi',tarot: 'The Star',          meaning: 'Emotion grounds in foundation (Aquarius)' },
-  'Netzach-Malkuth':   { letter: 'Qoph',  tarot: 'The Moon',          meaning: 'Desire becomes tangible through the imaginal (Pisces)' },
+  'Netzach-Yesod':     { letter: 'Tzaddi',tarot: 'The Star',          meaning: 'Emotion grounds in foundation (Aquarius). This path shows an awakening of the heart and a harmonizing of what you would like to be and see in the world, with what reality is around you.  When in shadow there is an inability to bring desire into a reality, or the ability to harmonize it in your life.' },
+  'Netzach-Malkuth':   { letter: 'Qoph',  tarot: 'The Moon',          meaning: 'Desire becomes tangible through the imaginal (Pisces). With this path there is a recognition of the self-limitng beliefs one has and be open to experiences to help you overcome them. When in shadow, it can lead to conceit, as you don/t realize how you hold yourself back.' },
   'Hod-Yesod':         { letter: 'Resh',  tarot: 'The Sun',           meaning: 'Mind descends to unconscious; clarity vitalizes (Sun)' },
   'Hod-Malkuth':       { letter: 'Shin',  tarot: 'Judgement',         meaning: 'Thought crystallizes in action (Fire/Spirit)' },
   'Yesod-Malkuth':     { letter: 'Tau',   tarot: 'The World',         meaning: 'Foundation manifests in matter (Saturn/Earth)' },
