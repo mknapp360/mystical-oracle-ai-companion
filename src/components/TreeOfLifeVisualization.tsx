@@ -137,6 +137,7 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
           <rect width="500" height="700" fill="url(#treeGlow)" />
 
           {/* Draw paths first (so they appear behind spheres) */}
+        console.log('Checking Chesed-Tiphereth path:', isPathActive('Chesed', 'Tiphereth'));
           {TREE_PATHS.map(([from, to], i) => {
             const fromPos = SEPHIROT_POSITIONS[from];
             const toPos = SEPHIROT_POSITIONS[to];
