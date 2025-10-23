@@ -193,13 +193,10 @@ const EnergeticSignaturePage: React.FC = () => {
   }
 
   const signature = calculateSignature(birthChart);
-  const birthDate = new Date(birthChart.birth_date_time);
-  const formattedDate = birthDate.toLocaleDateString('en-US', { 
-    year: 'numeric', month: 'long', day: 'numeric' 
-  });
-  const formattedTime = birthDate.toLocaleTimeString('en-US', { 
-    hour: '2-digit', minute: '2-digit' 
-  });
+  const { formattedDate, formattedTime } = formatBirthDateTime(
+  birthChart.birth_date_time,
+  birthChart.birth_timezone
+);
 
   // Calculate enhanced features
   console.log('=== BIRTH CHART DATA ===');
@@ -389,3 +386,7 @@ const EnergeticSignaturePage: React.FC = () => {
 };
 
 export default EnergeticSignaturePage;
+
+function formatBirthDateTime(birth_date_time: string, birth_timezone: string): { formattedDate: any; formattedTime: any; } {
+  throw new Error('Function not implemented.');
+}

@@ -32,17 +32,11 @@ export const NatalSignatureReport: React.FC<ReportProps> = ({
   pathActivations,
   retrogradeThemes
 }) => {
-  const birthDate = new Date(birthChart.birth_date_time);
-  const formattedDate = birthDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
-  const formattedTime = birthDate.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    timeZoneName: 'short'
-  });
+  const { formattedDate, formattedTimeWithZone } = formatBirthDateTime(
+  birthChart.birth_date_time,
+  birthChart.birth_timezone
+);
+  
 
   const handlePrint = () => {
     window.print();
@@ -88,7 +82,7 @@ export const NatalSignatureReport: React.FC<ReportProps> = ({
             Natal Energetic Signature
           </h1>
           <p className="text-lg text-gray-700 dark:text-gray-300">
-            {formattedDate} | {formattedTime}
+            {formattedDate} | {formattedTimeWithZone}  
           </p>
           <p className="text-md text-gray-600 dark:text-gray-400">
             {birthChart.birth_city}, {birthChart.birth_country}
@@ -472,4 +466,8 @@ function getPillar(sephirahName: string): string {
   if (rightPillar.includes(sephirahName)) return 'Right';
   if (middlePillar.includes(sephirahName)) return 'Middle';
   return 'Middle';
+}
+
+function formatBirthDateTime(birth_date_time: string, birth_timezone: string): { formattedDate: any; formattedTimeWithZone: any; } {
+  throw new Error('Function not implemented.');
 }
