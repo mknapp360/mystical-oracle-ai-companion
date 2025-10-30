@@ -124,7 +124,7 @@ export const PLANETARY_SEPHIROT: Record<string, PlanetarySephirah> = {
     archetype: 'The Material World',
     planet: 'Earth',
     influence: 'Physical manifestation, grounding, the body, tangible reality, completion of divine energy',
-    color: '#8B4513',
+    color: '#228B22',
     world: 'Assiah'
   }
 };
