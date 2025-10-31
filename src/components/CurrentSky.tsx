@@ -376,6 +376,53 @@ const KabbalisticCurrentSky: React.FC = () => {
     return tree;
   }, [data]);
 
+  // Treat treeData as the "activePlanets" you want to pass downward
+const activePlanets = useMemo(() => treeData, [treeData]);
+
+// Adapter: PathwayInterpretation -> component's expected activation shape
+type Activation = {
+  sephirah1: string;
+  sephirah2: string;
+  planets: [string, string];
+  aspectType: string;
+  illumination: 'full' | 'partial' | 'shadow';
+  hebrewLetter?: string;
+};
+
+const toActivation = (p: any): Activation => ({
+  // Try multiple likely fields defensively; fall back to "Unknown"
+  sephirah1:
+    p.sephirah1 ??
+    p.path?.sephirot?.[0] ??
+    p.path?.from ??
+    p.from ??
+    'Unknown',
+  sephirah2:
+    p.sephirah2 ??
+    p.path?.sephirot?.[1] ??
+    p.path?.to ??
+    p.to ??
+    'Unknown',
+  planets: (
+    Array.isArray(p.planets)
+      ? p.planets
+      : [p.planetA ?? p.a ?? '', p.planetB ?? p.b ?? '']
+  ).slice(0, 2) as [string, string],
+  aspectType: p.aspectType ?? p.aspect ?? 'conjunction',
+  illumination:
+    p.illumination === 'full' || p.illumination === 'partial' || p.illumination === 'shadow'
+      ? p.illumination
+      : 'partial',
+  hebrewLetter: p.hebrewLetter ?? p.path?.hebrewLetter,
+});
+
+// Build the array your component expects
+const pathActivations = useMemo<Activation[]>(() => {
+  const raw = generateAllActivePathwayInterpretations(activePlanets);
+  return (raw ?? []).map(toActivation);
+}, [activePlanets]);
+
+
   const transitReading = useMemo(() => {
     if (!data || !birthChart || !worldActivation) return null;
     
