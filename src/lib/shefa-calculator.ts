@@ -1,4 +1,5 @@
-// src/lib/shefa-calculator.ts
+// src/lib/shefa-calculator-enhanced.ts
+// Enhanced version that includes stranded sephiroth and ungrounded pathway diagnostics
 
 import { 
   PLANETARY_SEPHIROT, 
@@ -17,6 +18,13 @@ import {
 
 import { determineWorld } from './sephirotic-correspondences';
 
+import {
+  analyzeSephirothPathways,
+  type PathwayDiagnostics,
+  type StrandedSephirah,
+  type UngroundedPathway
+} from './sephiroth-pathway-diagnostics';
+
 interface DivinePattern {
   activeSephirot: string[];
   activePaths: Array<{ sign: string; letter: string; meaning: string; connects: [string, string] }>;
@@ -31,6 +39,7 @@ interface DivinePattern {
   }>;
   aspects: PlanetaryAspect[];
   sephirotStates: Map<string, ReturnType<typeof determineSephirahState>>;
+  pathwayDiagnostics?: PathwayDiagnostics; // NEW!
 }
 
 export interface DivineMessage {
@@ -44,11 +53,24 @@ export interface DivineMessage {
   worldManifestation: string;
   practicalWisdom: string;
   closingBlessing: string;
+  // NEW SECTIONS:
+  isolatedEnergy?: string;        // Guidance for stranded sephiroth
+  ungroundedManifestations?: string; // Guidance for blocked pathways
+  integrationWork?: string;       // Consolidated spiritual work
 }
 
 // Synthesize the complete divine message from the pattern
 export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
-  const { activeSephirot, activePaths, dominantWorld, worldPercentages, planetaryPlacements, aspects, sephirotStates } = pattern;
+  const { 
+    activeSephirot, 
+    activePaths, 
+    dominantWorld, 
+    worldPercentages, 
+    planetaryPlacements, 
+    aspects, 
+    sephirotStates,
+    pathwayDiagnostics 
+  } = pattern;
   
   // Determine the primary flow pattern
   const primaryFlow = analyzePrimaryFlow(planetaryPlacements);
@@ -59,7 +81,7 @@ export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
   // Generate aspect guidance
   const aspectInfo = generateAspectGuidance(aspects);
   
-  // Generate message sections
+  // Generate standard message sections
   const title = generateTitle(dominantWorld, primaryFlow);
   const opening = generateOpening(dominantWorld, worldPercentages);
   const shefaFlow = generateShefaFlow(primaryFlow, activeSephirot);
@@ -70,6 +92,17 @@ export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
   const worldManifestation = generateWorldManifestation(dominantWorld, worldPercentages);
   const practicalWisdom = generatePracticalWisdom(primaryFlow, dominantWorld, keyPaths, aspectInfo);
   const closingBlessing = generateClosingBlessing(dominantWorld);
+  
+  // Generate NEW diagnostic sections if diagnostics are available
+  let isolatedEnergy: string | undefined;
+  let ungroundedManifestations: string | undefined;
+  let integrationWork: string | undefined;
+  
+  if (pathwayDiagnostics) {
+    isolatedEnergy = generateIsolatedEnergyGuidance(pathwayDiagnostics.strandedSephiroth);
+    ungroundedManifestations = generateUngroundedPathwayGuidance(pathwayDiagnostics.ungroundedPathways);
+    integrationWork = pathwayDiagnostics.spiritualWork;
+  }
 
   return {
     title,
@@ -81,8 +114,46 @@ export function synthesizeDivineMessage(pattern: DivinePattern): DivineMessage {
     shadowWork,
     worldManifestation,
     practicalWisdom,
-    closingBlessing
+    closingBlessing,
+    isolatedEnergy,
+    ungroundedManifestations,
+    integrationWork
   };
+}
+
+// NEW: Generate guidance for stranded sephiroth
+function generateIsolatedEnergyGuidance(strandedSephiroth: StrandedSephirah[]): string {
+  if (strandedSephiroth.length === 0) {
+    return 'All active spheres are connected through illuminated pathways—your Tree shows healthy integration. Energy flows freely between activated centers.';
+  }
+  
+  const guidanceSegments = strandedSephiroth.map(sephirah => {
+    return `**${sephirah.name} (${sephirah.planet})**: ${sephirah.spiritualDiagnosis}\n\n*Integration Practice*: ${sephirah.integrationGuidance}`;
+  });
+  
+  const intro = strandedSephiroth.length === 1
+    ? 'One sphere operates in isolation today, requiring conscious integration:'
+    : `${strandedSephiroth.length} spheres operate in isolation today, each requiring conscious integration:`;
+  
+  return `${intro}\n\n${guidanceSegments.join('\n\n---\n\n')}`;
+}
+
+// NEW: Generate guidance for ungrounded pathways
+function generateUngroundedPathwayGuidance(ungroundedPathways: UngroundedPathway[]): string {
+  if (ungroundedPathways.length === 0) {
+    return 'All illuminated pathways connect active spheres—energy flows to where it can be received. Your Tree shows mature circulation patterns.';
+  }
+  
+  const guidanceSegments = ungroundedPathways.map(pathway => {
+    const arrow = pathway.blockageType === 'source-active-destination-inactive' ? '→' : '←';
+    return `**${pathway.fromSephirah} ${arrow} ${pathway.toSephirah}** (${pathway.zodiacSign} / ${pathway.hebrewLetter})\n${pathway.pathMeaning}\n\n${pathway.spiritualDiagnosis}\n\n*Your Work*: ${pathway.manifestationGuidance}`;
+  });
+  
+  const intro = ungroundedPathways.length === 1
+    ? 'One pathway is illuminated but cannot complete its flow—energy is blocked from manifesting:'
+    : `${ungroundedPathways.length} pathways are illuminated but cannot complete their flow:`;
+  
+  return `${intro}\n\n${guidanceSegments.join('\n\n---\n\n')}`;
 }
 
 // Analyze the primary flow pattern through the Tree
@@ -138,34 +209,23 @@ function generateOpening(world: World, percentages: Record<World, number>): stri
   const worldDescriptions: Record<World, string> = {
     Atziluth: 'The most exalted realm of pure spirit is dominant today. Divine archetypes are seeking to birth themselves through you.',
     Briah: 'The realm of thought and creation is dominant today. Ideas from the highest mind are forming and crystallizing.',
-    Yetzirah: 'The realm of formation and emotion is dominant today. Feelings are the bridge between spirit and matter.',
-    Assiah: 'The realm of action and manifestation is dominant today. The divine seeks embodiment through physical reality.'
+    Yetzirah: 'The realm of emotion and formation is dominant today. Feelings and images are shaping your reality.',
+    Assiah: 'The realm of physical action is dominant today. Divine energy is grounding into material manifestation.'
   };
   
-  return `Today, the ${worldDesc.name} (${worldDesc.hebrew}) illuminates ${percentage}% of the cosmic pattern. ${worldDescriptions[world]} The Tree of Life pulses with energy as the Shefa—the divine overflow—cascades through specific channels of expression.`;
+  return `${worldDescriptions[world]} ${Math.round(percentage)}% of today's celestial influx flows through ${worldDesc.hebrew}, inviting you to engage with ${worldDesc.realm.toLowerCase()} consciousness.`;
 }
 
-function generateShefaFlow(flow: ReturnType<typeof analyzePrimaryFlow>, sephirot: string[]): string {
-  const flowDescriptions: Record<string, string> = {
-    Kether: 'The Crown radiates pure unity consciousness, the undifferentiated source of all',
-    Chokmah: 'Wisdom streams forth as raw creative potential, the divine spark of "what could be"',
-    Binah: 'Understanding receives and shapes, giving form to infinite possibility',
-    Chesed: 'Mercy expands outward with boundless grace and generosity',
-    Geburah: 'Strength contracts inward with holy discrimination and boundaries',
-    Tiphereth: 'Beauty harmonizes all opposites in the sacred heart center',
-    Netzach: 'Victory persists through instinct, passion, and endurance',
-    Hod: 'Splendor analyzes and articulates through mind and word',
-    Yesod: 'Foundation channels all energies into the astral blueprint',
-    Malkuth: 'Kingdom grounds everything into tangible earthly form',
-    Daath: 'Knowledge reveals hidden connections across the abyss'
-  };
+function generateShefaFlow(
+  flow: ReturnType<typeof analyzePrimaryFlow>,
+  activeSephirot: string[]
+): string {
+  const activeDescriptions = activeSephirot.map(name => {
+    const sephirahData = Object.values(PLANETARY_SEPHIROT).find(s => s.name === name);
+    return sephirahData ? `${name} (${sephirahData.meaning})` : name;
+  });
   
-  const activeDescriptions = sephirot
-    .slice(0, 3)
-    .map(s => flowDescriptions[s] || '')
-    .filter(Boolean);
-  
-  return `The divine flow descends from ${flow.topSephirah}, centering in ${flow.centralSephirah}. ${activeDescriptions.join('. ')}. This creates a pattern of ${flow.theme}, inviting you to align with this cosmic current.`;
+  return `The divine influx (Shefa) descends from ${flow.topSephirah}, flowing through ${activeDescriptions.join(', ')}. This creates a pattern of ${flow.theme}, inviting you to align with this cosmic current.`;
 }
 
 function generatePathwayGuidance(paths: ReturnType<typeof identifyKeyPaths>): string {
@@ -219,90 +279,74 @@ function generateIlluminatedSpheres(states: Map<string, ReturnType<typeof determ
     return 'All spheres rest in balance today, neither fully illuminated nor in shadow.';
   }
   
-  return `Spheres bathed in divine light: ${illuminated.join('; ')}. These are your greatest gifts today—channels of grace and effortless flow.`;
+  return `Spheres bathed in divine light: ${illuminated.join('; ')}.`;
 }
 
-function generateShadowWork(states: Map<string, ReturnType<typeof determineSephirahState>>, aspects: PlanetaryAspect[]): string {
-  const shadows: string[] = [];
+function generateShadowWork(
+  states: Map<string, ReturnType<typeof determineSephirahState>>,
+  aspects: PlanetaryAspect[]
+): string {
+  const shadowed: string[] = [];
   
   states.forEach((state, sephirah) => {
     if (state.state === 'shadow') {
-      shadows.push(`${sephirah}: ${state.description}`);
+      shadowed.push(`${sephirah}: ${state.description}`);
     }
   });
   
-  if (shadows.length === 0) {
-    return 'No spheres require deep shadow work today. Rest in this blessing of clarity.';
+  const challengingAspects = aspects.filter(a => a.quality === 'challenging');
+  
+  if (shadowed.length === 0 && challengingAspects.length === 0) {
+    return 'The Tree faces minimal shadow today—a time of grace and ease. Use this gift wisely.';
   }
   
-  const challengingAspects = aspects.filter(a => a.quality === 'challenging').slice(0, 2);
-  const aspectDetails = challengingAspects.map(a => 
-    `${a.planet1} ${a.symbol} ${a.planet2} (${a.sephirah1}↔${a.sephirah2})`
-  ).join(', ');
+  const shadowGuidance = shadowed.length > 0
+    ? `Spheres in shadow: ${shadowed.join('; ')}. `
+    : '';
   
-  return `Spheres calling for integration: ${shadows.join('; ')}. The challenging aspects (${aspectDetails}) create friction that is the forge of spiritual gold. Where you feel resistance, lean in with compassion and consciousness.`;
+  const aspectDetails = challengingAspects.length > 0
+    ? `${challengingAspects.length} challenging aspect(s) create friction that, when worked with consciously, becomes the grist for transformation. `
+    : '';
+  
+  return `${shadowGuidance}${aspectDetails}Remember: shadow is not evil but rather unconscious potential awaiting integration.`;
 }
 
 function generateWorldManifestation(world: World, percentages: Record<World, number>): string {
   const worldDesc = FOUR_WORLDS[world];
-  const secondWorld = (Object.entries(percentages) as [World, number][])
-    .sort((a, b) => b[1] - a[1])[1];
+  const otherWorlds = (Object.keys(FOUR_WORLDS) as World[]).filter(w => w !== world);
+  const secondWorld = otherWorlds.reduce((a, b) => percentages[a] > percentages[b] ? a : b);
+  const secondPercentage = Math.round(percentages[secondWorld]);
   
-  const manifestationGuidance: Record<World, string> = {
-    Atziluth: 'This is a day for visioning, meditation, and connecting with your highest purpose. The spiritual realm is very close—set intentions that align with your soul\'s calling.',
-    Briah: 'This is a day for thinking, planning, and intellectual clarity. Ideas have power now—journal, strategize, and allow divine intelligence to flow through your mind.',
-    Yetzirah: 'This is a day for feeling, creating, and artistic expression. Honor your emotions as messengers from the divine. Creative work channels the Shefa directly.',
-    Assiah: 'This is a day for doing, building, and physical action. The spiritual wants to become tangible—take concrete steps toward your visions.'
-  };
-  
-  const secondWorldDesc = FOUR_WORLDS[secondWorld[0]];
-  
-  return `${manifestationGuidance[world]} While ${worldDesc.realm} dominates, ${Math.round(secondWorld[1])}% flows through ${secondWorldDesc.name}, suggesting a bridge between ${worldDesc.realm.toLowerCase()} and ${secondWorldDesc.realm.toLowerCase()}. Work at this intersection for maximum alignment.`;
+  return `With ${worldDesc.name} dominant, manifestation occurs primarily through ${worldDesc.realm.toLowerCase()}. ${FOUR_WORLDS[secondWorld].name} contributes ${secondPercentage}%, adding ${FOUR_WORLDS[secondWorld].realm.toLowerCase()} coloring. Work with both frequencies for optimal results.`;
 }
 
 function generatePracticalWisdom(
-  flow: ReturnType<typeof analyzePrimaryFlow>, 
+  flow: ReturnType<typeof analyzePrimaryFlow>,
   world: World,
   paths: ReturnType<typeof identifyKeyPaths>,
   aspectInfo: ReturnType<typeof generateAspectGuidance>
 ): string {
-  const practices: Record<World, string[]> = {
-    Atziluth: [
-      'Spend time in silent meditation or contemplative prayer',
-      'Ask: "What is the highest expression of my soul today?"',
-      'Work with symbols, archetypal images, or sacred art'
-    ],
-    Briah: [
-      'Journal your insights and revelations',
-      'Study wisdom teachings or engage in meaningful dialogue',
-      'Create mental models or frameworks for spiritual understanding'
-    ],
-    Yetzirah: [
-      'Express yourself through art, music, or movement',
-      'Process emotions consciously through feeling practices',
-      'Work with visualization, active imagination, or dreamwork'
-    ],
-    Assiah: [
-      'Take concrete action on a spiritual intention',
-      'Engage in ritual, ceremony, or embodied practice',
-      'Build or create something tangible that serves others'
-    ]
+  const worldPractices: Record<World, string[]> = {
+    Atziluth: ['Meditate on divine names', 'Contemplate eternal truths', 'Practice pure presence'],
+    Briah: ['Journal insights', 'Study sacred texts', 'Engage in creative ideation'],
+    Yetzirah: ['Express emotions through art', 'Practice breathwork', 'Engage in visualization'],
+    Assiah: ['Take physical action', 'Create tangible offerings', 'Move your body consciously']
   };
   
-  const selectedPractices = practices[world].slice(0, 2);
+  const selectedPractices = worldPractices[world].slice(0, 2);
   
-  const sephirahPractice = flow.centralSephirah === 'Tiphereth' 
-    ? 'Center yourself in your heart—let all decisions flow from this sacred place.'
-    : `Honor ${flow.centralSephirah} by aligning with its quality today.`;
+  const sephirahPractice = flow.centralSephirah === 'Tiphereth'
+    ? ' Center yourself in your heart before acting.'
+    : '';
   
-  let aspectPractice = '';
-  if (aspectInfo.shadowPaths.length > 0) {
-    aspectPractice = ' For shadow work, practice conscious integration: name the tension, breathe into the discomfort, ask what gift it brings.';
-  } else if (aspectInfo.illuminatedPaths.length > 0) {
-    aspectPractice = ' With harmonious aspects supporting you, trust the flow and let things unfold naturally.';
-  }
+  // Use shadowPaths or illuminatedPaths arrays instead of keyAspects
+  const aspectPractice = aspectInfo.shadowPaths && aspectInfo.shadowPaths.length > 0
+    ? ' Work consciously with the challenging aspects to transform tension into growth.'
+    : aspectInfo.illuminatedPaths && aspectInfo.illuminatedPaths.length > 0
+    ? ' Allow the harmonious aspects to support your flow today.'
+    : '';
   
-  return `Practical ways to align with today's pattern: ${selectedPractices.join('; ')}. ${sephirahPractice}${aspectPractice}`;
+  return `Practical ways to align with today's pattern: ${selectedPractices.join('; ')}.${sephirahPractice}${aspectPractice}`;
 }
 
 function generateClosingBlessing(world: World): string {
@@ -316,8 +360,12 @@ function generateClosingBlessing(world: World): string {
   return `The Tree of Life is alive within you—these cosmic patterns reflect your own inner landscape. ${blessings[world]} Remember: you are not separate from this flow. You ARE the Shefa expressing itself in this moment, in this place. Walk consciously through the day as a living blessing. ✨`;
 }
 
-// Main function to generate the complete message from sky data
-export function generateDivineMessageFromSky(skyData: any, kabbalisticReading: any, worldActivation: any): DivineMessage {
+// Main function to generate the complete message from sky data with FULL DIAGNOSTICS
+export function generateDivineMessageFromSky(
+  skyData: any, 
+  kabbalisticReading: any, 
+  worldActivation: any
+): DivineMessage {
   // Calculate aspects
   const planetToSephirah: Record<string, string> = {};
   kabbalisticReading.sephirotDetails.forEach((detail: any) => {
@@ -334,40 +382,54 @@ export function generateDivineMessageFromSky(skyData: any, kabbalisticReading: a
     sephirotStates.set(sephirah, determineSephirahState(sephirah, aspects));
   });
   
-  // Build the pattern
+  // Build planetary placements
+  const planetaryPlacements = kabbalisticReading.sephirotDetails.map((detail: any) => {
+    const planetData = skyData.planets[detail.planet];
+    const worldData = determineWorld(
+      detail.planet, 
+      planetData.sign, 
+      planetData.house
+    );
+    return {
+      planet: detail.planet,
+      sephirah: detail.sephirah.name,
+      sign: planetData.sign,
+      house: planetData.house,
+      world: worldData.primary
+    };
+  });
+  
+  // Build active paths
+  const activePaths = Object.entries(skyData.planets)
+    .map(([planet, data]: [string, any]) => {
+      const pathInfo = ZODIAC_PATHS[data.sign];
+      if (!pathInfo) return null;
+      return {
+        sign: data.sign,
+        letter: pathInfo.letterName,
+        meaning: pathInfo.meaning,
+        connects: pathInfo.connects
+      };
+    })
+    .filter(Boolean) as any;
+  
+  // NEW: Run pathway diagnostics
+  const pathwayDiagnostics = analyzeSephirothPathways(
+    kabbalisticReading.activeSephirot,
+    activePaths,
+    planetaryPlacements
+  );
+  
+  // Build the complete pattern
   const pattern: DivinePattern = {
     activeSephirot: kabbalisticReading.activeSephirot,
-    activePaths: Object.entries(skyData.planets)
-      .map(([planet, data]: [string, any]) => {
-        const pathInfo = ZODIAC_PATHS[data.sign];
-        if (!pathInfo) return null;
-        return {
-          sign: data.sign,
-          letter: pathInfo.letterName,
-          meaning: pathInfo.meaning,
-          connects: pathInfo.connects
-        };
-      })
-      .filter(Boolean) as any,
+    activePaths,
     dominantWorld: worldActivation.dominantWorld,
     worldPercentages: worldActivation.worldPercentages,
-    planetaryPlacements: kabbalisticReading.sephirotDetails.map((detail: any) => {
-      const planetData = skyData.planets[detail.planet];
-      const worldData = determineWorld(
-        detail.planet, 
-        planetData.sign, 
-        planetData.house
-      );
-      return {
-        planet: detail.planet,
-        sephirah: detail.sephirah.name,
-        sign: planetData.sign,
-        house: planetData.house,
-        world: worldData.primary
-      };
-    }),
+    planetaryPlacements,
     aspects,
-    sephirotStates
+    sephirotStates,
+    pathwayDiagnostics // Include diagnostics
   };
 
   return synthesizeDivineMessage(pattern);

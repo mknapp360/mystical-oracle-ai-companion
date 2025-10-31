@@ -386,6 +386,7 @@ export function determineSephirahState(
 
 // Generate aspect interpretation for the divine message
 export function generateAspectGuidance(aspects: PlanetaryAspect[]): {
+  keyAspects: any;
   illuminatedPaths: string[];
   shadowPaths: string[];
   summary: string;
@@ -418,8 +419,9 @@ export function generateAspectGuidance(aspects: PlanetaryAspect[]): {
   }
   
   return {
-    illuminatedPaths,
-    shadowPaths,
-    summary
-  };
+  illuminatedPaths,
+  shadowPaths,
+  summary,
+  keyAspects: undefined,
+};
 }

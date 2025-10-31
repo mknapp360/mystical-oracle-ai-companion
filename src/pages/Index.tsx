@@ -11,6 +11,8 @@ import { loginWithGoogle, logout } from '../components/Auth';
 import { NavBar } from '../components/NavBar';
 import React from "react";
 import CurrentSky from "@/components/CurrentSky";
+import { TreeInsightDisplay } from '@/components/TreeInsightDisplay';
+
 
 type ActiveTab = 'reading' | 'library';
 
@@ -71,7 +73,8 @@ const Index = () => {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           { <CurrentSky /> }
-          {activeTab === 'reading' && <CardReader cards={allCards} user={user} />}    
+          {activeTab === 'reading' && <CardReader cards={allCards} user={user} />}   
+          { <TreeInsightDisplay activePlanets={undefined} pathActivations={[]}/> }
         </main>
 
         {/* Footer */}

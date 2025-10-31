@@ -1,5 +1,5 @@
-// src/components/ShefaDisplay.tsx
-// Updated to support enhanced diagnostics while remaining backward compatible
+// src/components/DivineMessageDisplayEnhanced.tsx
+// Enhanced display with pathway diagnostics
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import {
   Droplets,
   AlertCircle,
   GitBranch,
+  Zap,
   Link
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -31,17 +32,17 @@ interface DivineMessage {
   worldManifestation: string;
   practicalWisdom: string;
   closingBlessing: string;
-  // NEW: Optional enhanced diagnostics
+  // Enhanced sections:
   isolatedEnergy?: string;
   ungroundedManifestations?: string;
   integrationWork?: string;
 }
 
-interface DivineMessageDisplayProps {
+interface DivineMessageDisplayEnhancedProps {
   message: DivineMessage;
 }
 
-export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ message }) => {
+export const DivineMessageDisplayEnhanced: React.FC<DivineMessageDisplayEnhancedProps> = ({ message }) => {
   return (
     <div className="space-y-6">
       {/* Title Card */}
@@ -88,7 +89,7 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
             </div>
             <div>
               <h3 className="font-serif text-lg font-semibold mb-2 text-blue-900 dark:text-blue-100">
-                The Shefa Flow (שפע)
+                The Shefa Flow
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 {message.shefaFlow}
@@ -109,7 +110,7 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
             </div>
             <div>
               <h3 className="font-serif text-lg font-semibold mb-2 text-indigo-900 dark:text-indigo-100">
-                The Sacred Pathways
+                Active Pathways
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 {message.pathwayGuidance}
@@ -119,7 +120,7 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
         </CardContent>
       </Card>
 
-      {/* NEW: Isolated Energy Section - Only shows if present */}
+      {/* NEW: Isolated Energy Section */}
       {message.isolatedEnergy && (
         <Card className="border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50 to-white dark:from-orange-950 dark:to-gray-900">
           <CardContent className="pt-6">
@@ -147,7 +148,7 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
         </Card>
       )}
 
-      {/* NEW: Ungrounded Manifestations Section - Only shows if present */}
+      {/* NEW: Ungrounded Manifestations Section */}
       {message.ungroundedManifestations && (
         <Card className="border-red-200 dark:border-red-800 bg-gradient-to-br from-red-50 to-white dark:from-red-950 dark:to-gray-900">
           <CardContent className="pt-6">
@@ -238,7 +239,7 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
         </CardContent>
       </Card>
 
-      {/* NEW: Integration Work - Only shows if present */}
+      {/* NEW: Integration Work */}
       {message.integrationWork && (
         <Card className="border-teal-200 dark:border-teal-800 bg-gradient-to-br from-teal-50 to-white dark:from-teal-950 dark:to-gray-900">
           <CardContent className="pt-6">
@@ -262,17 +263,17 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
       )}
 
       {/* World Manifestation */}
-      <Card className="border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950 dark:to-gray-900">
+      <Card className="border-cyan-200 dark:border-cyan-800 bg-gradient-to-br from-cyan-50 to-white dark:from-cyan-950 dark:to-gray-900">
         <CardContent className="pt-6">
           <div className="flex gap-4">
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-                <Eye className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center">
+                <Eye className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
               </div>
             </div>
             <div>
-              <h3 className="font-serif text-lg font-semibold mb-2 text-emerald-900 dark:text-emerald-100">
-                World Manifestation
+              <h3 className="font-serif text-lg font-semibold mb-2 text-cyan-900 dark:text-cyan-100">
+                How Energy Manifests Today
               </h3>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 {message.worldManifestation}
@@ -327,4 +328,4 @@ export const DivineMessageDisplay: React.FC<DivineMessageDisplayProps> = ({ mess
   );
 };
 
-export default DivineMessageDisplay;
+export default DivineMessageDisplayEnhanced;

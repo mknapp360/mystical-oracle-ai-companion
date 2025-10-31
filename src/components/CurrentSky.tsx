@@ -15,6 +15,7 @@ import { PersonalizedTransitDisplay } from './PersonalizedTransitDisplay';
 import { getUserBirthChart, saveTransitReading, type BirthChartData } from '@/lib/birthChartService';
 import { calculateTransitAspects, generatePersonalizedTransitMessage } from '@/lib/transit-calculator';
 import { supabase } from '@/lib/supabaseClient';
+import { ActivePathwaysInsightExpanded, ActivePathwaysText } from '@/components/ActivePathwaysInsight';
 
 import { 
   PLANETARY_SEPHIROT, 
@@ -659,9 +660,10 @@ const KabbalisticCurrentSky: React.FC = () => {
                     </div>
                     
                     <div className="px-4 py-3">
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        {pathwaySummary}
-                      </p>
+                      <ActivePathwaysInsightExpanded
+                          activePlanets={activePlanets}
+                          pathActivations={pathActivations}
+                        />
                     </div>
                     
                     <div className="px-4 pb-3 text-xs text-slate-500 border-t border-slate-100 pt-3">
