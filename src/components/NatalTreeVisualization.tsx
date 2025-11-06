@@ -109,13 +109,13 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
   return (
     <Card style={{ backgroundColor: '#1f2747' }}>
       <CardHeader>
-        <CardTitle className="text-center font-serif color:">
+        <CardTitle className="text-center font-serif text-white">
           The Tree of Life - Your Natal Signature
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-8">
         <svg 
-          viewBox="0 0 500 700" 
+          viewBox="0 0 500 760" 
           className="w-full h-auto max-h-[700px]"
           style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
         >
