@@ -136,7 +136,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
             </filter>
           </defs>
 
-          <rect width="500" height="700" fill="#1f2747" />
+          <rect width="500" height="700" fill="#252d2f" />
 
           {/* Draw paths first (so they appear behind spheres) */}
           {TREE_PATHS.map(([from, to], i) => {
