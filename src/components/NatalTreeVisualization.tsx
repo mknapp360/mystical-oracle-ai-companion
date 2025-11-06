@@ -107,7 +107,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
   };
 
   return (
-    <Card style={{ backgroundColor: '#1f2747' }}>
+    <Card style={{ backgroundColor: '#252d2f' }}>
       <CardHeader>
         <CardTitle className="text-center font-serif">
           The Tree of Life - Your Natal Signature
@@ -136,7 +136,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
             </filter>
           </defs>
 
-          <rect width="500" height="700" fill="#252d2f" />
+          <rect width="500" height="700" fill="#1f2747" />
 
           {/* Draw paths first (so they appear behind spheres) */}
           {TREE_PATHS.map(([from, to], i) => {
