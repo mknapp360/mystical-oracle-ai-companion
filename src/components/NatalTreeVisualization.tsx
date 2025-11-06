@@ -116,7 +116,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
       <CardContent className="pb-8">
         <svg 
           viewBox="0 0 500 800" 
-          className="w-full h-auto"
+          className="w-full h-auto max-h-[800px]"
           style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
         >
           {/* Background gradient */}
