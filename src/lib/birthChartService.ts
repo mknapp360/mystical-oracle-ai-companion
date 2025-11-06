@@ -1,9 +1,8 @@
 // src/lib/birthChartService.ts
-// COMPLETE FILE - Production Ready
+// FIXED: Single source of truth for BirthChartData interface
 
 import { supabase } from './supabaseClient';
 import { type PlanetaryAspect } from './aspect-calculator';
-import { ReactNode } from 'react';
 
 export interface PlanetaryPosition {
   absoluteDegree: number;
@@ -21,9 +20,8 @@ export interface PlanetaryPosition {
   };
 }
 
+// PRODUCTION-READY: Matches database schema exactly
 export interface BirthChartData {
-  birth_location: ReactNode;
-  planets(planets: any): unknown;
   id?: string;
   user_id?: string;
   birth_date_time: string;
@@ -196,95 +194,4 @@ export async function saveTransitReading(readingData: TransitReadingData): Promi
     console.error('Error saving transit reading:', error);
     throw error;
   }
-}
-
-// Get user's transit reading history
-export async function getUserTransitReadings(
-  userId: string,
-  limit: number = 10
-): Promise<TransitReadingData[]> {
-  try {
-    const { data, error } = await supabase
-      .from('transit_readings')
-      .select('*')
-      .eq('user_id', userId)
-      .order('transit_date', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching transit readings:', error);
-    throw error;
-  }
-}
-
-// Get transit reading by date
-export async function getTransitReadingByDate(
-  userId: string,
-  date: string
-): Promise<TransitReadingData | null> {
-  try {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const { data, error } = await supabase
-      .from('transit_readings')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('transit_date', startOfDay.toISOString())
-      .lte('transit_date', endOfDay.toISOString())
-      .order('transit_date', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error fetching transit reading by date:', error);
-    throw error;
-  }
-}
-
-// Helper: Get planetary position by name
-export function getPlanetPosition(
-  birthChart: BirthChartData, 
-  planetName: string
-): PlanetaryPosition | null {
-  return birthChart.planetary_positions?.[planetName] || null;
-}
-
-// Helper: Get all retrograde planets
-export function getRetrogradePlanets(birthChart: BirthChartData): string[] {
-  if (!birthChart.planetary_positions) return [];
-  
-  return Object.entries(birthChart.planetary_positions)
-    .filter(([_, pos]) => pos.isRetrograde)
-    .map(([name, _]) => name);
-}
-
-// Helper: Calculate angular distance between two planets
-export function getAngularDistance(
-  birthChart: BirthChartData,
-  planet1: string,
-  planet2: string
-): number | null {
-  const pos1 = birthChart.planetary_positions?.[planet1];
-  const pos2 = birthChart.planetary_positions?.[planet2];
-  
-  if (!pos1 || !pos2) return null;
-  
-  let diff = Math.abs(pos1.absoluteDegree - pos2.absoluteDegree);
-  if (diff > 180) diff = 360 - diff;
-  
-  return diff;
 }

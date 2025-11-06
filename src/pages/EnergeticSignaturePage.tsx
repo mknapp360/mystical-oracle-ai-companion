@@ -201,7 +201,7 @@ const EnergeticSignaturePage: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            <span>{birthChart.birth_location}</span>
+            <span>{birthChart.birth_city}</span>
           </div>
         </div>
       </div>
