@@ -1,5 +1,5 @@
 // src/pages/EnergeticSignaturePage.tsx
-// ENHANCED with Tree of Life Visualization and Four Worlds Display
+// FIXED: Completed useEffect hook and proper data loading
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,7 @@ import {
 } from '@/components/PathActivationDisplay';
 import { NatalTreeVisualization } from '@/components/NatalTreeVisualization';
 import { NatalSignatureReport } from '@/components/NatalSignatureReport';
+import { formatBirthDateTime } from '@/lib/dateFormatters';
 
 
 interface PlanetaryDetail {
@@ -33,6 +34,14 @@ interface PlanetaryDetail {
   primaryWorld: string;
 }
 
+interface EnergeticSignature {
+  worldPercentages: Record<string, number>;
+  dominantWorld: string;
+  pillarCount: { Left: number; Middle: number; Right: number };
+  elementalBalance: Record<string, number>;
+  planetaryDetails: PlanetaryDetail[];
+}
+
 const getPillar = (sephirahName: string): string => {
   const leftPillar = ['Binah', 'Geburah', 'Hod'];
   const rightPillar = ['Chokmah', 'Chesed', 'Netzach'];
@@ -42,6 +51,20 @@ const getPillar = (sephirahName: string): string => {
   if (rightPillar.includes(sephirahName)) return 'Right';
   if (middlePillar.includes(sephirahName)) return 'Middle';
   return 'Middle';
+};
+
+const worldIcons = {
+  Atziluth: <Flame className="w-4 h-4" />,
+  Briah: <Wind className="w-4 h-4" />,
+  Yetzirah: <Droplet className="w-4 h-4" />,
+  Assiah: <Mountain className="w-4 h-4" />
+};
+
+const worldColors = {
+  Atziluth: 'from-red-500 to-orange-500',
+  Briah: 'from-blue-400 to-blue-600',
+  Yetzirah: 'from-yellow-400 to-yellow-600',
+  Assiah: 'from-green-600 to-green-800'
 };
 
 const EnergeticSignaturePage: React.FC = () => {
@@ -71,198 +94,140 @@ const EnergeticSignaturePage: React.FC = () => {
     fetchUser();
   }, []);
 
-  const calculateSignature = (chart: BirthChartData) => {
-    const activeSephirot = new Set<string>();
-    const worldScores = { Atziluth: 0, Briah: 0, Yetzirah: 0, Assiah: 0 };
+  // Calculate energetic signature from birth chart
+  const calculateSignature = (chart: BirthChartData): EnergeticSignature => {
+    const worldCounts: Record<string, number> = { Atziluth: 0, Briah: 0, Yetzirah: 0, Assiah: 0 };
+    const pillarCounts = { Left: 0, Middle: 0, Right: 0 };
+    const elementCounts: Record<string, number> = { Fire: 0, Water: 0, Air: 0, Earth: 0 };
     const planetaryDetails: PlanetaryDetail[] = [];
-    const pillarCount = { Left: 0, Right: 0, Middle: 0 };
 
     Object.entries(chart.natal_planets).forEach(([planet, data]) => {
-      const sephirah = PLANETARY_SEPHIROT[planet];
-      const path = ZODIAC_PATHS[data.sign];
+      const sephirahMapping = PLANETARY_SEPHIROT[planet];
+      if (!sephirahMapping) return;
       
-      if (!sephirah) return;
+      const sephirahName = sephirahMapping.name;
+      const pillar = getPillar(sephirahName);
+      pillarCounts[pillar as keyof typeof pillarCounts]++;
 
-      const worlds = determineWorld(planet, data.sign, data.house);
-      activeSephirot.add(sephirah.name);
-      
-      worldScores[worlds.primary] += 3;
-      worldScores[worlds.influences[0]] += 2;
+      // determineWorld returns { primary, influences, strength }
+      // It needs 3 parameters: planet, sign, house
+      const worldData = determineWorld(planet, data.sign, data.house);
+      const primaryWorld = worldData.primary;
+      worldCounts[primaryWorld]++;
 
-      const pillar = getPillar(sephirah.name);
-      pillarCount[pillar as 'Left' | 'Right' | 'Middle']++;
+      const element = ['Aries', 'Leo', 'Sagittarius'].includes(data.sign) ? 'Fire' :
+                     ['Cancer', 'Scorpio', 'Pisces'].includes(data.sign) ? 'Water' :
+                     ['Gemini', 'Libra', 'Aquarius'].includes(data.sign) ? 'Air' : 'Earth';
+      elementCounts[element]++;
 
       planetaryDetails.push({
         planet,
-        sephirah: sephirah.name,
+        sephirah: sephirahName,
         sign: data.sign,
         degree: data.degree_in_sign.toFixed(1),
-        element: path?.hebrewLetter ? getSignElement(data.sign) : 'unknown',
-        primaryWorld: worlds.primary
+        element,
+        primaryWorld
       });
     });
 
-    const totalScore = Object.values(worldScores).reduce((a, b) => a + b, 0);
-    const worldPercentages = Object.fromEntries(
-      Object.entries(worldScores).map(([world, score]) => [
-        world,
-        ((score / totalScore) * 100).toFixed(1)
-      ])
-    );
+    const totalPlanets = Object.values(worldCounts).reduce((a, b) => a + b, 0);
+    const worldPercentages: Record<string, number> = {};
+    Object.entries(worldCounts).forEach(([world, count]) => {
+      worldPercentages[world] = (count / totalPlanets) * 100;
+    });
 
-    const dominantWorld = Object.entries(worldScores).sort((a, b) => b[1] - a[1])[0][0];
-    const spread = Math.max(...Object.values(worldScores)) - Math.min(...Object.values(worldScores));
-    const isBalanced = spread <= (totalScore * 0.15);
+    const dominantWorld = Object.entries(worldPercentages)
+      .reduce((a, b) => a[1] > b[1] ? a : b)[0];
 
     return {
-      activeSephirot: Array.from(activeSephirot),
       worldPercentages,
       dominantWorld,
-      planetaryDetails,
-      pillarCount,
-      isBalanced
+      pillarCount: pillarCounts,
+      elementalBalance: elementCounts,
+      planetaryDetails
     };
   };
 
-  const getSignElement = (sign: string): string => {
-    const fireSigns = ['Aries', 'Leo', 'Sagittarius'];
-    const waterSigns = ['Cancer', 'Scorpio', 'Pisces'];
-    const airSigns = ['Gemini', 'Libra', 'Aquarius'];
-    const earthSigns = ['Taurus', 'Virgo', 'Capricorn'];
-    
-    if (fireSigns.includes(sign)) return 'Fire';
-    if (waterSigns.includes(sign)) return 'Water';
-    if (airSigns.includes(sign)) return 'Air';
-    if (earthSigns.includes(sign)) return 'Earth';
-    return 'Air';
-  };
-
-  const worldIcons = {
-    Atziluth: <Flame className="w-5 h-5 text-white" />,
-    Briah: <Wind className="w-5 h-5 text-white" />,
-    Yetzirah: <Droplet className="w-5 h-5 text-white" />,
-    Assiah: <Mountain className="w-5 h-5 text-white" />
-  };
-
-  const worldColors = {
-    Atziluth: 'from-amber-500 to-orange-600',
-    Briah: 'from-sky-400 to-blue-500',
-    Yetzirah: 'from-purple-400 to-indigo-500',
-    Assiah: 'from-emerald-600 to-green-700'
-  };
-
+  // Show loading state
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 pb-24 space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="container mx-auto py-8 px-4">
+        <Skeleton className="h-12 w-64 mb-6" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-8 pb-24">
-        <Card>
-          <CardHeader>
-            <CardTitle>Authentication Required</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Please sign in to view your natal energetic signature.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+  // Show birth chart form if no chart exists
   if (!birthChart) {
     return (
-      <div className="container mx-auto px-4 py-8 pb-24">
-        <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Sparkles className="w-7 h-7 text-purple-600" />
-              Natal Energetic Signature
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-6">
-              Enter your birth information to calculate your natal energetic signature.
-            </p>
-            <BirthChartForm 
-              userId={user.id}
-              onSave={(chart) => setBirthChart(chart)} 
-            />
-          </CardContent>
-        </Card>
+      <div className="container mx-auto py-8 px-4 max-w-2xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2">Your Energetic Signature</h1>
+          <p className="text-muted-foreground">
+            Enter your birth details to discover your unique Kabbalistic blueprint
+          </p>
+        </div>
+        <BirthChartForm 
+          userId={user.id}
+          onSave={(chart) => setBirthChart(chart)}
+          existingChart={undefined}
+        />
       </div>
     );
   }
 
+  // Calculate all derived data
   const signature = calculateSignature(birthChart);
-  const { formattedDate, formattedTime } = formatBirthDateTime(
-  birthChart.birth_date_time,
-  birthChart.birth_timezone
-);
-
-  // Calculate enhanced features
-  console.log('=== BIRTH CHART DATA ===');
-  console.log('Has natal_aspects?', !!birthChart.natal_aspects);
-  console.log('natal_aspects length:', birthChart.natal_aspects?.length || 0);
-  console.log('natal_aspects:', birthChart.natal_aspects);
-  
-  const pathActivations = birthChart.natal_aspects 
-    ? calculatePathActivations(birthChart.natal_aspects) 
-    : [];
+  const pathActivations = calculatePathActivations(birthChart.natal_aspects || []);
   const retrogradeThemes = identifyRetrogradeThemes(birthChart);
-  const aspectPatterns = birthChart.natal_aspects 
-    ? detectAspectPatterns(birthChart.natal_aspects, birthChart) 
-    : [];
-  
-  console.log('Path activations calculated:', pathActivations.length);
+  const aspectPatterns = detectAspectPatterns(
+    birthChart.natal_aspects || [],
+    birthChart
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-24 space-y-6">
-      {/* Header Card */}
-      <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Sparkles className="w-7 h-7 text-purple-600" />
-            Natal Energetic Signature
-          </CardTitle>
-          <div className="flex flex-col gap-2 mt-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              {formattedDate} at {formattedTime}
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              {birthChart.birth_city}, {birthChart.birth_country}
-            </div>
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <Sparkles className="w-8 h-8 text-purple-600" />
+          <h1 className="text-3xl font-bold">Your Energetic Signature</h1>
+        </div>
+        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>{new Date(birthChart.birth_date_time).toLocaleDateString()}</span>
           </div>
-        </CardHeader>
-      </Card>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            <span>{birthChart.birth_location}</span>
+          </div>
+        </div>
+      </div>
 
-      {/* Tabs for different views */}
+      {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tree">Tree of Life</TabsTrigger>
           <TabsTrigger value="patterns">Life Patterns</TabsTrigger>
-          <TabsTrigger value="report">Report</TabsTrigger>
+          <TabsTrigger value="report">Full Report</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          {/* Four Worlds Activation - Similar to CurrentSky */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Four Worlds Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Four Worlds Activation</CardTitle>
-              {signature.isBalanced && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  ⚖️ <strong>Quaternary Balance:</strong> All worlds nearly equal—balanced access to all levels.
-                </p>
-              )}
+              <CardTitle className="flex items-center gap-2">
+                Four Worlds Distribution
+                {signature.dominantWorld && (
+                  <span className="text-sm font-normal text-muted-foreground">
+                    • Dominant: {signature.dominantWorld}
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* World Percentage Bars */}
@@ -378,7 +343,7 @@ const EnergeticSignaturePage: React.FC = () => {
           <RetrogradeThemesSection themes={retrogradeThemes} />
         </TabsContent>
 
-        {/* NEW: Report Tab */}
+        {/* Report Tab */}
         <TabsContent value="report" className="mt-6">
           <NatalSignatureReport
             birthChart={birthChart}
@@ -393,7 +358,3 @@ const EnergeticSignaturePage: React.FC = () => {
 };
 
 export default EnergeticSignaturePage;
-
-function formatBirthDateTime(birth_date_time: string, birth_timezone: string): { formattedDate: any; formattedTime: any; } {
-  throw new Error('Function not implemented.');
-}

@@ -3,6 +3,7 @@
 
 import { supabase } from './supabaseClient';
 import { type PlanetaryAspect } from './aspect-calculator';
+import { ReactNode } from 'react';
 
 export interface PlanetaryPosition {
   absoluteDegree: number;
@@ -21,6 +22,8 @@ export interface PlanetaryPosition {
 }
 
 export interface BirthChartData {
+  birth_location: ReactNode;
+  planets(planets: any): unknown;
   id?: string;
   user_id?: string;
   birth_date_time: string;
