@@ -263,9 +263,9 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
           })}
 
           {/* Three Pillars labels */}
-          <text x="120" y="730" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
-          <text x="250" y="730" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
-          <text x="380" y="730" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
+          <text x="120" y="770" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
+          <text x="250" y="770" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
+          <text x="380" y="770" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
         </svg>
 
         {/* Legend */}
