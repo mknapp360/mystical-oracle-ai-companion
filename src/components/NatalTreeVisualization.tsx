@@ -20,7 +20,7 @@ const SEPHIROT_POSITIONS: Record<string, { x: number; y: number }> = {
   Netzach: { x: 380, y: 480 },
   Hod: { x: 120, y: 480 },
   Yesod: { x: 250, y: 580 },
-  Malkuth: { x: 250, y: 690 }
+  Malkuth: { x: 250, y: 700 }
 };
 
 // All possible paths on the Tree
@@ -115,8 +115,8 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
       </CardHeader>
       <CardContent className="pb-8">
         <svg 
-          viewBox="0 0 500 810" 
-          className="w-full h-auto max-h-[700px]"
+          viewBox="0 0 500 800" 
+          className="w-full h-auto"
           style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
         >
           {/* Background gradient */}
@@ -136,7 +136,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
             </filter>
           </defs>
 
-          <rect width="500" height="700" fill="#252f55" />
+          <rect width="500" height="800" fill="#252f55" />
 
           {/* Draw paths first (so they appear behind spheres) */}
           {TREE_PATHS.map(([from, to], i) => {
