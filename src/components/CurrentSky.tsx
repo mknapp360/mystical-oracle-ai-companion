@@ -592,83 +592,134 @@ const pathActivations = useMemo<Activation[]>(() => {
               
               {/* Sky Arc Visualization */}
               <div className="relative px-4 py-6">
+                {/* tiny CSS for cloud pan animation */}
+                <style>{`
+                  @keyframes pan-slow { 
+                    0% { transform: scale(1.08) translateX(-6px) translateY(-4px); }
+                    50% { transform: scale(1.08) translateX(6px) translateY(4px); }
+                    100% { transform: scale(1.08) translateX(-6px) translateY(-4px); }
+                  }
+                  .cloud-pan { animation: pan-slow 22s ease-in-out infinite; transform-origin: 50% 50%; }
+                `}</style>
+
                 <svg
                   viewBox="0 0 360 180"
-                  className="w-full h-auto"
-                  style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))' }}
+                  className="w-full h-auto rounded-xl overflow-hidden"
                 >
                   <defs>
-                    {/* optional day/night tint over the clouds background */}
-                    <linearGradient id="dayNightTint" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor={skyArc.isDaytime ? "#ffffff" : "#1a1a2e"} />
-                      <stop offset="100%" stopColor={skyArc.isDaytime ? "#ffffff" : "#16213e"} />
+                    {/* brand tints */}
+                    <linearGradient id="brandDay" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f2f2f2" stopOpacity="0.06" />
+                      <stop offset="100%" stopColor="#1f2747" stopOpacity="0.18" />
                     </linearGradient>
+                    <linearGradient id="brandNight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#252d2f" stopOpacity="0.50" />
+                      <stop offset="100%" stopColor="#1f2747" stopOpacity="0.75" />
+                    </linearGradient>
+
+                    {/* glow for arc/markers */}
+                    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="2.2" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    {/* film grain */}
+                    <filter id="grain">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+                      <feColorMatrix type="saturate" values="0" />
+                      <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.04"/>
+                      </feComponentTransfer>
+                      <feBlend in2="SourceGraphic" mode="multiply"/>
+                    </filter>
+
+                    {/* vignette */}
+                    <radialGradient id="vignette" cx="50%" cy="45%" r="70%">
+                      <stop offset="60%" stopColor="#000" stopOpacity="0"/>
+                      <stop offset="100%" stopColor="#000" stopOpacity="0.35"/>
+                    </radialGradient>
+
+                    {/* simple reusable star shape */}
+                    <symbol id="star" viewBox="0 0 10 10">
+                      <circle cx="5" cy="5" r="0.9" fill="#f2f2f2" />
+                    </symbol>
                   </defs>
 
-                  {/* FULL BACKGROUND IMAGE */}
-                  <image
-                    href="/Clouds2.png"
-                    x="0"
-                    y="0"
-                    width="360"
-                    height="180"
-                    preserveAspectRatio="xMidYMid slice"
-                  />
+                  {/* BACKGROUND: clouds with gentle parallax pan */}
+                  <g filter="url(#grain)">
+                    <image
+                      href="/clouds.png"
+                      x="0" y="0" width="360" height="180"
+                      preserveAspectRatio="xMidYMid slice"
+                      className="cloud-pan"
+                    />
+                  </g>
 
-                  {/* subtle tint so text/arc stay readable; adjust opacity to taste */}
+                  {/* day/night tint for readability */}
                   <rect
-                    x="0"
-                    y="0"
-                    width="360"
-                    height="180"
-                    fill="url(#dayNightTint)"
-                    opacity={skyArc.isDaytime ? 0.10 : 0.35}
+                    x="0" y="0" width="360" height="180"
+                    fill={skyArc.isDaytime ? "url(#brandDay)" : "url(#brandNight)"}
                   />
 
-                  {/* the arc */}
+                  {/* faint starfield only at night */}
+                  {!skyArc.isDaytime && (
+                    <g opacity="0.28">
+                      {/* sprinkle a few stars; duplicate to taste */}
+                      <use href="#star" x="40"  y="24" />
+                      <use href="#star" x="120" y="48" />
+                      <use href="#star" x="200" y="22" />
+                      <use href="#star" x="300" y="40" />
+                      <use href="#star" x="260" y="70" />
+                      <use href="#star" x="90"  y="72" />
+                    </g>
+                  )}
+
+                  {/* vignette for cinematic depth */}
+                  <rect x="0" y="0" width="360" height="180" fill="url(#vignette)" pointerEvents="none" />
+
+                  {/* ARC */}
                   <path
                     d={`M 20 ${skyArc.baseY} Q ${skyArc.centerX} ${skyArc.baseY - skyArc.arcRadius - 20} ${360 - 20} ${skyArc.baseY}`}
-                    stroke={skyArc.isDaytime ? "#FDB813" : "#C0C0C0"}
+                    stroke="#bb9258"
                     strokeWidth="3"
                     fill="none"
                     strokeLinecap="round"
-                    opacity="0.6"
+                    opacity="0.9"
+                    filter="url(#softGlow)"
                   />
 
                   {/* sunrise marker */}
-                  <g transform={`translate(20, ${skyArc.baseY})`}>
-                    <circle r="4" fill="#FDB813" />
-                    <text y="20" textAnchor="start" className="text-xs fill-slate-700 font-medium">
+                  <g transform={`translate(20, ${skyArc.baseY})`} filter="url(#softGlow)">
+                    <circle r="5" fill="#bb9258" />
+                    <circle r="8" fill="#bb9258" opacity="0.18" />
+                    <text y="20" textAnchor="start" fontSize="9" fill="#f2f2f2">
                       {formatTime(data.sun_moon.sunrise)}
                     </text>
                   </g>
 
                   {/* sunset marker */}
-                  <g transform={`translate(${360 - 20}, ${skyArc.baseY})`}>
-                    <circle r="4" fill="#FF6B35" />
-                    <text y="20" textAnchor="end" className="text-xs fill-slate-700 font-medium">
+                  <g transform={`translate(${360 - 20}, ${skyArc.baseY})`} filter="url(#softGlow)">
+                    <circle r="5" fill="#752f3a" />
+                    <circle r="8" fill="#752f3a" opacity="0.18" />
+                    <text y="20" textAnchor="end" fontSize="9" fill="#f2f2f2">
                       {formatTime(data.sun_moon.sunset)}
                     </text>
                   </g>
 
-                  {/* moving sun/moon icon */}
-                  <g transform={`translate(${skyArc.iconX}, ${skyArc.iconY})`}>
+                  {/* moving sun / moon */}
+                  <g transform={`translate(${skyArc.iconX}, ${skyArc.iconY})`} filter="url(#softGlow)">
                     {skyArc.isDaytime ? (
-                      <image
-                        href="/sun.png"
-                        x="-30"
-                        y="-30"
-                        width="60"
-                        height="60"
-                        style={{ filter: 'drop-shadow(0 0 12px rgba(253, 184, 19, 0.5))' }}
-                      />
-                    ) : (
-                      // Use a moon image if you have one:
-                      // <image href="/moon.png" x="-28" y="-28" width="56" height="56" />
-                      // Or draw a simple crescent:
                       <>
-                        <circle r="18" fill="#f9fafb" />
-                        <circle r="18" cx="8" fill="#00000000" />
+                        <circle r="13" fill="#bb9258" />
+                        <circle r="20" fill="#bb9258" opacity="0.15" />
+                      </>
+                    ) : (
+                      <>
+                        <circle r="12" fill="#f2f2f2" />
+                        <circle r="12" cx="6" fill="#00000000" />
                       </>
                     )}
                   </g>
