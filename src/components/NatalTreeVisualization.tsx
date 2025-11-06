@@ -115,7 +115,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
       </CardHeader>
       <CardContent className="pb-8">
         <svg 
-          viewBox="0 0 500 760" 
+          viewBox="0 0 500 810" 
           className="w-full h-auto max-h-[700px]"
           style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
         >
