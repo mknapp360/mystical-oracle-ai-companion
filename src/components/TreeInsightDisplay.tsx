@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Loader2, Copy, Check } from 'lucide-react';
-import { getTreeInsight, generateTreeStateJSON, type TreeInsightResponse } from '@/lib/getTreeInsight';
+import { getTreeInsightV2, generateDivineUtteranceJSON, type TreeInsightResponseV2 } from '@/lib/getTreeInsightV2';
 
 interface TreeInsightDisplayProps {
   activePlanets: Record<string, { sign: string; house: string; sephirah: string; world: string }>;
@@ -25,7 +25,7 @@ export const TreeInsightDisplay: React.FC<TreeInsightDisplayProps> = ({
   pathActivations
 }) => {
   const [userQuestion, setUserQuestion] = useState('');
-  const [insight, setInsight] = useState<TreeInsightResponse | null>(null);
+  const [insight, setInsight] = useState<TreeInsightResponseV2 | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showRawJSON, setShowRawJSON] = useState(false);
@@ -36,10 +36,9 @@ export const TreeInsightDisplay: React.FC<TreeInsightDisplayProps> = ({
     setError(null);
     
     try {
-      const result = await getTreeInsight(
+      const result = await getTreeInsightV2(
         activePlanets,
         pathActivations,
-        userQuestion || undefined
       );
       setInsight(result);
     } catch (err) {

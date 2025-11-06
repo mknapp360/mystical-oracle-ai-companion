@@ -51,14 +51,21 @@ const EnergeticSignaturePage: React.FC = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      
-      if (data.user) {
-        const chart = await getUserBirthChart(data.user.id);
-        setBirthChart(chart);
+      try {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+        
+        if (data.user) {
+          // FIXED: Complete the getUserBirthChart call with user ID
+          const chart = await getUserBirthChart(data.user.id);
+          setBirthChart(chart);
+        }
+      } catch (error) {
+        console.error('Error fetching user or birth chart:', error);
+      } finally {
+        // FIXED: Always set loading to false
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchUser();

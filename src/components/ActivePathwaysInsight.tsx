@@ -2,7 +2,7 @@
 // Component to display Euclid's interpretation in the Active Pathways section
 
 import React, { useState, useEffect } from 'react';
-import { getTreeInsightV2, type EuclidResponse } from '@/lib/getTreeInsight';
+import { getTreeInsightV2, type EuclidResponse } from '@/lib/getTreeInsightV2';
 import { Loader2 } from 'lucide-react';
 
 interface ActivePathwaysInsightProps {

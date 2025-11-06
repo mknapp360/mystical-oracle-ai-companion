@@ -1,6 +1,8 @@
 // src/lib/getTreeInsightV2.ts
 // Updated utility for Euclid-formatted Tree of Life insights
 
+import { ReactNode } from "react";
+
 export interface EuclidResponse {
   structure_note?: string;
   graph_summary: {
@@ -46,7 +48,28 @@ export interface EuclidResponse {
 }
 
 export interface TreeInsightResponseV2 {
+  insight: ReactNode;
   final_interpretation: string;
+
+  treeState: {
+    sephiroth: Array<{
+      planets: any;
+      name: string;
+      isIlluminated: boolean;
+      isStranded: boolean;
+    }>;
+    pathways: Array<{
+      name: string;                        // e.g., "Hod ↔ Netzach" or similar
+      hebrewLetter?: string;               // e.g., "Nun"
+      sephirah1: string;                   // "Hod"
+      sephirah2: string;                   // "Netzach"
+      illuminationType: 'full' | 'partial' | 'shadow';
+      isFullyConnected: boolean;
+      planets?: string[];                  // for "{path.planets?.join(' ' + path.aspectType + ' ')}"
+      aspectType?: string;                 // e.g., "trine", "square"
+    }>;
+  };
+
   full_response: EuclidResponse;
   divine_utterance: any;
 }
