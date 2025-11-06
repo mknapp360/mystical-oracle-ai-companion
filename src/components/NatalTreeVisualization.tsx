@@ -109,7 +109,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
   return (
     <Card style={{ backgroundColor: '#1f2747' }}>
       <CardHeader>
-        <CardTitle className="text-center font-serif">
+        <CardTitle className="text-center font-serif color:">
           The Tree of Life - Your Natal Signature
         </CardTitle>
       </CardHeader>
@@ -141,10 +141,12 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
           {/* Draw paths first (so they appear behind spheres) */}
           {TREE_PATHS.map(([from, to], i) => {
             const fromPos = SEPHIROT_POSITIONS[from];
-            const toPos = SEPHIROT_POSITIONS[to];
+            const toPos   = SEPHIROT_POSITIONS[to];
             const pathData = isPathActive(from, to);
-            const isActive = pathData !== null;
-            
+
+            // If no activation, render nothing
+            if (!pathData) return null;
+
             return (
               <g key={`path-${i}`}>
                 <line
@@ -152,13 +154,11 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
                   y1={fromPos.y}
                   x2={toPos.x}
                   y2={toPos.y}
-                  stroke={isActive ? getPathColor(pathData.illumination) : '#e0e7ff'}
-                  strokeWidth={isActive ? 3 : 1.5}
-                  opacity={isActive ? 0.9 : 0.3}
-                  strokeDasharray={isActive ? '0' : '5,5'}
+                  stroke={getPathColor(pathData.illumination)}
+                  strokeWidth={3}
+                  opacity={0.95}
                 />
-                {/* Label active paths with Hebrew letter */}
-                {isActive && pathData.hebrewLetter && (
+                {pathData.hebrewLetter && (
                   <text
                     x={(fromPos.x + toPos.x) / 2}
                     y={(fromPos.y + toPos.y) / 2}
