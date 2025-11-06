@@ -99,18 +99,18 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
 
   const getPathColor = (illumination: string) => {
     switch (illumination) {
-      case 'full': return '#fbbf24'; // yellow-400
-      case 'partial': return '#60a5fa'; // blue-400
+      case 'full': return '#bb9258'; // yellow-400
+      case 'partial': return '#bb9258'; // blue-400
       case 'shadow': return '#9ca3af'; // gray-400
       default: return '#e5e7eb';
     }
   };
 
   return (
-    <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
+    <Card style={{ backgroundColor: '#1f2747' }}>
       <CardHeader>
         <CardTitle className="text-center font-serif">
-          The Tree of Life - Your Natal Activation
+          The Tree of Life - Your Natal Signature
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -136,7 +136,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
             </filter>
           </defs>
 
-          <rect width="500" height="700" fill="url(#natalTreeGlow)" />
+          <rect width="500" height="700" fill="#1f2747" />
 
           {/* Draw paths first (so they appear behind spheres) */}
           {TREE_PATHS.map(([from, to], i) => {
@@ -202,7 +202,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
                   cx={pos.x}
                   cy={pos.y}
                   r={28}
-                  fill={isActive ? color : '#f3f4f6'}
+                  fill={isActive ? color : '#bb9258'}
                   stroke={isActive ? color : '#d1d5db'}
                   strokeWidth={isActive ? 3 : 2}
                   opacity={isActive ? 1 : 0.5}
@@ -216,7 +216,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
                 <text
                   x={pos.x}
                   y={pos.y - 38}
-                  fill={isActive ? '#1f2937' : '#9ca3af'}
+                  fill={isActive ? '#bb9258' : '#9ca3af'}
                   fontSize="13"
                   fontWeight={isActive ? 'bold' : 'normal'}
                   textAnchor="middle"
@@ -250,7 +250,7 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
                   <text
                     x={pos.x}
                     y={pos.y + 45}
-                    fill={isActive ? '#7c3aed' : '#9ca3af'}
+                    fill={isActive ? '#bb9258' : '#9ca3af'}
                     fontSize="15"
                     textAnchor="middle"
                     opacity={isActive ? 1 : 0.5}
@@ -263,9 +263,9 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
           })}
 
           {/* Three Pillars labels */}
-          <text x="120" y="690" fill="#6b7280" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
-          <text x="250" y="690" fill="#6b7280" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
-          <text x="380" y="690" fill="#6b7280" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
+          <text x="120" y="690" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
+          <text x="250" y="690" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
+          <text x="380" y="690" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
         </svg>
 
         {/* Legend */}
