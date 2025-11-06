@@ -592,27 +592,40 @@ const pathActivations = useMemo<Activation[]>(() => {
               
               {/* Sky Arc Visualization */}
               <div className="relative px-4 py-6">
-                <svg 
-                  viewBox="0 0 360 180" 
+                <svg
+                  viewBox="0 0 360 180"
                   className="w-full h-auto"
                   style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))' }}
                 >
                   <defs>
-                    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor={skyArc.isDaytime ? "#87CEEB" : "#1a1a2e"} />
-                      <stop offset="100%" stopColor={skyArc.isDaytime ? "#f0f4f8" : "#16213e"} />
+                    {/* optional day/night tint over the clouds background */}
+                    <linearGradient id="dayNightTint" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor={skyArc.isDaytime ? "#ffffff" : "#1a1a2e"} />
+                      <stop offset="100%" stopColor={skyArc.isDaytime ? "#ffffff" : "#16213e"} />
                     </linearGradient>
-                    
-                    <pattern id="clouds" x="0" y="0" width="100" height="60" patternUnits="userSpaceOnUse">
-                      <ellipse cx="20" cy="30" rx="25" ry="15" fill="rgba(255,255,255,0.3)" />
-                      <ellipse cx="60" cy="25" rx="30" ry="18" fill="rgba(255,255,255,0.25)" />
-                      <ellipse cx="85" cy="35" rx="20" ry="12" fill="rgba(255,255,255,0.2)" />
-                    </pattern>
                   </defs>
-                  
-                  <rect x="0" y="0" width="360" height="180" fill="url(#skyGradient)" />
-                  <rect x="0" y="0" width="360" height="120" fill="url(#clouds)" opacity="0.6" />
-                  
+
+                  {/* FULL BACKGROUND IMAGE */}
+                  <image
+                    href="/Clouds2.png"
+                    x="0"
+                    y="0"
+                    width="360"
+                    height="180"
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+
+                  {/* subtle tint so text/arc stay readable; adjust opacity to taste */}
+                  <rect
+                    x="0"
+                    y="0"
+                    width="360"
+                    height="180"
+                    fill="url(#dayNightTint)"
+                    opacity={skyArc.isDaytime ? 0.10 : 0.35}
+                  />
+
+                  {/* the arc */}
                   <path
                     d={`M 20 ${skyArc.baseY} Q ${skyArc.centerX} ${skyArc.baseY - skyArc.arcRadius - 20} ${360 - 20} ${skyArc.baseY}`}
                     stroke={skyArc.isDaytime ? "#FDB813" : "#C0C0C0"}
@@ -621,32 +634,27 @@ const pathActivations = useMemo<Activation[]>(() => {
                     strokeLinecap="round"
                     opacity="0.6"
                   />
-                  
+
+                  {/* sunrise marker */}
                   <g transform={`translate(20, ${skyArc.baseY})`}>
                     <circle r="4" fill="#FDB813" />
-                    <text 
-                      y="20" 
-                      textAnchor="start" 
-                      className="text-xs fill-slate-700 font-medium"
-                    >
+                    <text y="20" textAnchor="start" className="text-xs fill-slate-700 font-medium">
                       {formatTime(data.sun_moon.sunrise)}
                     </text>
                   </g>
-                  
+
+                  {/* sunset marker */}
                   <g transform={`translate(${360 - 20}, ${skyArc.baseY})`}>
                     <circle r="4" fill="#FF6B35" />
-                    <text 
-                      y="20" 
-                      textAnchor="end" 
-                      className="text-xs fill-slate-700 font-medium"
-                    >
+                    <text y="20" textAnchor="end" className="text-xs fill-slate-700 font-medium">
                       {formatTime(data.sun_moon.sunset)}
                     </text>
                   </g>
-                  
+
+                  {/* moving sun/moon icon */}
                   <g transform={`translate(${skyArc.iconX}, ${skyArc.iconY})`}>
                     {skyArc.isDaytime ? (
-                      <image 
+                      <image
                         href="/sun.png"
                         x="-30"
                         y="-30"
@@ -655,14 +663,13 @@ const pathActivations = useMemo<Activation[]>(() => {
                         style={{ filter: 'drop-shadow(0 0 12px rgba(253, 184, 19, 0.5))' }}
                       />
                     ) : (
-                      <image 
-                        href="/clouds.png"
-                        x="-35"
-                        y="-20"
-                        width="70"
-                        height="40"
-                        style={{ filter: 'drop-shadow(0 0 8px rgba(100, 100, 120, 0.3))' }}
-                      />
+                      // Use a moon image if you have one:
+                      // <image href="/moon.png" x="-28" y="-28" width="56" height="56" />
+                      // Or draw a simple crescent:
+                      <>
+                        <circle r="18" fill="#f9fafb" />
+                        <circle r="18" cx="8" fill="#00000000" />
+                      </>
                     )}
                   </g>
                 </svg>
