@@ -19,8 +19,8 @@ const SEPHIROT_POSITIONS: Record<string, { x: number; y: number }> = {
   Tiphereth: { x: 250, y: 360 },
   Netzach: { x: 380, y: 480 },
   Hod: { x: 120, y: 480 },
-  Yesod: { x: 250, y: 560 },
-  Malkuth: { x: 250, y: 650 }
+  Yesod: { x: 250, y: 580 },
+  Malkuth: { x: 250, y: 690 }
 };
 
 // All possible paths on the Tree
@@ -263,9 +263,9 @@ export const NatalTreeVisualization: React.FC<NatalTreeVisualizationProps> = ({
           })}
 
           {/* Three Pillars labels */}
-          <text x="120" y="690" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
-          <text x="250" y="690" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
-          <text x="380" y="690" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
+          <text x="120" y="730" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Severity</text>
+          <text x="250" y="730" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Balance</text>
+          <text x="380" y="730" fill="#f2f2f2" fontSize="12" fontStyle="italic" textAnchor="middle">Pillar of Mercy</text>
         </svg>
 
         {/* Legend */}
