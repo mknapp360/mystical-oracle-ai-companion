@@ -108,7 +108,7 @@ export const TreeOfLifeVisualization: React.FC<TreeOfLifeProps> = ({ activePlane
     <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950">
       <CardHeader>
         <CardTitle className="text-center font-serif">
-          The Tree of Life - Current Activation
+          The Tree of Life - Current Emanation
         </CardTitle>
       </CardHeader>
       <CardContent>
